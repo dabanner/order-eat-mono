@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRestaurantStore } from '../../../store/restaurantStore';
@@ -11,11 +11,14 @@ export default function RestaurantScreen() {
   const { restaurants } = useRestaurantStore();
   const { getFoodCategoryById } = useFoodCategoryStore();
   const [selectedFoodCategory, setSelectedFoodCategory] = useState<FoodCategory | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);  // Track current image index
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState('14"');
+  const { width } = useWindowDimensions();
+  const isWeb = Platform.OS === 'web';
+  const isWideScreen = width >= 768;
 
   const restaurant = restaurants?.find((r) => r.id === id);
 
-  // Safeguard against null/undefined restaurant
   if (!restaurant) {
     return (
       <View style={styles.container}>
@@ -26,7 +29,6 @@ export default function RestaurantScreen() {
 
   const images = restaurant.images || [];
 
-  // Extract unique categories from menuItems with proper naming
   const categories = restaurant.menuItems
     ? Array.from(
       new Set(restaurant.menuItems.map((item) => item.foodCategoryId))
@@ -41,69 +43,43 @@ export default function RestaurantScreen() {
     })
     : [];
 
-  // Filter menu items based on the selected category
   const filteredMenuItems = selectedFoodCategory
     ? restaurant.menuItems.filter((item) => item.foodCategoryId === selectedFoodCategory.id)
     : restaurant.menuItems;
 
-    const handleScroll = (event: any) => {
-      const contentOffsetX = event.nativeEvent.contentOffset.x;
-      const viewWidth = event.nativeEvent.layoutMeasurement.width; // Dynamically get the view width
-      const newIndex = Math.round(contentOffsetX / viewWidth);
-    
-      // Ensure we don't exceed the bounds of the image array
-      if (newIndex !== currentIndex && newIndex >= 0 && newIndex < images.length) {
-        setCurrentIndex(newIndex);
-      }
-    };
-    
+  const handleScroll = (event: any) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const viewWidth = event.nativeEvent.layoutMeasurement.width;
+    const newIndex = Math.round(contentOffsetX / viewWidth);
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        {/* Image Carousel */}
-        <View style={styles.carouselContainer}>
-  {/* Horizontal ScrollView for images */}
-  <ScrollView
-    horizontal
-    pagingEnabled
-    showsHorizontalScrollIndicator={false}
-    onScroll={handleScroll}
-    scrollEventThrottle={16} // Improve responsiveness
-  >
-    {images.map((image, index) => (
-      <Image key={index} source={{ uri: image }} style={styles.carouselImage} />
-    ))}
-  </ScrollView>
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < images.length) {
+      setCurrentIndex(newIndex);
+    }
+  };
 
-  {/* Back Button */}
-  <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-    <MaterialIcons name="arrow-back" size={24} color="black" />
-  </TouchableOpacity>
+  const renderMobileLayout = () => (
+    <ScrollView style={styles.container}>
+      <View style={styles.carouselContainer}>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
+          {images.map((image, index) => (
+            <Image key={index} source={{ uri: image }} style={styles.carouselImage} />
+          ))}
+        </ScrollView>
 
-  {/* More Button */}
-  <TouchableOpacity style={styles.moreButton}>
-    <MaterialIcons name="more-horiz" size={24} color="black" />
-  </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <MaterialIcons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
 
-  {/* Page Indicator (Overlay) */}
-  <View style={styles.pageIndicatorContainer}>
-    {images.map((_, index) => (
-      <TouchableOpacity
-        key={index}
-        onPress={() => setCurrentIndex(index)}
-        style={[
-          styles.pageIndicator,
-          currentIndex === index && styles.pageIndicatorActive,
-        ]}
-      />
-    ))}
-  </View>
-</View>
+        <TouchableOpacity style={styles.favoriteButton}>
+          <MaterialIcons name="favorite" size={24} color="#FF8C00" />
+        </TouchableOpacity>
 
-
-
-        {/* Page Indicator (Round Buttons for Carousel) */}
         <View style={styles.pageIndicatorContainer}>
           {images.map((_, index) => (
             <TouchableOpacity
@@ -116,68 +92,132 @@ export default function RestaurantScreen() {
             />
           ))}
         </View>
+      </View>
 
-        {/* Restaurant Info */}
-        <View style={styles.infoContainer}>
-          <View style={styles.ratingContainer}>
-            <MaterialIcons name="star" size={24} color="#FF8C00" />
-            <Text style={styles.rating}>{restaurant.rating}</Text>
-            <MaterialIcons name="schedule" size={24} color="#FF8C00" style={styles.time} />
-            <Text style={styles.rating}>{restaurant.time}</Text>
-          </View>
-          <Text style={styles.restaurantName}>{restaurant.name}</Text>
-          <Text style={styles.description}>{restaurant.description}</Text>
-        </View>
+      {renderRestaurantInfo()}
+      {renderCategories()}
+      {renderMenuItems()}
+    </ScrollView>
+  );
 
-        {/* Categories */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
-          {categories.map((category) => (
-            <TouchableOpacity
-              key={category.id}
+  const renderWebLayout = () => (
+    <ScrollView style={styles.container}>
+    <View style={styles.webContainer}>
+      <View style={styles.webSidebar}>
+        {images.map((image, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => setCurrentIndex(index)}
+            style={styles.webThumbnail}
+          >
+            <Image
+              source={{ uri: image }}
               style={[
-                styles.categoryButton,
-                selectedFoodCategory?.id === category.id && styles.categoryButtonActiveView,
+                styles.webThumbnailImage,
+                currentIndex === index && styles.webThumbnailActive,
               ]}
-              onPress={() =>
-                setSelectedFoodCategory(
-                  selectedFoodCategory?.id === category.id ? null : category
-                )
-              }
-            >
-              <Text
-                style={[
-                  styles.categoryButtonText,
-                  selectedFoodCategory?.id === category.id && styles.categoryButtonTextActive,
-                ]}
-              >
-                {category.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        {/* Menu Items */}
-        <View style={styles.menuContainer}>
-          <Text style={styles.menuTitle}>
-            {selectedFoodCategory ? `${selectedFoodCategory.name} (${filteredMenuItems.length})` : 'All Items'}
-          </Text>
-          <View style={styles.menuGrid}>
-            {filteredMenuItems.map((item) => (
-              <View key={item.id} style={styles.menuItem}>
-                <Image source={{ uri: item.image }} style={styles.menuItemImage} />
-                <Text style={styles.menuItemName}>{item.name}</Text>
-                <Text style={styles.menuItemDescription}>{item.description}</Text>
-                <View style={styles.menuItemFooter}>
-                  <Text style={styles.menuItemPrice}>${item.price}</Text>
-                  <TouchableOpacity style={styles.addButton}>
-                    <MaterialIcons name="add" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
+      <View style={styles.webMainImage}>
+        <Image
+          source={{ uri: images[currentIndex] }}
+          style={styles.webLargeImage}
+        />
+        <TouchableOpacity style={styles.favoriteButton}>
+          <MaterialIcons name="favorite" size={24} color="#FF8C00" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.webContent}>
+        <View style={styles.webHeader}>
+          <Text style={styles.restaurantName}>{restaurant.name}</Text>
         </View>
-      </ScrollView>
+
+        <View style={styles.ratingContainer}>
+          <MaterialIcons name="star" size={24} color="#FF8C00" />
+          <Text style={styles.rating}>{restaurant.rating}</Text>
+          <MaterialIcons name="schedule" size={24} color="#FF8C00" style={styles.time} />
+          <Text style={styles.rating}>{restaurant.time}</Text>
+        </View>
+        <Text style={styles.description}>{restaurant.description}</Text>
+      </View>
+    </View>
+    {renderCategories()}
+    {renderMenuItems()}
+    </ScrollView>
+    
+  );
+
+  const renderRestaurantInfo = () => (
+    <View style={styles.infoContainer}>
+      <View style={styles.ratingContainer}>
+        <MaterialIcons name="star" size={24} color="#FF8C00" />
+        <Text style={styles.rating}>{restaurant.rating}</Text>
+        <MaterialIcons name="schedule" size={24} color="#FF8C00" style={styles.time} />
+        <Text style={styles.rating}>{restaurant.time}</Text>
+      </View>
+      <Text style={styles.restaurantName}>{restaurant.name}</Text>
+      <Text style={styles.description}>{restaurant.description}</Text>
+    </View>
+  );
+
+  const renderCategories = () => (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
+      {categories.map((category) => (
+        <TouchableOpacity
+          key={category.id}
+          style={[
+            styles.categoryButton,
+            selectedFoodCategory?.id === category.id && styles.categoryButtonActiveView,
+          ]}
+          onPress={() =>
+            setSelectedFoodCategory(
+              selectedFoodCategory?.id === category.id ? null : category
+            )
+          }
+        >
+          <Text
+            style={[
+              styles.categoryButtonText,
+              selectedFoodCategory?.id === category.id && styles.categoryButtonTextActive,
+            ]}
+          >
+            {category.name}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  );
+
+  const renderMenuItems = () => (
+    <View style={styles.menuContainer}>
+      <Text style={styles.menuTitle}>
+        {selectedFoodCategory ? `${selectedFoodCategory.name} (${filteredMenuItems.length})` : 'All Items'}
+      </Text>
+      <View style={styles.menuGrid}>
+        {filteredMenuItems.map((item) => (
+          <View key={item.id} style={styles.menuItem}>
+            <Image source={{ uri: item.image }} style={styles.menuItemImage} />
+            <Text style={styles.menuItemName}>{item.name}</Text>
+            <Text style={styles.menuItemDescription}>{item.description}</Text>
+            <View style={styles.menuItemFooter}>
+              <Text style={styles.menuItemPrice}>${item.price}</Text>
+              <TouchableOpacity style={styles.addButton}>
+                <MaterialIcons name="add" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      {isWeb && isWideScreen ? renderWebLayout() : renderMobileLayout()}
     </SafeAreaView>
   );
 }
@@ -190,64 +230,159 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  webContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    padding: 20,
+  },
+  webSidebar: {
+    width: 100,
+    marginRight: 20,
+  },
+  webThumbnail: {
+    width: 100,
+    height: 100,
+    marginBottom: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  webThumbnailImage: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.7,
+  },
+  webThumbnailActive: {
+    opacity: 1,
+    borderWidth: 2,
+    borderColor: '#FF8C00',
+  },
+  webMainImage: {
+    flex: 2,
+    position: 'relative',
+    marginRight: 20,
+  },
+  webLargeImage: {
+    width: '100%',
+    height: 500,
+    borderRadius: 12,
+  },
+  webContent: {
+    flex: 1,
+    paddingTop: 20,
+  },
+  webHeader: {
+    marginBottom: 20,
+  },
+  webBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  brandName: {
+    fontSize: 16,
+    color: '#666',
+    marginLeft: 8,
+  },
+  sizeContainer: {
+    marginTop: 24,
+  },
+  sizeLabel: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 12,
+  },
+  sizeOptions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  sizeButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    backgroundColor: '#f5f5f5',
+  },
+  sizeButtonActive: {
+    backgroundColor: '#FF8C00',
+  },
+  sizeButtonText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  sizeButtonTextActive: {
+    color: 'white',
+  },
+  priceContainer: {
+    marginTop: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  priceLabel: {
+    fontSize: 16,
+    color: '#666',
+    marginRight: 12,
+  },
+  price: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FF8C00',
+  },
+  // Existing styles remain the same
   carouselContainer: {
     position: 'relative',
     marginBottom: 5,
     width: '100%',
     height: 300,
   },
-  
   carouselImage: {
-    width: 330, 
+    width: 330,
     height: 300,
     borderRadius: 12,
-    marginHorizontal: 5, 
+    marginHorizontal: 5,
     borderWidth: 1,
     borderColor: '#ddd',
   },
-  
-
   pageIndicatorContainer: {
     position: 'absolute',
-    bottom: 10, 
+    bottom: 10,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
-    pointerEvents: 'box-none', 
+    pointerEvents: 'box-none',
+    alignItems: 'center',
   },
-
-
   pageIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
-    
   pageIndicatorActive: {
-    backgroundColor: '#FF8C00',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#ffffff',
   },
-
   backButton: {
     position: 'absolute',
     top: 10,
     left: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
     padding: 10,
     borderRadius: 50,
     zIndex: 1,
   },
-  moreButton: {
+  favoriteButton: {
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
     padding: 10,
     borderRadius: 50,
     zIndex: 1,
   },
-
   infoContainer: {
     padding: 16,
   },
