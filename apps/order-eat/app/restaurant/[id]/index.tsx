@@ -37,9 +37,9 @@ export default function RestaurantScreen() {
 
   useEffect(() => {
     if (categories.length > 0) {
-      setSelectedFoodCategory(getFoodCategoryById(categories[0].id)); // Set default category
+      setSelectedFoodCategory(getFoodCategoryById(categories[0].id)); 
     }
-  }, [categories]);
+  }, []);
 
   // Filter menu items based on the selected category
   const filteredMenuItems = selectedFoodCategory
@@ -79,7 +79,7 @@ export default function RestaurantScreen() {
                 styles.categoryButton,
                 selectedFoodCategory?.id === category.id && styles.categoryButtonActiveView,
               ]}
-              onPress={() => setSelectedFoodCategory(category)} // Set whole category object
+              onPress={() => setSelectedFoodCategory(category)} 
             >
               <Text
                 style={[
