@@ -19,6 +19,7 @@ export interface Restaurant {
   time: string;
   images: string[];
   description: string;
+  shortDescription: string;
   menuItems: MenuItem[];
 }
 
@@ -41,6 +42,7 @@ const initialRestaurants: Restaurant[] = [
       'https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D',
     ],
     description: 'Authentic Italian pizzas and pasta made with love and tradition.',
+    shortDescription: 'Pizza - Pasta - Tiramisu',
     menuItems: [
       {
         id: 'p1',
@@ -102,6 +104,7 @@ const initialRestaurants: Restaurant[] = [
       'https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D',
     ],
     description: 'Juicy burgers and crispy fries for the perfect comfort meal.',
+    shortDescription: 'Burgers - Fries - Milkshakes',
     menuItems: [
       {
         id: 'b1',

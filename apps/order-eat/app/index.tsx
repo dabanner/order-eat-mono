@@ -122,7 +122,13 @@ export default function HomeScreen() {
                   style={styles.restaurantImage}
                 />
                 <Text style={styles.restaurantName}>{item.name}</Text>
-                <Text style={styles.restaurantType}>{item.type}</Text>
+                <Text style={styles.restaurantType}>{item.shortDescription}</Text>
+                <View style={styles.ratingContainer}>
+                  <MaterialIcons name="star" size={24} color="#FF8C00" />
+                  <Text style={styles.rating}>{item.rating}</Text>
+                  <MaterialIcons name="schedule" size={24} color="#FF8C00" style={styles.time} />
+                  <Text style={styles.rating}>{item.time}</Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -371,8 +377,12 @@ maxWidth: '100%',
     alignItems: 'center',
   },
   rating: {
+    fontSize: 16,
+    fontWeight: 'bold',
     marginLeft: 4,
-    fontWeight: '500',
+  },
+  time: {
+    marginLeft: 16,
   },
   deliveryContainer: {
     flexDirection: 'row',
