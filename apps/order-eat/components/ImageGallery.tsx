@@ -116,19 +116,17 @@ const styles = StyleSheet.create({
   },
   mainImage: {
     ...Platform.select({
-      android: {
-        gap: 20,
-      },
       web: {
         width: '100%',
         height: '100%',
       },
       default: {
-        width: 300,
+        width: 330,
         height: 300,
       },
     }),
     borderRadius: 12,
+    marginHorizontal: 8,
   },
   pageIndicatorContainer: {
     position: 'absolute',

@@ -54,21 +54,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    ...Platform.select({
+      web: {
+        justifyContent: 'space-evenly',
+        gap: 25,
+      },
+    }),
   },
   menuItem: {
-    width: Platform.OS === 'web' ? '33.33%' : '48%',
+    width: Platform.OS === 'web' ? '30%' : '48%',
     backgroundColor: '#f9f9f9',
     borderRadius: 8,
     marginBottom: 16,
     padding: 10,
     borderWidth: 1,
     borderColor: '#ddd',
+    ...Platform.select({
+      web: {
+        marginBottom: 0,
+      },
+    }),
   },
   menuItemImage: {
     width: '100%',
     height: 150,
     borderRadius: 8,
     marginBottom: 10,
+    ...Platform.select({
+      web: {
+        cursor: 'pointer',
+        height: 200,
+      },
+    }),
   },
   menuItemName: {
     fontSize: 18,
