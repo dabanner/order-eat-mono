@@ -106,7 +106,17 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     flexDirection: Platform.OS === 'web' ? 'row' : 'column',
-    padding: 20,
+    ...Platform.select({
+      web: {
+        padding: 20,
+      },
+      android: {
+        padding: 5,
+      },
+      ios: {
+        padding: 5,
+      },
+    }),
   },
   gallerySection: {
     flex: Platform.OS === 'web' ? 3 : 1,
@@ -114,8 +124,6 @@ const styles = StyleSheet.create({
   infoSection: {
     flex: 2,
     paddingLeft: Platform.OS === 'web' ? 40 : 0,
-    borderLeftWidth: Platform.OS === 'web' ? 1 : 0,
-    borderLeftColor: '#eee',
   },
   backButton: {
     position: 'absolute',
