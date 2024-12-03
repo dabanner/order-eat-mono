@@ -16,6 +16,7 @@ export interface Restaurant {
   name: string;
   type: string;
   rating: number;
+  time: string;
   images: string[];
   description: string;
   menuItems: MenuItem[];
@@ -33,6 +34,7 @@ const initialRestaurants: Restaurant[] = [
     name: 'Pizza De La Mama',
     type: 'Italian',
     rating: 4.7,
+    time: '20 min',
     images: [
       'https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D',
       'https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D',
@@ -93,6 +95,7 @@ const initialRestaurants: Restaurant[] = [
     name: 'Burger Bliss',
     type: 'American',
     rating: 4.5,
+    time: '15 min',
     images: [
       'https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D',
       'https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D',

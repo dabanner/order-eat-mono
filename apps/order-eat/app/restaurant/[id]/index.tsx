@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ export default function RestaurantScreen() {
   const router = useRouter();
   const { restaurants } = useRestaurantStore();
   const { getFoodCategoryById } = useFoodCategoryStore();
-  const [selectedFoodCategory, setSelectedFoodCategory] = useState<FoodCategory>();
+  const [selectedFoodCategory, setSelectedFoodCategory] = useState<FoodCategory | null>(null);
 
   const restaurant = restaurants?.find((r) => r.id === id);
 
@@ -29,17 +29,10 @@ export default function RestaurantScreen() {
     ? Array.from(
         new Set(restaurant.menuItems.map((item) => item.foodCategoryId))
       ).map((categoryId) => ({
-        //useFoodCategoryStore
         id: categoryId,
         name: getFoodCategoryById(categoryId)?.name || 'Unknown',
       }))
     : [];
-
-  useEffect(() => {
-    if (categories.length > 0) {
-      setSelectedFoodCategory(getFoodCategoryById(categories[0].id)); 
-    }
-  }, []);
 
   // Filter menu items based on the selected category
   const filteredMenuItems = selectedFoodCategory
@@ -65,6 +58,8 @@ export default function RestaurantScreen() {
           <View style={styles.ratingContainer}>
             <MaterialIcons name="star" size={24} color="#FF8C00" />
             <Text style={styles.rating}>{restaurant.rating}</Text>
+            <MaterialIcons name="schedule" size={24} color="#FF8C00" style={styles.time} />
+            <Text style={styles.rating}>{restaurant.time}</Text>
           </View>
           <Text style={styles.restaurantName}>{restaurant.name}</Text>
           <Text style={styles.description}>{restaurant.description}</Text>
@@ -79,7 +74,11 @@ export default function RestaurantScreen() {
                 styles.categoryButton,
                 selectedFoodCategory?.id === category.id && styles.categoryButtonActiveView,
               ]}
-              onPress={() => setSelectedFoodCategory(category)} 
+              onPress={() =>
+                setSelectedFoodCategory(
+                  selectedFoodCategory?.id === category.id ? null : category
+                )
+              }
             >
               <Text
                 style={[
@@ -163,6 +162,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginLeft: 4,
+  },
+  time: {
+    marginLeft: 16,
   },
   restaurantName: {
     fontSize: 24,
