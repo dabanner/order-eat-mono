@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRestaurantStore } from '../../../store/restaurantStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,10 +8,10 @@ import { useFoodCategoryStore, FoodCategory } from '@/store/foodCaregoryStore';
 
 export default function RestaurantScreen() {
   const { id } = useLocalSearchParams();
-  const router = useRouter();
   const { restaurants } = useRestaurantStore();
   const { getFoodCategoryById } = useFoodCategoryStore();
   const [selectedFoodCategory, setSelectedFoodCategory] = useState<FoodCategory | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);  // Track current image index
 
   const restaurant = restaurants?.find((r) => r.id === id);
 
@@ -24,19 +24,21 @@ export default function RestaurantScreen() {
     );
   }
 
+  const images = restaurant.images || [];
+
   // Extract unique categories from menuItems with proper naming
   const categories = restaurant.menuItems
     ? Array.from(
-        new Set(restaurant.menuItems.map((item) => item.foodCategoryId))
-      ).map((categoryId) => {
-        const category = getFoodCategoryById(categoryId);
-        return {
-          id: categoryId,
-          name: category?.name || 'Unknown',
-          price: category?.price || 0,
-          image: category?.image || '',
-        };
-      })
+      new Set(restaurant.menuItems.map((item) => item.foodCategoryId))
+    ).map((categoryId) => {
+      const category = getFoodCategoryById(categoryId);
+      return {
+        id: categoryId,
+        name: category?.name || 'Unknown',
+        price: category?.price || 0,
+        image: category?.image || '',
+      };
+    })
     : [];
 
   // Filter menu items based on the selected category
@@ -44,18 +46,75 @@ export default function RestaurantScreen() {
     ? restaurant.menuItems.filter((item) => item.foodCategoryId === selectedFoodCategory.id)
     : restaurant.menuItems;
 
+    const handleScroll = (event: any) => {
+      const contentOffsetX = event.nativeEvent.contentOffset.x;
+      const viewWidth = event.nativeEvent.layoutMeasurement.width; // Dynamically get the view width
+      const newIndex = Math.round(contentOffsetX / viewWidth);
+    
+      // Ensure we don't exceed the bounds of the image array
+      if (newIndex !== currentIndex && newIndex >= 0 && newIndex < images.length) {
+        setCurrentIndex(newIndex);
+      }
+    };
+    
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        {/* Header Image Carousel */}
-        <View style={styles.carousel}>
-          <Image source={{ uri: restaurant.images[0] }} style={styles.headerImage} />
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <MaterialIcons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.moreButton}>
-            <MaterialIcons name="more-horiz" size={24} color="black" />
-          </TouchableOpacity>
+        {/* Image Carousel */}
+        <View style={styles.carouselContainer}>
+  {/* Horizontal ScrollView for images */}
+  <ScrollView
+    horizontal
+    pagingEnabled
+    showsHorizontalScrollIndicator={false}
+    onScroll={handleScroll}
+    scrollEventThrottle={16} // Improve responsiveness
+  >
+    {images.map((image, index) => (
+      <Image key={index} source={{ uri: image }} style={styles.carouselImage} />
+    ))}
+  </ScrollView>
+
+  {/* Back Button */}
+  <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+    <MaterialIcons name="arrow-back" size={24} color="black" />
+  </TouchableOpacity>
+
+  {/* More Button */}
+  <TouchableOpacity style={styles.moreButton}>
+    <MaterialIcons name="more-horiz" size={24} color="black" />
+  </TouchableOpacity>
+
+  {/* Page Indicator (Overlay) */}
+  <View style={styles.pageIndicatorContainer}>
+    {images.map((_, index) => (
+      <TouchableOpacity
+        key={index}
+        onPress={() => setCurrentIndex(index)}
+        style={[
+          styles.pageIndicator,
+          currentIndex === index && styles.pageIndicatorActive,
+        ]}
+      />
+    ))}
+  </View>
+</View>
+
+
+
+        {/* Page Indicator (Round Buttons for Carousel) */}
+        <View style={styles.pageIndicatorContainer}>
+          {images.map((_, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setCurrentIndex(index)}
+              style={[
+                styles.pageIndicator,
+                currentIndex === index && styles.pageIndicatorActive,
+              ]}
+            />
+          ))}
         </View>
 
         {/* Restaurant Info */}
@@ -131,30 +190,64 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  carousel: {
+  carouselContainer: {
     position: 'relative',
+    marginBottom: 5,
+    width: '100%',
     height: 300,
   },
-  headerImage: {
-    width: '100%',
-    height: '100%',
+  
+  carouselImage: {
+    width: 330, 
+    height: 300,
+    borderRadius: 12,
+    marginHorizontal: 5, 
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
+  
+
+  pageIndicatorContainer: {
+    position: 'absolute',
+    bottom: 10, 
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    pointerEvents: 'box-none', 
+  },
+
+
+  pageIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  },
+    
+  pageIndicatorActive: {
+    backgroundColor: '#FF8C00',
+  },
+
   backButton: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 8,
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    padding: 10,
+    borderRadius: 50,
+    zIndex: 1,
   },
   moreButton: {
     position: 'absolute',
-    top: 16,
-    right: 16,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 8,
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    padding: 10,
+    borderRadius: 50,
+    zIndex: 1,
   },
+
   infoContainer: {
     padding: 16,
   },
@@ -217,58 +310,46 @@ const styles = StyleSheet.create({
   },
   menuItem: {
     width: '48%',
-    backgroundColor: 'white',
-    borderRadius: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
     marginBottom: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-      web: {
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-      },
-    }),
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   menuItemImage: {
     width: '100%',
-    height: 200,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 10,
   },
   menuItemName: {
     fontSize: 18,
     fontWeight: 'bold',
-    padding: 12,
   },
   menuItemDescription: {
     fontSize: 14,
     color: '#666',
-    paddingHorizontal: 12,
+    marginVertical: 5,
   },
   menuItemFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 12,
   },
   menuItemPrice: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   addButton: {
     backgroundColor: '#FF8C00',
-    borderRadius: 20,
-    padding: 8,
+    padding: 10,
+    borderRadius: 50,
   },
   notFoundText: {
-    fontSize: 24,
     textAlign: 'center',
-    marginTop: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
   },
 });
