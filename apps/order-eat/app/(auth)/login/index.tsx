@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { CheckboxWithLabel } from "@/components/CheckboxWithLabel";
-import { SocialButton } from "@/components/SocialButton";
-import { InputField } from "@/components/InputField";
-import { Divider } from "@/components/Divider";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedText } from "@/components/ui/ThemedText";
+import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
+import { CheckboxWithLabel } from "@/components/ui/CheckboxWithLabel";
+import { SocialButton } from "@/components/ui/SocialButton";
+import { InputField } from "@/components/ui/InputField";
+import { Divider } from "@/components/ui/Divider";
 import { useRouter } from 'expo-router';
 import { useUserStore } from '../../../store/userStore';
 

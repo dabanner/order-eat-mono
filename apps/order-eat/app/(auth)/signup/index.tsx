@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { InputField } from "@/components/InputField";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedText } from "@/components/ui/ThemedText";
+import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
+import { InputField } from "@/components/ui/InputField";
 import { useRouter } from 'expo-router';
 import { useUserStore } from '../../../store/userStore';
 

@@ -27,7 +27,7 @@ export default function HomeScreen() {
 
   const handleRestaurantPress = (restaurantId: string) => {
     router.push({
-      pathname: "/restaurant/[id]/",
+      pathname: "/restaurant/[id]",
       params: { id: restaurantId }
     });
   };
