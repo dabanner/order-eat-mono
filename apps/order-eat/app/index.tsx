@@ -3,16 +3,17 @@ import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, Platform, S
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons, Ionicons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
-import { useCategoryStore } from '../store/categoryStore';
+import { useFoodCategoryStore } from '../store/foodCaregoryStore';
 import { useRestaurantStore } from '../store/restaurantStore';
 import { useUserStore } from '../store/userStore';
 import { SideMenu } from '../components/SideMenu/side-menu';
 
 export default function HomeScreen() {
-  const categories = useCategoryStore((state) => state.categories);
+  const categories = useFoodCategoryStore((state) => state.categories);
   const restaurants = useRestaurantStore((state) => state.restaurants);
   const { user, setUser } = useUserStore();
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (!user) {
@@ -23,6 +24,14 @@ export default function HomeScreen() {
   const openSideMenu = () => {
     setIsSideMenuOpen(true);
   };
+
+  const handleRestaurantPress = (restaurantId: string) => {
+    router.push({
+      pathname: "/restaurant/[id]/",
+      params: { id: restaurantId }
+    });
+  };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -103,28 +112,18 @@ export default function HomeScreen() {
 
           <View style={styles.restaurantsGrid}>
             {restaurants.map((item) => (
-              <View key={item.id} style={styles.restaurantCard}>
+              <TouchableOpacity
+                key={item.id}
+                style={styles.restaurantCard}
+                onPress={() => handleRestaurantPress(item.id)}
+              >
                 <Image
-                  source={{ uri: item.image }}
+                  source={{ uri: item.images[0] }}
                   style={styles.restaurantImage}
                 />
                 <Text style={styles.restaurantName}>{item.name}</Text>
                 <Text style={styles.restaurantType}>{item.type}</Text>
-                <View style={styles.restaurantInfo}>
-                  <View style={styles.ratingContainer}>
-                    <FontAwesome name="star" size={16} color="#FF8C00" />
-                    <Text style={styles.rating}>{item.rating}</Text>
-                  </View>
-                  <View style={styles.deliveryContainer}>
-                    <MaterialCommunityIcons name="truck-delivery-outline" size={16} color="#FF8C00" />
-                    <Text style={styles.deliveryText}>{item.delivery}</Text>
-                  </View>
-                  <View style={styles.timeContainer}>
-                    <Ionicons name="time-outline" size={16} color="#FF8C00" />
-                    <Text style={styles.timeText}>{item.time}</Text>
-                  </View>
-                </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -151,7 +150,6 @@ const styles = StyleSheet.create({
     padding: 16,
     ...Platform.select({
       web: {
-        
 maxWidth: '100%',
         width: '100%',
         marginHorizontal: 'auto',
