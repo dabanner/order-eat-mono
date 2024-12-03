@@ -28,10 +28,15 @@ export default function RestaurantScreen() {
   const categories = restaurant.menuItems
     ? Array.from(
         new Set(restaurant.menuItems.map((item) => item.foodCategoryId))
-      ).map((categoryId) => ({
-        id: categoryId,
-        name: getFoodCategoryById(categoryId)?.name || 'Unknown',
-      }))
+      ).map((categoryId) => {
+        const category = getFoodCategoryById(categoryId);
+        return {
+          id: categoryId,
+          name: category?.name || 'Unknown',
+          price: category?.price || 0,
+          image: category?.image || '',
+        };
+      })
     : [];
 
   // Filter menu items based on the selected category
@@ -206,18 +211,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   menuGrid: {
-    ...Platform.select({
-      web: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: 16,
-      },
-      default: {
-        flexDirection: 'column',
-      },
-    }),
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   menuItem: {
+    width: '48%',
     backgroundColor: 'white',
     borderRadius: 12,
     marginBottom: 16,
