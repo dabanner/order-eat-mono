@@ -1,117 +1,122 @@
 import React, { useState } from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {Image, Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
 import { ThemedView } from "@/components/ui/ThemedView";
 import { ThemedText } from "@/components/ui/ThemedText";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import { InputField } from "@/components/ui/InputField";
 import { useRouter } from 'expo-router';
-import { useUserStore } from '../../../store/userStore';
+import { useUserStore} from "@/store/userStore";
 
 export default function SignUpScreen() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [repeatPassword, setRepeatPassword] = useState('');
-  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
-  const router = useRouter();
-  const setUser = useUserStore((state) => state.setUser);
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [repeatPassword, setRepeatPassword] = useState('');
+    const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+    const router = useRouter();
+    const setUser = useUserStore((state) => state.setUser);
 
-  const handleSignup = () => {
-    // TODO: Implement actual signup logic
-    if (password === repeatPassword) {
-      setUser();
-      router.replace('/');
-    } else {
-      // TODO
-      console.log('Passwords do not match');
-    }
-  };
+    const handleSignup = () => {
+        // TODO: Implement actual signup logic
+        if (password === repeatPassword) {
+            setUser();
+            router.replace('/');
+        } else {
+            // TODO
+            console.log('Passwords do not match');
+        }
+    };
 
-  const handleLogin = () => {
-    router.push('/login');
-  };
+    const handleLogin = () => {
+        router.push('/login');
+    };
 
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#121223', dark: '#121223' }}
-      headerImage={
-        <ThemedView style={styles.headerContainer}>
-          <Image
-            source={require('@/assets/images/motif1.png')}
-            style={styles.motif1}
-          />
-          <View style={styles.headerContent}>
-            <ThemedText style={styles.headerTitle}>Sign Up</ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
-              Please sign up to get started
-            </ThemedText>
-          </View>
-          <Image
-            source={require('@/assets/images/motif2.png')}
-            style={styles.motif2}
-          />
+    return (
+        <ThemedView style={styles.container}>
+            <ParallaxScrollView
+                headerBackgroundColor={{ light: '#121223', dark: '#121223' }}
+                headerImage={
+                    <ThemedView style={styles.headerContainer}>
+                        <Image
+                            source={require('@/assets/images/motif1.png')}
+                            style={styles.motif1}
+                        />
+                        <View style={styles.headerContent}>
+                            <ThemedText style={styles.headerTitle}>Sign Up</ThemedText>
+                            <ThemedText style={styles.headerSubtitle}>
+                                Please sign up to get started
+                            </ThemedText>
+                        </View>
+                        <Image
+                            source={require('@/assets/images/motif2.png')}
+                            style={styles.motif2}
+                        />
+                    </ThemedView>
+                }
+            >
+                <ThemedView style={styles.formContainer}>
+                    <View>
+                        <InputField
+                            label="FULL NAME"
+                            placeholder="Enter your full name"
+                            value={name}
+                            onChangeText={setName}
+                        />
+                        <InputField
+                            label="EMAIL"
+                            placeholder="Enter your email"
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            value={email}
+                            onChangeText={setEmail}
+                        />
+                        <InputField
+                            label="PASSWORD"
+                            placeholder="Enter your password"
+                            secureTextEntry={!showPassword}
+                            value={password}
+                            onChangeText={setPassword}
+                            rightIcon={
+                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                    <ThemedText style={{ color: '#707070'}} >{showPassword ? 'Hide' : 'Show'}</ThemedText>
+                                </TouchableOpacity>
+                            }
+                        />
+                        <InputField
+                            label="REPEAT PASSWORD"
+                            placeholder="Repeat your password"
+                            secureTextEntry={!showRepeatPassword}
+                            value={repeatPassword}
+                            onChangeText={setRepeatPassword}
+                            rightIcon={
+                                <TouchableOpacity onPress={() => setShowRepeatPassword(!showRepeatPassword)}>
+                                    <ThemedText style={{ color: '#707070'}} >{showRepeatPassword ? 'Hide' : 'Show'}</ThemedText>
+                                </TouchableOpacity>
+                            }
+                        />
+                    </View>
+
+                    <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
+                        <ThemedText style={styles.signupButtonText}>Sign Up</ThemedText>
+                    </TouchableOpacity>
+
+                    <View style={styles.loginContainer}>
+                        <ThemedText style={styles.loginText}>Do you have an account? </ThemedText>
+                        <TouchableOpacity onPress={handleLogin}>
+                            <ThemedText style={styles.loginLink}>LOG IN</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                </ThemedView>
+            </ParallaxScrollView>
         </ThemedView>
-      }
-    >
-      <ThemedView style={styles.formContainer}>
-        <View>
-          <InputField
-            label="FULL NAME"
-            placeholder="Enter your full name"
-            value={name}
-            onChangeText={setName}
-          />
-          <InputField
-            label="EMAIL"
-            placeholder="Enter your email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-          />
-          <InputField
-            label="PASSWORD"
-            placeholder="Enter your password"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-            rightIcon={
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <ThemedText style={{ color: '#707070'}} >{showPassword ? 'Hide' : 'Show'}</ThemedText>
-              </TouchableOpacity>
-            }
-          />
-          <InputField
-            label="REPEAT PASSWORD"
-            placeholder="Repeat your password"
-            secureTextEntry={!showRepeatPassword}
-            value={repeatPassword}
-            onChangeText={setRepeatPassword}
-            rightIcon={
-              <TouchableOpacity onPress={() => setShowRepeatPassword(!showRepeatPassword)}>
-                <ThemedText style={{ color: '#707070'}} >{showRepeatPassword ? 'Hide' : 'Show'}</ThemedText>
-              </TouchableOpacity>
-            }
-          />
-        </View>
-
-        <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
-          <ThemedText style={styles.signupButtonText}>Sign Up</ThemedText>
-        </TouchableOpacity>
-
-        <View style={styles.loginContainer}>
-          <ThemedText style={styles.loginText}>Do you have an account? </ThemedText>
-          <TouchableOpacity onPress={handleLogin}>
-            <ThemedText style={styles.loginLink}>LOG IN</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </ThemedView>
-    </ParallaxScrollView>
-  )
+    )
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     headerContainer: {
         height: 200,
         justifyContent: 'center',
@@ -120,12 +125,12 @@ const styles = StyleSheet.create({
     },
     headerContent: {
         alignItems: 'center',
+        marginTop: 124,
     },
     headerTitle: {
-        fontSize: 32,
+        fontSize: 28,
         fontWeight: 'bold',
         color: '#FFFFFF',
-        marginBottom: 8,
     },
     headerSubtitle: {
         fontSize: 16,
@@ -149,8 +154,23 @@ const styles = StyleSheet.create({
     formContainer: {
         padding: 34,
         backgroundColor: '#FFFFFF',
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
+        ...Platform.select({
+            ios: {
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+            },
+            android: {
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+            },
+            web: {
+                borderTopLeftRadius: 54,
+                borderTopRightRadius: 54,
+                borderBottomLeftRadius: 54,
+                borderBottomRightRadius: 54,
+                marginHorizontal: 450,
+            },
+        }),
     },
     signupButton: {
         backgroundColor: '#F4804F',
