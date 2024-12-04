@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRestaurantStore } from '../../../store/restaurantStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ export default function RestaurantScreen() {
   const { restaurants } = useRestaurantStore();
   const { getFoodCategoryById } = useFoodCategoryStore();
   const [selectedFoodCategory, setSelectedFoodCategory] = useState<FoodCategory | null>(null);
+  const router = useRouter();
 
   const restaurant = useMemo(() => restaurants?.find((r) => r.id === id), [restaurants, id]);
 
@@ -54,6 +55,10 @@ export default function RestaurantScreen() {
     setSelectedFoodCategory(category);
   }, []);
 
+  const handleMenuItemClick = useCallback((itemId: string) => {
+    router.push(`/restaurant/${id}/menu-item/${itemId}`);
+  }, [id, router]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -86,7 +91,8 @@ export default function RestaurantScreen() {
         />
         <MenuList 
           menuItems={filteredMenuItems} 
-          selectedCategory={selectedFoodCategory} 
+          selectedCategory={selectedFoodCategory}
+          onItemClick={handleMenuItemClick}
         />
       </ScrollView>
     </SafeAreaView>
@@ -157,3 +163,4 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+

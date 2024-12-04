@@ -14,9 +14,10 @@ interface MenuItem {
 interface MenuListProps {
   menuItems: MenuItem[];
   selectedCategory: FoodCategory | null;
+  onItemClick: (itemId: string) => void;
 }
 
-export const MenuList: React.FC<MenuListProps> = ({ menuItems, selectedCategory }) => {
+export const MenuList: React.FC<MenuListProps> = ({ menuItems, selectedCategory, onItemClick }) => {
   return (
     <View style={styles.menuContainer}>
       <Text style={styles.menuTitle}>
@@ -24,7 +25,11 @@ export const MenuList: React.FC<MenuListProps> = ({ menuItems, selectedCategory 
       </Text>
       <View style={styles.menuGrid}>
         {menuItems.map((item) => (
-          <View key={item.id} style={styles.menuItem}>
+          <TouchableOpacity
+            key={item.id}
+            style={styles.menuItem}
+            onPress={() => onItemClick(item.id)}
+          >
             <Image source={{ uri: item.image }} style={styles.menuItemImage} />
             <Text style={styles.menuItemName}>{item.name}</Text>
             <Text style={styles.menuItemDescription}>{item.description}</Text>
@@ -34,7 +39,7 @@ export const MenuList: React.FC<MenuListProps> = ({ menuItems, selectedCategory 
                 <MaterialIcons name="add" size={24} color="white" />
               </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
     </View>
@@ -111,4 +116,3 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
 });
-
