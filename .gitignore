@@ -4,7 +4,8 @@
 node_modules
 .pnp
 .pnp.js
-
+.idea
+.expo
 # Local env files
 .env
 .env.local
