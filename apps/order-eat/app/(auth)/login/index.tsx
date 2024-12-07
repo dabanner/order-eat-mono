@@ -135,18 +135,31 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     headerContainer: {
-        justifyContent: 'center',
+        height: 250, // Consistent height for both screens
+        justifyContent: 'flex-start', // Changed from center
         alignItems: 'center',
         backgroundColor: '#121223',
+        paddingTop: Platform.select({
+            ios: 60, // Account for iOS status bar
+            android: 50, // Account for Android status bar
+            default: 40,
+        }),
     },
     headerContent: {
         alignItems: 'center',
-        marginTop: 124,
+        height: 80, // Explicit height for the content
+        justifyContent: 'center',
+        marginTop: Platform.select({
+            ios: 40,
+            android: 40,
+            default: 40,
+        }),
     },
     headerTitle: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#FFFFFF',
+        marginBottom: 8, // Add consistent spacing
     },
     headerSubtitle: {
         fontSize: 16,
