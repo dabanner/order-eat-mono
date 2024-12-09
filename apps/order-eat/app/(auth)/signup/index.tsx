@@ -5,7 +5,7 @@ import { ThemedText } from "@/components/ui/ThemedText";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import { InputField } from "@/components/ui/InputField";
 import { useRouter } from 'expo-router';
-import { useUserStore} from "@/store/userStore";
+import { useUserStore} from "@repo/store/src/userStore";
 
 export default function SignUpScreen() {
     const [name, setName] = useState('');

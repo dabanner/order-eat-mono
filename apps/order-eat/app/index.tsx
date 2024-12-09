@@ -3,9 +3,9 @@ import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, Platform, S
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons, Ionicons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
-import { useFoodCategoryStore } from '../store/foodCaregoryStore';
-import { useRestaurantStore } from '../store/restaurantStore';
-import { useUserStore } from '../store/userStore';
+import { useFoodCategoryStore } from '@repo/store/src/foodCaregoryStore';
+import { useRestaurantStore } from '@repo/store/src/restaurantStore';
+import { useUserStore } from '@repo/store/src/userStore';
 import { SideMenu } from '../components/SideMenu/side-menu';
 
 export default function HomeScreen() {

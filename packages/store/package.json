@@ -1,0 +1,31 @@
+{
+  "name": "@repo/store",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc"
+  },
+  "exports": {
+    "./foodCategoryStore": {
+      "types": "./src/foodCategoryStore.ts",
+      "default": "./dist/foodCategoryStore.js"
+    },
+    "./mealTypeStore": {
+      "types": "./src/mealTypeStore.ts",
+      "default": "./dist/mealTypeStore.js"
+    },
+    "./restaurantStore": {
+      "types": "./src/restaurantStore.ts",
+      "default": "./dist/restaurantStore.js"
+    },
+    "./userStore": {
+      "types": "./src/userStore.ts",
+      "default": "./dist/userStore.js"
+    }
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "typescript": "latest",
+    "zustand": "^5.0.1"
+  }
+}

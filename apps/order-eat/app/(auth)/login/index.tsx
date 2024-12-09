@@ -8,7 +8,7 @@ import { SocialButton } from "@/components/ui/SocialButton";
 import { InputField } from "@/components/ui/InputField";
 import { Divider } from "@/components/ui/Divider";
 import { useRouter } from 'expo-router';
-import { useUserStore} from "@/store/userStore";
+import { useUserStore} from "@repo/store/src/userStore";
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
