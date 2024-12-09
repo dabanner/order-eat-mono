@@ -1,76 +1,97 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions, Platform } from 'react-native';
-import { Html5Qrcode } from 'html5-qrcode';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions } from 'react-native';
+import { Camera, CameraView } from 'expo-camera';
 
 const { width } = Dimensions.get('window');
 
-export default function TabletScannerPage() {
-  const [manualCode, setManualCode] = useState('');
+// Component for native scanner
+const NativeScanner = ({ onScan, onClose, scanned }) => (
+    <View style={styles.scannerContainer}>
+      <View style={styles.cameraWrapper}>
+        <CameraView
+            style={styles.camera}
+            onBarcodeScanned={scanned ? undefined : onScan}
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr'],
+            }}
+        />
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={onClose}>
+          <Text style={styles.buttonText}>Close Scanner</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+);
+
+// Component for manual code entry
+const ManualEntry = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
+    <View style={styles.manualEntryContainer}>
+      <TextInput
+          style={styles.input}
+          onChangeText={onCodeChange}
+          value={code}
+          placeholder="Enter code manually"
+          keyboardType="number-pad"
+      />
+      <TouchableOpacity style={styles.button} onPress={onSubmit}>
+        <Text style={styles.buttonText}>Submit</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={onScannerOpen}>
+        <Text style={styles.buttonText}>Scan QR Code</Text>
+      </TouchableOpacity>
+    </View>
+);
+
+// Custom hook for scanner functionality
+const useScanner = (onScanComplete) => {
   const [showScanner, setShowScanner] = useState(false);
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
 
   useEffect(() => {
-    if (showScanner) {
-      if (Platform.OS === 'web') {
-        initializeWebScanner();
-      } else {
-        initializeNativeScanner();
-      }
-    }
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
 
-    return () => {
-      stopScanner();
-    };
-  }, [showScanner]);
-
-  const initializeWebScanner = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach(track => track.stop());
-      setHasPermission(true);
-
-      const scanner = new Html5Qrcode('reader');
-      scannerRef.current = scanner;
-
-      await scanner.start(
-          { facingMode: 'environment' },
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-          },
-          (decodedText) => {
-            handleQRCode(decodedText);
-          },
-          (error) => {
-            console.warn(error);
-          }
-      );
-    } catch (err) {
-      console.error('Scanner error:', err);
-      setShowScanner(false);
-    }
+  const openScanner = () => {
+    setShowScanner(true);
+    setScanned(false);
   };
 
-  const initializeNativeScanner = async () => {
-    const { status } = await BarCodeScanner.requestPermissionsAsync();
-    setHasPermission(status === 'granted');
+  const closeScanner = () => {
+    setShowScanner(false);
   };
 
-  const stopScanner = () => {
-    if (Platform.OS === 'web' && scannerRef.current) {
-      try {
-        scannerRef.current.stop().catch(console.error);
-        scannerRef.current = null;
-      } catch (error) {
-        console.error('Error stopping scanner:', error);
-      }
+  return {
+    showScanner,
+    hasPermission,
+    scanned,
+    setScanned,
+    openScanner,
+    closeScanner,
+  };
+};
+
+// Main component
+export default function TabletScannerPage() {
+  const [manualCode, setManualCode] = useState('');
+
+  const handleScanComplete = (data) => {
+    alert(`QR Code scanned: ${data}`);
+  };
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    if (!scanned) {
+      setScanned(true);
+      handleScanComplete(data);
     }
   };
 
   const handleManualSubmit = () => {
-    if (manualCode) {
+    if (manualCode.trim()) {
       alert(`Manually entered code: ${manualCode}`);
       setManualCode('');
     } else {
@@ -78,74 +99,14 @@ export default function TabletScannerPage() {
     }
   };
 
-  const openScanner = () => {
-    setShowScanner(true);
-  };
-
-  const handleQRCode = (data: string) => {
-    alert(`QR Code scanned: ${data}`);
-    closeScanner();
-  };
-
-  const closeScanner = () => {
-    stopScanner();
-    setShowScanner(false);
-  };
-
-  const handleBarCodeScanned = ({ data }) => {
-    handleQRCode(data);
-  };
-
-  const renderScanner = () => {
-    if (Platform.OS === 'web') {
-      return (
-          <div className="scanner-container" style={{
-            width: '100%',
-            maxWidth: '600px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-            <div id="reader" style={{
-              width: '100%',
-              height: '400px',
-              marginBottom: '20px'
-            }} />
-            <button
-                onClick={closeScanner}
-                style={{
-                  backgroundColor: '#F4804F',
-                  color: 'white',
-                  padding: '12px 30px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}
-            >
-              Close Scanner
-            </button>
-          </div>
-      );
-    } else {
-      return (
-          <View style={styles.scannerContainer}>
-            <BarCodeScanner
-                onBarCodeScanned={handleBarCodeScanned}
-                style={styles.camera}
-                barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
-            />
-            <TouchableOpacity
-                style={[styles.button, styles.closeButton]}
-                onPress={closeScanner}
-            >
-              <Text style={styles.buttonText}>Close Scanner</Text>
-            </TouchableOpacity>
-          </View>
-      );
-    }
-  };
+  const {
+    showScanner,
+    hasPermission,
+    scanned,
+    setScanned,
+    openScanner,
+    closeScanner,
+  } = useScanner(handleScanComplete);
 
   if (hasPermission === false) {
     return (
@@ -162,30 +123,25 @@ export default function TabletScannerPage() {
         </View>
         <View style={styles.content}>
           {showScanner ? (
-              renderScanner()
+              <NativeScanner
+                  onScan={handleBarCodeScanned}
+                  onClose={closeScanner}
+                  scanned={scanned}
+              />
           ) : (
-              <View style={styles.manualEntryContainer}>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={setManualCode}
-                    value={manualCode}
-                    placeholder="Enter code manually"
-                    keyboardType="number-pad"
-                />
-                <TouchableOpacity style={styles.button} onPress={handleManualSubmit}>
-                  <Text style={styles.buttonText}>Submit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={openScanner}>
-                  <Text style={styles.buttonText}>Scan QR Code</Text>
-                </TouchableOpacity>
-              </View>
+              <ManualEntry
+                  code={manualCode}
+                  onCodeChange={setManualCode}
+                  onSubmit={handleManualSubmit}
+                  onScannerOpen={openScanner}
+              />
           )}
         </View>
       </View>
   );
 }
 
-
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -193,16 +149,41 @@ const styles = StyleSheet.create({
   },
   scannerContainer: {
     width: width * 0.8,
-    aspectRatio: 1,
+    height: "70%",
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    padding: 20,
+  },
+  cameraWrapper: {
+    width: '50%',
+    aspectRatio: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#F4804F',
   },
   camera: {
     width: '100%',
     height: '100%',
   },
+  buttonContainer: {
+    width: '100%',
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#F4804F',
+    height: 48,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    margin: 10,
+    minWidth: 150,
+  },
   closeButton: {
-    position: 'absolute',
-    bottom: -60,
     width: '80%',
   },
   header: {
@@ -233,14 +214,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 18,
     marginBottom: 20,
-  },
-  button: {
-    backgroundColor: '#F4804F',
-    height: 48,
-    borderRadius: 8,
-    marginBottom: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 30,
   },
   buttonText: {
     color: '#fff',
