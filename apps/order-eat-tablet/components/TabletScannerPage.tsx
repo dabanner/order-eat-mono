@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { Html5Qrcode } from 'html5-qrcode';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 
 const { width } = Dimensions.get('window');
 
@@ -11,8 +12,12 @@ export default function TabletScannerPage() {
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
   useEffect(() => {
-    if (showScanner && Platform.OS === 'web') {
-      initializeScanner();
+    if (showScanner) {
+      if (Platform.OS === 'web') {
+        initializeWebScanner();
+      } else {
+        initializeNativeScanner();
+      }
     }
 
     return () => {
@@ -20,7 +25,7 @@ export default function TabletScannerPage() {
     };
   }, [showScanner]);
 
-  const initializeScanner = async () => {
+  const initializeWebScanner = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       stream.getTracks().forEach(track => track.stop());
@@ -48,8 +53,13 @@ export default function TabletScannerPage() {
     }
   };
 
+  const initializeNativeScanner = async () => {
+    const { status } = await BarCodeScanner.requestPermissionsAsync();
+    setHasPermission(status === 'granted');
+  };
+
   const stopScanner = () => {
-    if (scannerRef.current) {
+    if (Platform.OS === 'web' && scannerRef.current) {
       try {
         scannerRef.current.stop().catch(console.error);
         scannerRef.current = null;
@@ -63,6 +73,8 @@ export default function TabletScannerPage() {
     if (manualCode) {
       alert(`Manually entered code: ${manualCode}`);
       setManualCode('');
+    } else {
+      alert('Please enter a code');
     }
   };
 
@@ -78,6 +90,10 @@ export default function TabletScannerPage() {
   const closeScanner = () => {
     stopScanner();
     setShowScanner(false);
+  };
+
+  const handleBarCodeScanned = ({ data }) => {
+    handleQRCode(data);
   };
 
   const renderScanner = () => {
@@ -112,9 +128,32 @@ export default function TabletScannerPage() {
             </button>
           </div>
       );
+    } else {
+      return (
+          <View style={styles.scannerContainer}>
+            <BarCodeScanner
+                onBarCodeScanned={handleBarCodeScanned}
+                style={styles.camera}
+                barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
+            />
+            <TouchableOpacity
+                style={[styles.button, styles.closeButton]}
+                onPress={closeScanner}
+            >
+              <Text style={styles.buttonText}>Close Scanner</Text>
+            </TouchableOpacity>
+          </View>
+      );
     }
-    return null;
   };
+
+  if (hasPermission === false) {
+    return (
+        <View style={styles.container}>
+          <Text>No access to camera</Text>
+        </View>
+    );
+  }
 
   return (
       <View style={styles.container}>
@@ -146,10 +185,25 @@ export default function TabletScannerPage() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',
+  },
+  scannerContainer: {
+    width: width * 0.8,
+    aspectRatio: 1,
+    alignItems: 'center',
+  },
+  camera: {
+    width: '100%',
+    height: '100%',
+  },
+  closeButton: {
+    position: 'absolute',
+    bottom: -60,
+    width: '80%',
   },
   header: {
     height: 60,
