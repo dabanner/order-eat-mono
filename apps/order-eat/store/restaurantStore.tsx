@@ -7,6 +7,39 @@ export interface NutritionInfo {
   fats: number;
 }
 
+export interface DetailedNutritionInfo extends NutritionInfo {
+  fiber: number;
+  servingSize: string;
+  description: string;
+  details: {
+    totalFat: {
+      value: number;
+      saturatedFat: number;
+      transFat: number;
+    };
+    totalCarbohydrates: {
+      value: number;
+      fiber: number;
+      sugars: number;
+    };
+    protein: {
+      value: number;
+      source: string;
+    };
+    minerals: {
+      sodium: number;
+      potassium: number;
+      calcium: number;
+      iron: number;
+    };
+    vitamins: {
+      vitaminA: number;
+      vitaminC: number;
+      vitaminD: number;
+    };
+  };
+}
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -24,7 +57,7 @@ export interface MenuItem {
     icon: string;
   }[];
   allergens: string[];
-  nutrition: NutritionInfo;
+  nutrition: DetailedNutritionInfo;
 }
 
 export interface Restaurant {
@@ -87,10 +120,40 @@ const initialRestaurants: Restaurant[] = [
         ],
         allergens: ['Salt', 'Gluten', 'Nuts', 'Shellfish', 'Egg'],
         nutrition: {
-          carbs: 65,
-          proteins: 27,
-          calories: 120,
-          fats: 91
+          carbs: 89,
+          proteins: 12.2,
+          calories: 850,
+          fats: 10.4,
+          fiber: 2.5,
+          servingSize: '14" calzone (350g serving)',
+          description: 'This handcrafted Italian calzone delivers a perfect blend of proteins and carbohydrates, with 850 calories per portion. Made with premium ingredients, it provides 32g of protein from free-range chicken and fresh mozzarella. The carbohydrate content (89g) comes primarily from our house-made dough.',
+          details: {
+            totalFat: {
+              value: 10.4,
+              saturatedFat: 4.2,
+              transFat: 0
+            },
+            totalCarbohydrates: {
+              value: 89,
+              fiber: 2.5,
+              sugars: 3.2
+            },
+            protein: {
+              value: 12.2,
+              source: 'free-range chicken and fresh mozzarella'
+            },
+            minerals: {
+              sodium: 980,
+              potassium: 320,
+              calcium: 15,
+              iron: 10
+            },
+            vitamins: {
+              vitaminA: 8,
+              vitaminC: 12,
+              vitaminD: 6
+            }
+          }
         }
       },
       {
@@ -110,10 +173,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 65,
+          proteins: 18,
+          calories: 750,
+          fats: 12,
+          fiber: 2,
+          servingSize: '14" pizza (300g serving)',
+          description: 'Our classic Pepperoni Pizza is a perfect balance of flavors, featuring our signature tomato sauce, mozzarella cheese, and premium pepperoni slices on our hand-tossed crust.',
+          details: {
+            totalFat: {
+              value: 12,
+              saturatedFat: 5,
+              transFat: 0
+            },
+            totalCarbohydrates: {
+              value: 65,
+              fiber: 2,
+              sugars: 4
+            },
+            protein: {
+              value: 18,
+              source: 'mozzarella cheese and pepperoni'
+            },
+            minerals: {
+              sodium: 1200,
+              potassium: 280,
+              calcium: 20,
+              iron: 15
+            },
+            vitamins: {
+              vitaminA: 10,
+              vitaminC: 8,
+              vitaminD: 4
+            }
+          }
         }
       },
       {
@@ -133,10 +226,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 70,
+          proteins: 22,
+          calories: 680,
+          fats: 15,
+          fiber: 3,
+          servingSize: '250g serving',
+          description: 'Our Spaghetti Carbonara is a rich and creamy pasta dish made with authentic Italian ingredients, featuring a silky sauce of eggs, Pecorino Romano cheese, and crispy pancetta.',
+          details: {
+            totalFat: {
+              value: 15,
+              saturatedFat: 6,
+              transFat: 0
+            },
+            totalCarbohydrates: {
+              value: 70,
+              fiber: 3,
+              sugars: 2
+            },
+            protein: {
+              value: 22,
+              source: 'eggs, cheese, and pancetta'
+            },
+            minerals: {
+              sodium: 850,
+              potassium: 300,
+              calcium: 18,
+              iron: 12
+            },
+            vitamins: {
+              vitaminA: 6,
+              vitaminC: 2,
+              vitaminD: 8
+            }
+          }
         }
       },
       {
@@ -156,10 +279,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 30,
+          proteins: 4,
+          calories: 220,
+          fats: 8,
+          fiber: 1,
+          servingSize: '2 slices (80g)',
+          description: 'Our Garlic Bread is a perfect side dish, made with freshly baked bread, slathered with our house-made garlic butter and sprinkled with aromatic herbs.',
+          details: {
+            totalFat: {
+              value: 8,
+              saturatedFat: 3,
+              transFat: 0
+            },
+            totalCarbohydrates: {
+              value: 30,
+              fiber: 1,
+              sugars: 1
+            },
+            protein: {
+              value: 4,
+              source: 'wheat flour'
+            },
+            minerals: {
+              sodium: 320,
+              potassium: 80,
+              calcium: 4,
+              iron: 6
+            },
+            vitamins: {
+              vitaminA: 2,
+              vitaminC: 1,
+              vitaminD: 0
+            }
+          }
         }
       },
       {
@@ -179,10 +332,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 35,
+          proteins: 5,
+          calories: 300,
+          fats: 18,
+          fiber: 0.5,
+          servingSize: '1 slice (120g)',
+          description: 'Our Tiramisu is a heavenly Italian dessert made with layers of coffee-soaked ladyfingers and creamy mascarpone cheese, dusted with cocoa powder.',
+          details: {
+            totalFat: {
+              value: 18,
+              saturatedFat: 10,
+              transFat: 0
+            },
+            totalCarbohydrates: {
+              value: 35,
+              fiber: 0.5,
+              sugars: 25
+            },
+            protein: {
+              value: 5,
+              source: 'eggs and mascarpone cheese'
+            },
+            minerals: {
+              sodium: 80,
+              potassium: 120,
+              calcium: 8,
+              iron: 4
+            },
+            vitamins: {
+              vitaminA: 12,
+              vitaminC: 0,
+              vitaminD: 2
+            }
+          }
         }
       },
     ],
@@ -219,10 +402,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 40,
+          proteins: 25,
+          calories: 550,
+          fats: 35,
+          fiber: 2,
+          servingSize: '1 burger (200g)',
+          description: 'Our Classic Cheeseburger features a juicy beef patty topped with melted cheese, crisp lettuce, ripe tomato, and our secret special sauce, all on a toasted bun.',
+          details: {
+            totalFat: {
+              value: 35,
+              saturatedFat: 15,
+              transFat: 0.5
+            },
+            totalCarbohydrates: {
+              value: 40,
+              fiber: 2,
+              sugars: 6
+            },
+            protein: {
+              value: 25,
+              source: 'beef patty and cheese'
+            },
+            minerals: {
+              sodium: 980,
+              potassium: 450,
+              calcium: 20,
+              iron: 15
+            },
+            vitamins: {
+              vitaminA: 8,
+              vitaminC: 4,
+              vitaminD: 2
+            }
+          }
         }
       },
       {
@@ -242,10 +455,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 45,
+          proteins: 30,
+          calories: 750,
+          fats: 50,
+          fiber: 2,
+          servingSize: '1 burger (250g)',
+          description: 'Our Bacon Deluxe Burger is a flavor explosion featuring a juicy beef patty, crispy bacon, melted cheese, crunchy onion rings, and tangy BBQ sauce on a toasted bun.',
+          details: {
+            totalFat: {
+              value: 50,
+              saturatedFat: 20,
+              transFat: 0.5
+            },
+            totalCarbohydrates: {
+              value: 45,
+              fiber: 2,
+              sugars: 10
+            },
+            protein: {
+              value: 30,
+              source: 'beef patty, bacon, and cheese'
+            },
+            minerals: {
+              sodium: 1200,
+              potassium: 500,
+              calcium: 25,
+              iron: 20
+            },
+            vitamins: {
+              vitaminA: 10,
+              vitaminC: 6,
+              vitaminD: 2
+            }
+          }
         }
       },
       {
@@ -265,10 +508,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 50,
+          proteins: 28,
+          calories: 600,
+          fats: 30,
+          fiber: 2,
+          servingSize: '1 sandwich (220g)',
+          description: 'Our Crispy Chicken Sandwich features a perfectly crispy chicken breast fillet topped with tangy pickles and a kick of spicy mayo, all on a soft brioche bun.',
+          details: {
+            totalFat: {
+              value: 30,
+              saturatedFat: 5,
+              transFat: 0
+            },
+            totalCarbohydrates: {
+              value: 50,
+              fiber: 2,
+              sugars: 5
+            },
+            protein: {
+              value: 28,
+              source: 'chicken breast'
+            },
+            minerals: {
+              sodium: 1100,
+              potassium: 400,
+              calcium: 15,
+              iron: 10
+            },
+            vitamins: {
+              vitaminA: 6,
+              vitaminC: 2,
+              vitaminD: 1
+            }
+          }
         }
       },
       {
@@ -288,10 +561,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 45,
+          proteins: 12,
+          calories: 480,
+          fats: 30,
+          fiber: 3,
+          servingSize: '1 serving (200g)',
+          description: 'Our Loaded Fries are a indulgent side dish featuring crispy golden fries topped with melted cheese, crispy bacon bits, and fresh green onions.',
+          details: {
+            totalFat: {
+              value: 30,
+              saturatedFat: 10,
+              transFat: 0
+            },
+            totalCarbohydrates: {
+              value: 45,
+              fiber: 3,
+              sugars: 2
+            },
+            protein: {
+              value: 12,
+              source: 'cheese and bacon'
+            },
+            minerals: {
+              sodium: 800,
+              potassium: 600,
+              calcium: 15,
+              iron: 8
+            },
+            vitamins: {
+              vitaminA: 4,
+              vitaminC: 15,
+              vitaminD: 0
+            }
+          }
         }
       },
       {
@@ -311,10 +614,40 @@ const initialRestaurants: Restaurant[] = [
         keyIngredients: [],
         allergens: [],
         nutrition: {
-          carbs: 0,
-          proteins: 0,
-          calories: 0,
-          fats: 0
+          carbs: 60,
+          proteins: 10,
+          calories: 550,
+          fats: 25,
+          fiber: 2,
+          servingSize: '1 milkshake (400ml)',
+          description: 'Our Chocolate Milkshake is a decadent treat made with premium chocolate ice cream, whole milk, and a touch of vanilla, blended to creamy perfection.',
+          details: {
+            totalFat: {
+              value: 25,
+              saturatedFat: 15,
+              transFat: 0
+            },
+            totalCarbohydrates: {
+              value: 60,
+              fiber: 2,
+              sugars: 50
+            },
+            protein: {
+              value: 10,
+              source: 'milk and ice cream'
+            },
+            minerals: {
+              sodium: 250,
+              potassium: 500,
+              calcium: 30,
+              iron: 2
+            },
+            vitamins: {
+              vitaminA: 15,
+              vitaminC: 1,
+              vitaminD: 25
+            }
+          }
         }
       },
     ],
