@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRestaurantStore } from '@/store/restaurantStore';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -82,34 +82,66 @@ export default function MenuItemDetail() {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>KEY INGREDIENTS</Text>
-                        <View style={styles.ingredients}>
-                            {menuItem.keyIngredients.map((ingredient, index) => (
-                                <View key={index} style={styles.ingredient}>
-                                    <View style={styles.ingredientIcon}>
-                                        <FontAwesome6 name={ingredient.icon} size={24} color="#FF8C00" />
-                                    </View>
-                                    <Text style={styles.ingredientText}>
-                                        {ingredient.name}
-                                        {ingredient.isAllergy && (
-                                            <Text style={styles.allergyText}>{'\n'}(Allergy)</Text>
-                                        )}
-                                    </Text>
-                                </View>
-                            ))}
+            <Text style={styles.sectionTitle}>KEY INGREDIENTS</Text>
+            {Platform.OS === 'web' ? (
+                <View style={styles.ingredients}>
+                    {menuItem.keyIngredients.map((ingredient, index) => (
+                        <View key={index} style={styles.ingredient}>
+                            <View style={styles.ingredientIcon}>
+                                <FontAwesome6 name={ingredient.icon} size={24} color="#FF8C00" />
+                            </View>
+                            <Text style={styles.ingredientText}>
+                                {ingredient.name}
+                                {ingredient.isAllergy && (
+                                    <Text style={styles.allergyText}>{'\n'}(Allergy)</Text>
+                                )}
+                            </Text>
                         </View>
+                    ))}
+                </View>
+            ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
+                    <View style={styles.ingredients}>
+                        {menuItem.keyIngredients.map((ingredient, index) => (
+                            <View key={index} style={styles.ingredient}>
+                                <View style={styles.ingredientIcon}>
+                                    <FontAwesome6 name={ingredient.icon} size={24} color="#FF8C00" />
+                                </View>
+                                <Text style={styles.ingredientText}>
+                                    {ingredient.name}
+                                    {ingredient.isAllergy && (
+                                        <Text style={styles.allergyText}>{'\n'}(Allergy)</Text>
+                                    )}
+                                </Text>
+                            </View>
+                        ))}
                     </View>
+                </ScrollView>
+            )}
+          </View>
 
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>ALLERGENS</Text>
-                        <View style={styles.allergens}>
-                            {menuItem.allergens.map((allergen, index) => (
-                                <View key={index} style={styles.allergen}>
-                                    <Text style={styles.allergenText}>{allergen}</Text>
-                                </View>
-                            ))}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>ALLERGENS</Text>
+            {Platform.OS === 'web' ? (
+                <View style={styles.allergens}>
+                    {menuItem.allergens.map((allergen, index) => (
+                        <View key={index} style={styles.allergen}>
+                            <Text style={styles.allergenText}>{allergen}</Text>
                         </View>
+                    ))}
+                </View>
+            ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.allergensScroll}>
+                    <View style={styles.allergens}>
+                        {menuItem.allergens.map((allergen, index) => (
+                            <View key={index} style={styles.allergen}>
+                                <Text style={styles.allergenText}>{allergen}</Text>
+                            </View>
+                        ))}
                     </View>
+                </ScrollView>
+            )}
+          </View>
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>NUTRITIONS</Text>
@@ -245,9 +277,10 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: '600',
-        marginBottom: 16,
         color: '#1A1A1A',
         textTransform: 'uppercase',
+        marginRight: 16,
+        marginBottom: 5,
     },
     sizeSection: {
         marginBottom: 32,
@@ -278,17 +311,24 @@ const styles = StyleSheet.create({
     selectedSizeText: {
         color: 'white',
     },
-    ingredients: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    ingredient: {
-        alignItems: 'center',
-        width: '18%',
+    ingredientsScroll: {
         marginBottom: 16,
-    },
-    ingredientIcon: {
+      },
+      allergensScroll: {
+        marginBottom: 16,
+      },
+      ingredients: {
+        flexDirection: 'row',
+        flexWrap: Platform.OS === 'web' ? 'wrap' : 'nowrap',
+        justifyContent: Platform.OS === 'web' ? 'flex-start' : 'space-between',
+      },
+      ingredient: {
+        alignItems: 'center',
+        width: Platform.OS === 'web' ? '5%' : '15%',
+        marginRight: Platform.OS === 'web' ? 0 : 16,
+        marginBottom: Platform.OS === 'web' ? 16 : 0,
+      },
+      ingredientIcon: {
         width: 48,
         height: 48,
         backgroundColor: '#FFF5E6',
@@ -296,34 +336,34 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 8,
-    },
-    ingredientText: {
+      },
+      ingredientText: {
         fontSize: 12,
         textAlign: 'center',
         color: '#1A1A1A',
-    },
-    allergyText: {
+      },
+      allergyText: {
         color: '#FF8C00',
         fontSize: 10,
-    },
-    allergens: {
+      },
+      allergens: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
+        flexWrap: Platform.OS === 'web' ? 'wrap' : 'nowrap',
         gap: 8,
-    },
-    allergen: {
+      },
+      allergen: {
         paddingVertical: 8,
         paddingHorizontal: 16,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#F8F9FB',
         borderRadius: 20,
         borderWidth: 1,
         borderColor: '#E5E7EB',
-    },
-    allergenText: {
+      },
+      allergenText: {
         fontSize: 14,
         color: '#1A1A1A',
         fontWeight: '500',
-    },
+      },
     nutritionGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -338,8 +378,10 @@ const styles = StyleSheet.create({
     nutritionIcon: {
         width: 48,
         height: 48,
-        backgroundColor: '#F8F9FB',
+        backgroundColor: '#ffffff',
         borderRadius: 24,
+        borderWidth: 3,
+        borderColor: '#F0F5FA',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
@@ -400,7 +442,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FF8C00',
         padding: 16,
         alignItems: 'center',
-        margin: 20,
+        marginTop: 20,
         borderRadius: 16,
     },
     addButtonText: {

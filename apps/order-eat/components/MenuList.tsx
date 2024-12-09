@@ -8,7 +8,7 @@ interface MenuItem {
   name: string;
   description: string;
   price: number;
-  image: string;
+  images: string[];
 }
 
 interface MenuListProps {
@@ -30,7 +30,7 @@ export const MenuList: React.FC<MenuListProps> = ({ menuItems, selectedCategory,
             style={styles.menuItem}
             onPress={() => onItemClick(item.id)}
           >
-            <Image source={{ uri: item.image }} style={styles.menuItemImage} />
+            <Image source={{ uri: item.images[0] }} style={styles.menuItemImage} />
             <Text style={styles.menuItemName}>{item.name}</Text>
             <Text style={styles.menuItemDescription}>{item.description}</Text>
             <View style={styles.menuItemFooter}>

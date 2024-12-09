@@ -36,6 +36,7 @@ export interface Restaurant {
   time: string;
   images: string[];
   description: string;
+  shortDescription: string;
   menuItems: MenuItem[];
 }
 
@@ -60,6 +61,7 @@ const initialRestaurants: Restaurant[] = [
       'https://www.tourisme-rennes.com/voy_content/uploads/2023/09/Hotel-Balthazar-restaurant.jpg',
     ],
     description: 'Authentic Italian pizzas and pasta made with love and tradition.',
+    shortDescription: 'Pizza - Pasta - Tiramisu',
     menuItems: [
       {
         id: 'p1',
@@ -67,9 +69,8 @@ const initialRestaurants: Restaurant[] = [
         description: 'Pizza folded in half with chicken, mushrooms, and cheese',
         price: 32,
         images: [
-          'https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D',
-          'https://cdn.sortiraparis.com/images/80/100789/834071-too-restaurant-too-hotel-paris-photos-menu-entrees.jpg',
-          'https://www.tourisme-rennes.com/voy_content/uploads/2023/09/Hotel-Balthazar-restaurant.jpg',
+          'https://cdn.tasteatlas.com/Images/Dishes/2bfdf993487d4995b8ed4ce3e99c5703.jpg',
+          'https://cdn.tasteatlas.com/images/dishes/2dd9d07402f9404bb1149da811a0c42d.jpg?m=facebook',
         ],
         foodCategoryId: 'f1',
         mealTypeId: 'm1',
@@ -78,10 +79,11 @@ const initialRestaurants: Restaurant[] = [
         selectedSize: '14"',
         keyIngredients: [
           { name: 'Chicken', icon: 'drumstick-bite' },
-          { name: 'Onion', icon: 'pepper-hot', isAllergy: true },
+          { name: 'Lemon', icon: 'lemon' },
           { name: 'Cheese', icon: 'cheese' },
           { name: 'Bread', icon: 'bread-slice' },
           { name: 'Olive Oil', icon: 'oil-can' },
+          {name: 'Carrot', icon: 'carrot'}
         ],
         allergens: ['Salt', 'Gluten', 'Nuts', 'Shellfish', 'Egg'],
         nutrition: {
@@ -198,6 +200,7 @@ const initialRestaurants: Restaurant[] = [
       'https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D',
     ],
     description: 'Juicy burgers and crispy fries for the perfect comfort meal.',
+    shortDescription: 'Burgers - Fries - Milkshakes',
     menuItems: [
       {
         id: 'b1',
