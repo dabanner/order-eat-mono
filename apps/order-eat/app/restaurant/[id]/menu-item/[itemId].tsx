@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useRestaurantStore } from '@/store/restaurantStore';
+import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
