@@ -4,6 +4,7 @@ import { DetailedNutritionInfo } from '../store/restaurantStore';
 
 interface NutritionDisplayProps {
   nutrition: DetailedNutritionInfo;
+  image: string;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -13,27 +14,25 @@ const calculateSize = (baseSize: number) => {
   return Math.round(baseSize * scaleFactor);
 };
 
-export function WebNutritionDisplay({ nutrition }: NutritionDisplayProps) {
+export function WebNutritionDisplay({ nutrition, image }: NutritionDisplayProps) {
   const { width } = useWindowDimensions();
   const isSmallScreen = width < 768;
 
   return (
-    <View style={styles.content}>
+    <View style={[styles.content, isSmallScreen && styles.contentSmall]}>
       <View style={[styles.textContent, isSmallScreen && styles.textContentSmall]}>
-        <View style={styles.infoContainer}>
+        <View>
           <Text style={styles.size}>SIZE: {nutrition.servingSize}</Text>
           <Text style={styles.description}>{nutrition.description}</Text>
         </View>
       </View>
 
-      {/* Right side - Circular nutrition display */}
       <View style={[styles.circleWrapper, isSmallScreen && styles.circleWrapperSmall]}>
         <View style={styles.circleContainer}>
           <View style={styles.circle}>
-            {/* Center image */}
             <View style={styles.imageContainer}>
               <Image
-                source={{ uri: 'https://png.pngtree.com/png-vector/20240124/ourmid/pngtree-pizza-calzone-food-png-image_11485238.png' }}
+                source={{ uri: image }}
                 style={styles.image}
               />
             </View>
@@ -77,6 +76,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     width: '100%',
     marginHorizontal: 'auto',
+    maxHeight: 400,
+  },
+  contentSmall: {
+    maxHeight: 200,
   },
   textContent: {
     flex: 1,
@@ -84,9 +87,6 @@ const styles = StyleSheet.create({
   },
   textContentSmall: {
     marginRight: 20,
-  },
-  infoContainer: {
-    marginTop: 16,
   },
   size: {
     fontSize: 18,
@@ -112,8 +112,8 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   circle: {
-    width: '80%',
-    height: '80%',
+    width: '70%',
+    height: '70%',
     borderRadius: 9999,
     backgroundColor: '#FFF2F0',
     position: 'relative',
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain',
+    resizeMode: 'cover',
   },
   nutritionItem: {
     position: 'absolute',

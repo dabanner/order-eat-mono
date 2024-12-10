@@ -7,6 +7,7 @@ import { FontAwesome6 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageGallery } from '@/components/ImageGallery';
 import { WebNutritionDisplay } from '@/components/WebNutritionDisplay';
+import { MenuItemHeader } from '@/components/MenuItemHeader';
 export default function MenuItemDetail() {
     const { id, itemId } = useLocalSearchParams();
     const router = useRouter();
@@ -31,161 +32,120 @@ export default function MenuItemDetail() {
         console.log(`Added ${quantity} ${menuItem.name} to cart`);
     }, [quantity, menuItem]);
 
+    const onSizeSelect = useCallback((size) => {
+        console.log(`Selected size: ${size}`);
+    }, []);
+
+    const renderMenuItemHeader = () => (
+        <MenuItemHeader
+            restaurant={{
+                name: restaurant?.name || '',
+                rating: restaurant?.rating || 0,
+            }}
+            menuItem={{
+                name: menuItem.name,
+                description: menuItem.description,
+                price: menuItem.price,
+                sizes: menuItem.sizes,
+                selectedSize: menuItem.selectedSize,
+            }}
+            onSizeSelect={onSizeSelect}
+        />
+    );
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView style={styles.container}>
-                <View style={styles.imageContainer}>
-                    <ImageGallery images={menuItem.images || []} />
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => router.back()}
-                    >
-                        <MaterialIcons name="arrow-back" size={24} color="black" />
-                    </TouchableOpacity>
+                <View style={styles.header}>
+                    <View style={styles.headerContent}>
+                        <View style={styles.gallerySection}>
+                            <ImageGallery images={menuItem.images || []} />
+                        </View>
+                        {Platform.OS === 'web' && (
+                            <View style={styles.infoSection}>
+                                {renderMenuItemHeader()}
+                            </View>
+                        )}
+                    </View>
                 </View>
+                {Platform.OS !== 'web' && renderMenuItemHeader()}
 
-                <View style={styles.content}>
-                    <Text style={styles.name}>{menuItem.name}</Text>
-
-                    <View style={styles.restaurantName}>
-                        <MaterialIcons name="storefront" size={20} color="#FF8C00" style={styles.restaurantIcon} />
-                        <Text style={styles.restaurantText}>{restaurant?.name}</Text>
-                    </View>
-
-                    <View style={styles.ratingContainer}>
-                        <MaterialIcons name="star" size={20} color="#FF8C00" />
-                        <Text style={styles.rating}>{restaurant?.rating}</Text>
-                        <MaterialIcons name="schedule" size={20} color="#FF8C00" style={styles.clockIcon} />
-                        <Text style={styles.prepTime}>{menuItem.preparationTime} min</Text>
-                    </View>
-
-                    <Text style={styles.description}>{menuItem.description}</Text>
-
-                    <View style={styles.sizeSection}>
-                        <Text style={styles.sectionTitle}>SIZE:</Text>
-                        <View style={styles.sizes}>
-                            {menuItem.sizes.map((size) => (
-                                <TouchableOpacity
-                                    key={size}
-                                    style={[
-                                        styles.sizeButton,
-                                        size === menuItem.selectedSize && styles.selectedSize
-                                    ]}
-                                >
-                                    <Text style={[
-                                        styles.sizeText,
-                                        size === menuItem.selectedSize && styles.selectedSizeText
-                                    ]}>{size}</Text>
-                                </TouchableOpacity>
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>KEY INGREDIENTS</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
+                        <View style={styles.ingredients}>
+                            {menuItem.keyIngredients.map((ingredient, index) => (
+                                <View key={index} style={styles.ingredient}>
+                                    <View style={styles.ingredientIcon}>
+                                        <FontAwesome6  name={ingredient.icon} size={24} color="#FF8C00" />
+                                    </View>
+                                    <Text style={styles.ingredientText}>
+                                        {ingredient.name}
+                                        {ingredient.isAllergy && (
+                                            <Text style={styles.allergyText}>{'\n'}(Allergy)</Text>
+                                        )}
+                                    </Text>
+                                </View>
                             ))}
                         </View>
-                    </View>
+                    </ScrollView>
+                </View>
 
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>KEY INGREDIENTS</Text>
-                        {Platform.OS === 'web' ? (
-                            <View style={styles.ingredients}>
-                                {menuItem.keyIngredients.map((ingredient, index) => (
-                                    <View key={index} style={styles.ingredient}>
-                                        <View style={styles.ingredientIcon}>
-                                            <FontAwesome6 name={ingredient.icon} size={24} color="#FF8C00" />
-                                        </View>
-                                        <Text style={styles.ingredientText}>
-                                            {ingredient.name}
-                                            {ingredient.isAllergy && (
-                                                <Text style={styles.allergyText}>{'\n'}(Allergy)</Text>
-                                            )}
-                                        </Text>
-                                    </View>
-                                ))}
-                            </View>
-                        ) : (
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
-                                <View style={styles.ingredients}>
-                                    {menuItem.keyIngredients.map((ingredient, index) => (
-                                        <View key={index} style={styles.ingredient}>
-                                            <View style={styles.ingredientIcon}>
-                                                <FontAwesome6 name={ingredient.icon} size={24} color="#FF8C00" />
-                                            </View>
-                                            <Text style={styles.ingredientText}>
-                                                {ingredient.name}
-                                                {ingredient.isAllergy && (
-                                                    <Text style={styles.allergyText}>{'\n'}(Allergy)</Text>
-                                                )}
-                                            </Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            </ScrollView>
-                        )}
-                    </View>
 
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>ALLERGENS</Text>
-                        {Platform.OS === 'web' ? (
-                            <View style={styles.allergens}>
-                                {menuItem.allergens.map((allergen, index) => (
-                                    <View key={index} style={styles.allergen}>
-                                        <Text style={styles.allergenText}>{allergen}</Text>
-                                    </View>
-                                ))}
-                            </View>
-                        ) : (
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.allergensScroll}>
-                                <View style={styles.allergens}>
-                                    {menuItem.allergens.map((allergen, index) => (
-                                        <View key={index} style={styles.allergen}>
-                                            <Text style={styles.allergenText}>{allergen}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            </ScrollView>
-                        )}
-                    </View>
-
-                    <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>NUTRITIONS</Text>
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>NUTRITION</Text>
                     {Platform.OS === 'web' ? (
-                        <WebNutritionDisplay nutrition={menuItem.nutrition} />
+                        <WebNutritionDisplay nutrition={menuItem.nutrition} image={menuItem.images[0]} />
                     ) : (
-    
-                            <View style={styles.nutritionGrid}>
-                                <View style={styles.nutritionItem}>
-                                    <View style={styles.nutritionIcon}>
-                                        <FontAwesome6 name="wheat-awn" size={24} color="#666" />
-                                    </View>
-                                    <Text style={styles.nutritionValue}>{menuItem.nutrition.carbs}g carbs</Text>
+                        <View style={styles.nutritionGrid}>
+                            <View style={styles.nutritionItem}>
+                                <View style={styles.nutritionIcon}>
+                                    <FontAwesome6 name="wheat-awn" size={24} color="#666" />
                                 </View>
-                                <View style={styles.nutritionItem}>
-                                    <View style={styles.nutritionIcon}>
-                                        <FontAwesome6 name="egg" size={24} color="#666" />
-                                    </View>
-                                    <Text style={styles.nutritionValue}>{menuItem.nutrition.proteins}g proteins</Text>
-                                </View>
-                                <View style={styles.nutritionItem}>
-                                    <View style={styles.nutritionIcon}>
-                                        <FontAwesome6 name="fire" size={24} color="#666" />
-                                    </View>
-                                    <Text style={styles.nutritionValue}>{menuItem.nutrition.calories} Kcal</Text>
-                                </View>
-                                <View style={styles.nutritionItem}>
-                                    <View style={styles.nutritionIcon}>
-                                        <FontAwesome6 name="cheese" size={24} color="#666" />
-                                    </View>
-                                    <Text style={styles.nutritionValue}>{menuItem.nutrition.fats}g fats</Text>
-                                </View>
+                                <Text style={styles.nutritionValue}>{menuItem.nutrition.carbs}g carbs</Text>
                             </View>
+                            <View style={styles.nutritionItem}>
+                                <View style={styles.nutritionIcon}>
+                                    <FontAwesome6 name="egg" size={24} color="#666" />
+                                </View>
+                                <Text style={styles.nutritionValue}>{menuItem.nutrition.proteins}g proteins</Text>
+                            </View>
+                            <View style={styles.nutritionItem}>
+                                <View style={styles.nutritionIcon}>
+                                    <FontAwesome6 name="fire" size={24} color="#666" />
+                                </View>
+                                <Text style={styles.nutritionValue}>{menuItem.nutrition.calories} Kcal</Text>
+                            </View>
+                            <View style={styles.nutritionItem}>
+                                <View style={styles.nutritionIcon}>
+                                    <FontAwesome6 name="cheese" size={24} color="#666" />
+                                </View>
+                                <Text style={styles.nutritionValue}>{menuItem.nutrition.fats}g fats</Text>
+                            </View>
+                        </View>
                     )}
-                    </View>
+                </View>
+                
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>ALLERGENS</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.allergensScroll}>
+                        <View style={styles.allergens}>
+                            {menuItem.allergens.map((allergen, index) => (
+                                <View key={index} style={styles.allergen}>
+                                    <Text style={styles.allergenText}>{allergen}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    </ScrollView>
                 </View>
             </ScrollView>
             <View style={styles.footerContainer}>
+            <View style={styles.footerContent}>
                 <View style={styles.footer}>
                     <View style={styles.priceContainer}>
                         <Text style={styles.currency}>$</Text>
                         <Text style={styles.price}>{menuItem.price}</Text>
                     </View>
-
                     <View style={styles.quantityContainer}>
                         <TouchableOpacity
                             style={styles.quantityButton}
@@ -206,130 +166,58 @@ export default function MenuItemDetail() {
                     <Text style={styles.addButtonText}>ADD TO CART</Text>
                 </TouchableOpacity>
             </View>
+            </View>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     container: {
         flex: 1,
     },
-    imageContainer: {
+    header: {
         position: 'relative',
     },
-    backButton: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 8,
-        zIndex: 10,
+    headerContent: {
+        flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+        padding: Platform.OS === 'web' ? 20 : 5,
+        paddingBottom: 0,
     },
-    content: {
-        padding: 20,
+    gallerySection: {
+        flex: Platform.OS === 'web' ? 3 : 1,
     },
-    restaurantName: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    restaurantText: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: '#666',
-    },
-    name: {
-        fontSize: 28,
-        fontWeight: '600',
-        marginBottom: 12,
-        color: '#1A1A1A',
-    },
-    ratingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    rating: {
-        marginLeft: 4,
-        marginRight: 16,
-        fontSize: 16,
-        color: '#1A1A1A',
-    },
-    restaurantIcon: {
-        marginRight: 8,
-    },
-    clockIcon: {
-        marginRight: 8,
-    },
-    prepTime: {
-        fontSize: 16,
-        color: '#1A1A1A',
-    },
-    description: {
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 32,
-        lineHeight: 24,
+    infoSection: {
+        flex: 2,
+        paddingLeft: Platform.OS === 'web' ? 40 : 0,
     },
     section: {
-        marginBottom: 32,
+        padding: 20,
+        paddingBottom: 0,
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: '600',
         color: '#1A1A1A',
         textTransform: 'uppercase',
-        marginRight: 16,
-        marginBottom: 5,
-    },
-    sizeSection: {
-        marginBottom: 32,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    sizes: {
-        flexDirection: 'row',
-        gap: 12,
-        flex: 1,
-    },
-    sizeButton: {
-        width: 50,
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 25,
-        backgroundColor: '#F8F9FB',
-    },
-    selectedSize: {
-        backgroundColor: '#FF8C00',
-    },
-    sizeText: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: '#666',
-    },
-    selectedSizeText: {
-        color: 'white',
+        marginBottom: 16,
     },
     ingredientsScroll: {
         marginBottom: 16,
     },
-    allergensScroll: {
-        marginBottom: 16,
-    },
     ingredients: {
         flexDirection: 'row',
-        flexWrap: Platform.OS === 'web' ? 'wrap' : 'nowrap',
+        flexWrap: 'nowrap',
         justifyContent: Platform.OS === 'web' ? 'flex-start' : 'space-between',
     },
     ingredient: {
         alignItems: 'center',
-        width: Platform.OS === 'web' ? '5%' : '15%',
+        width: Platform.OS === 'web' ? '20%' : 80,
         marginRight: Platform.OS === 'web' ? 0 : 16,
         marginBottom: Platform.OS === 'web' ? 16 : 0,
     },
@@ -350,6 +238,9 @@ const styles = StyleSheet.create({
     allergyText: {
         color: '#FF8C00',
         fontSize: 10,
+    },
+    allergensScroll: {
+        marginBottom: Platform.OS === 'web' ? 170 : 10,
     },
     allergens: {
         flexDirection: 'row',
@@ -397,11 +288,21 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     footerContainer: {
-        backgroundColor: '#F0F5FA',
+        position: Platform.OS === 'web' ? 'fixed' : 'relative',
+        bottom: 0,
+        left: Platform.OS === 'web' ? '25%' : 0,
+        right: Platform.OS === 'web' ? '25%' : 0,
+        backgroundColor: 'transparent',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
+        width: Platform.OS === 'web' ? '50%' : '100%',
+        zIndex: 1000,
+      },
+      footerContent: {
+        backgroundColor: '#F0F5FA',
+        borderRadius: Platform.OS === 'web' ? 24 : 0,
         padding: 20,
-    },
+      },
     footer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -421,6 +322,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: '600',
         color: '#1A1A1A',
+        marginLeft: Platform.OS === 'web' ? 5 : 0,
     },
     quantityContainer: {
         flexDirection: 'row',
@@ -456,4 +358,3 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
 });
-

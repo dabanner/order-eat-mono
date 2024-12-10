@@ -104,6 +104,7 @@ const initialRestaurants: Restaurant[] = [
         images: [
           'https://cdn.tasteatlas.com/Images/Dishes/2bfdf993487d4995b8ed4ce3e99c5703.jpg',
           'https://cdn.tasteatlas.com/images/dishes/2dd9d07402f9404bb1149da811a0c42d.jpg?m=facebook',
+          'https://cdn.tasteatlas.com/Images/Dishes/2bfdf993487d4995b8ed4ce3e99c5703.jpg',
         ],
         foodCategoryId: 'f1',
         mealTypeId: 'm1',
