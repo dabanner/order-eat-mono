@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageGallery } from '@/components/ImageGallery';
 import { WebNutritionDisplay } from '@/components/WebNutritionDisplay';
 import { MenuItemHeader } from '@/components/MenuItemHeader';
+import { Footer } from '@/components/Footer';
 export default function MenuItemDetail() {
     const { id, itemId } = useLocalSearchParams();
     const router = useRouter();
@@ -77,7 +78,7 @@ export default function MenuItemDetail() {
                             {menuItem.keyIngredients.map((ingredient, index) => (
                                 <View key={index} style={styles.ingredient}>
                                     <View style={styles.ingredientIcon}>
-                                        <FontAwesome6  name={ingredient.icon} size={24} color="#FF8C00" />
+                                        <FontAwesome6 name={ingredient.icon} size={24} color="#FF8C00" />
                                     </View>
                                     <Text style={styles.ingredientText}>
                                         {ingredient.name}
@@ -125,7 +126,7 @@ export default function MenuItemDetail() {
                         </View>
                     )}
                 </View>
-                
+
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>ALLERGENS</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.allergensScroll}>
@@ -139,34 +140,17 @@ export default function MenuItemDetail() {
                     </ScrollView>
                 </View>
             </ScrollView>
-            <View style={styles.footerContainer}>
-            <View style={styles.footerContent}>
-                <View style={styles.footer}>
-                    <View style={styles.priceContainer}>
-                        <Text style={styles.currency}>$</Text>
-                        <Text style={styles.price}>{menuItem.price}</Text>
-                    </View>
-                    <View style={styles.quantityContainer}>
-                        <TouchableOpacity
-                            style={styles.quantityButton}
-                            onPress={() => handleQuantityChange(false)}
-                        >
-                            <MaterialIcons name="remove" size={20} color="white" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantity}>{quantity}</Text>
-                        <TouchableOpacity
-                            style={styles.quantityButton}
-                            onPress={() => handleQuantityChange(true)}
-                        >
-                            <MaterialIcons name="add" size={20} color="white" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
-                    <Text style={styles.addButtonText}>ADD TO CART</Text>
-                </TouchableOpacity>
-            </View>
-            </View>
+            <Footer
+                text={'$' + menuItem.price.toString()}
+                counter={quantity}
+                buttonText="ADD TO CART"
+                updateText={(newPrice) => {
+                    // Implement logic to update the price if needed
+                    console.log('Update price to:', newPrice);
+                }}
+                updateCounter={handleQuantityChange}
+                onClickButton={handleAddToCart}
+            />
         </SafeAreaView>
     );
 };
@@ -297,64 +281,10 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 24,
         width: Platform.OS === 'web' ? '50%' : '100%',
         zIndex: 1000,
-      },
-      footerContent: {
+    },
+    footerContent: {
         backgroundColor: '#F0F5FA',
         borderRadius: Platform.OS === 'web' ? 24 : 0,
         padding: 20,
-      },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    priceContainer: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    currency: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#1A1A1A',
-        marginRight: 2,
-    },
-    price: {
-        fontSize: 32,
-        fontWeight: '600',
-        color: '#1A1A1A',
-        marginLeft: Platform.OS === 'web' ? 5 : 0,
-    },
-    quantityContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#1F2937',
-        borderRadius: 30,
-        padding: 4,
-    },
-    quantityButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#FF8C00',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    quantity: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: '600',
-        marginHorizontal: 20,
-    },
-    addButton: {
-        backgroundColor: '#FF8C00',
-        padding: 16,
-        alignItems: 'center',
-        marginTop: 20,
-        borderRadius: 16,
-    },
-    addButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
-    },
+    }
 });
