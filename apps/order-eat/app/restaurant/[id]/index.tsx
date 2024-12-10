@@ -2,9 +2,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRestaurantStore } from '../../../store/restaurantStore';
+import { useRestaurantStore } from '@repo/store/src/restaurantStore'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFoodCategoryStore, FoodCategory } from '@/store/foodCaregoryStore';
+import { useFoodCategoryStore, FoodCategory } from '@repo/store/src/foodCaregoryStore';
 import { RestaurantHeader } from '@/components/RestaurantHeader';
 import { ImageGallery } from '@/components/ImageGallery';
 import { CategoryList } from '@/components/CategoryList';

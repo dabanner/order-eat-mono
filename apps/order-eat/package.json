@@ -11,12 +11,14 @@
     "test": "jest --watchAll",
     "lint": "expo lint",
     "check-types": "tsc --noEmit",
-    "dev": "npx expo start"
+    "dev": "npx expo start",
+    "tunnel": "npx expo start --tunnel"
   },
   "jest": {
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo/ngrok": "^4.1.3",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
@@ -42,7 +44,8 @@
     "react-native-screens": "~4.1.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.2",
-    "zustand": "^5.0.1"
+    "zustand": "^5.0.1",
+    "@repo/store": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
