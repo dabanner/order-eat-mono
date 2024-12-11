@@ -21,21 +21,25 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   return (
     <View style={styles.gallery}>
       <View style={styles.thumbnails}>
-        {images.map((image, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() => setCurrentIndex(index)}
-            style={styles.thumbnail}
-          >
-            <Image
-              source={{ uri: image }}
-              style={[
-                styles.thumbnailImage,
-                currentIndex === index && styles.thumbnailActive,
-              ]}
-            />
-          </TouchableOpacity>
-        ))}
+        {Platform.OS === 'web' ? (
+          <ScrollView style={styles.thumbnailList} contentContainerStyle={{ flexGrow: 1 }}>
+            {images.map((image, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => setCurrentIndex(index)}
+                style={styles.thumbnail}
+              >
+                <Image
+                  source={{ uri: image }}
+                  style={[
+                    styles.thumbnailImage,
+                    currentIndex === index && styles.thumbnailActive,
+                  ]}
+                />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        ) : null}
       </View>
       <View style={styles.mainImageContainer}>
         {Platform.OS === 'web' ? (
@@ -87,17 +91,26 @@ const styles = StyleSheet.create({
         display: 'none',
       },
       web: {
-        width: 100,
+        width: 120,
+        height: 300, 
+        overflow: 'hidden',
+      },
+    }),
+  },
+  thumbnailList: {
+    ...Platform.select({
+      web: {
+        flexGrow: 1,
+        flexShrink: 1,
+        height: '100%',
       },
     }),
   },
   thumbnail: {
     width: 100,
     height: 100,
-    marginBottom: Platform.OS === 'web' ? 10 : 0,
-    marginRight: Platform.OS === 'web' ? 0 : 10,
+    marginBottom: 10,
     borderRadius: 8,
-    overflow: 'hidden',
   },
   thumbnailImage: {
     width: '100%',
@@ -112,6 +125,7 @@ const styles = StyleSheet.create({
   mainImageContainer: {
     flex: 1,
     position: 'relative',
+    height: 300, // Fixed height for the main image
     width: '100%',
   },
   mainImage: {
@@ -153,4 +167,3 @@ const styles = StyleSheet.create({
     borderColor: '#ffffff',
   },
 });
-

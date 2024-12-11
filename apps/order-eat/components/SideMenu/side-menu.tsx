@@ -8,7 +8,7 @@ import {
   MaterialCommunityIcons,
   Feather
 } from '@expo/vector-icons';
-import { useUserStore } from '../../store/userStore';
+import { useUserStore } from '@repo/store/src/userStore';
 import { useRouter } from 'expo-router';
 
 interface SideMenuProps {
