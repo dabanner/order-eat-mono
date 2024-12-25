@@ -1,8 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions, Linking, Modal } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 
 const { width } = Dimensions.get('window');
+
+// Custom Alert Component
+const CustomAlert = ({ visible, url, onNavigate, onRetake, onCancel }) => (
+    <Modal
+        transparent={true}
+        visible={visible}
+        animationType="fade"
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.alertBox}>
+          <Text style={styles.alertTitle}>QR Code Detected</Text>
+          <Text style={styles.alertMessage}>Would you like to navigate to:</Text>
+          <Text style={styles.urlText}>{url}</Text>
+          <View style={styles.alertButtonContainer}>
+            <TouchableOpacity
+                style={[styles.alertButton, styles.navigateButton]}
+                onPress={onNavigate}
+            >
+              <Text style={styles.alertButtonText}>Navigate</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={[styles.alertButton, styles.retakeButton]}
+                onPress={onRetake}
+            >
+              <Text style={styles.alertButtonText}>Retake</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={[styles.alertButton, styles.cancelButton]}
+                onPress={onCancel}
+            >
+              <Text style={styles.alertButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+);
 
 // Component for native scanner
 const NativeScanner = ({ onScan, onClose, scanned }) => (
@@ -31,8 +68,9 @@ const ManualEntry = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
           style={styles.input}
           onChangeText={onCodeChange}
           value={code}
-          placeholder="Enter code manually"
-          keyboardType="number-pad"
+          placeholder="Enter URL manually"
+          keyboardType="url"
+          autoCapitalize="none"
       />
       <TouchableOpacity style={styles.button} onPress={onSubmit}>
         <Text style={styles.buttonText}>Submit</Text>
@@ -44,10 +82,12 @@ const ManualEntry = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
 );
 
 // Custom hook for scanner functionality
-const useScanner = (onScanComplete) => {
+const useScanner = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [scannedUrl, setScannedUrl] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -59,54 +99,94 @@ const useScanner = (onScanComplete) => {
   const openScanner = () => {
     setShowScanner(true);
     setScanned(false);
+    setShowAlert(false);
+    setScannedUrl('');
   };
 
   const closeScanner = () => {
     setShowScanner(false);
+    setScanned(false);
+    setShowAlert(false);
+    setScannedUrl('');
+  };
+
+  const handleUrl = async (url) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        alert('Cannot open this URL');
+      }
+    } catch (error) {
+      alert('An error occurred while opening the URL');
+    }
   };
 
   return {
     showScanner,
     hasPermission,
     scanned,
+    showAlert,
+    scannedUrl,
     setScanned,
+    setShowAlert,
+    setScannedUrl,
     openScanner,
     closeScanner,
+    handleUrl,
   };
 };
 
 // Main component
 export default function TabletScannerPage() {
   const [manualCode, setManualCode] = useState('');
-
-  const handleScanComplete = (data) => {
-    alert(`QR Code scanned: ${data}`);
-  };
-
-  const handleBarCodeScanned = ({ type, data }) => {
-    if (!scanned) {
-      setScanned(true);
-      handleScanComplete(data);
-    }
-  };
-
-  const handleManualSubmit = () => {
-    if (manualCode.trim()) {
-      alert(`Manually entered code: ${manualCode}`);
-      setManualCode('');
-    } else {
-      alert('Please enter a code');
-    }
-  };
-
   const {
     showScanner,
     hasPermission,
     scanned,
+    showAlert,
+    scannedUrl,
     setScanned,
+    setShowAlert,
+    setScannedUrl,
     openScanner,
     closeScanner,
-  } = useScanner(handleScanComplete);
+    handleUrl,
+  } = useScanner();
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    if (!scanned) {
+      setScanned(true);
+      setScannedUrl(data);
+      setShowAlert(true);
+    }
+  };
+
+  const handleNavigate = () => {
+    handleUrl(scannedUrl);
+    closeScanner();
+  };
+
+  const handleRetake = () => {
+    setScanned(false);
+    setShowAlert(false);
+    setScannedUrl('');
+  };
+
+  const handleCancel = () => {
+    closeScanner();
+  };
+
+  const handleManualSubmit = () => {
+    if (manualCode.trim()) {
+      setScannedUrl(manualCode);
+      setShowAlert(true);
+      setManualCode('');
+    } else {
+      alert('Please enter a URL');
+    }
+  };
 
   if (hasPermission === false) {
     return (
@@ -137,6 +217,13 @@ export default function TabletScannerPage() {
               />
           )}
         </View>
+        <CustomAlert
+            visible={showAlert}
+            url={scannedUrl}
+            onNavigate={handleNavigate}
+            onRetake={handleRetake}
+            onCancel={handleCancel}
+        />
       </View>
   );
 }
@@ -182,9 +269,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     margin: 10,
     minWidth: 150,
-  },
-  closeButton: {
-    width: '80%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     height: 60,
@@ -217,6 +303,68 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alertBox: {
+    width: width * 0.8,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  alertTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  alertMessage: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  urlText: {
+    fontSize: 16,
+    color: '#007AFF',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  alertButtonContainer: {
+    width: '100%',
+    flexDirection: 'column',
+    gap: 10,
+  },
+  alertButton: {
+    width: '100%',
+    height: 48,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  navigateButton: {
+    backgroundColor: '#007AFF',
+  },
+  retakeButton: {
+    backgroundColor: '#F4804F',
+  },
+  cancelButton: {
+    backgroundColor: '#FF3B30',
+  },
+  alertButtonText: {
+    color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
   },
