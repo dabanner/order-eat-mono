@@ -63,12 +63,6 @@ export default function RestaurantScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={() => router.back()}
-          >
-            <MaterialIcons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
           <TouchableOpacity style={styles.favoriteButton}>
             <MaterialIcons name="favorite" size={24} color="#FF8C00" />
           </TouchableOpacity>
@@ -130,20 +124,6 @@ const styles = StyleSheet.create({
   infoSection: {
     flex: 2,
     paddingLeft: Platform.OS === 'web' ? 40 : 0,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 50,
-    zIndex: 10,
-    ...Platform.select({
-      web: {
-        display: 'none',
-      },
-    }),
   },
   favoriteButton: {
     position: 'absolute',

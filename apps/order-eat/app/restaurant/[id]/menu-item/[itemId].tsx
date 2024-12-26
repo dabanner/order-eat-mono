@@ -33,7 +33,7 @@ export default function MenuItemDetail() {
         console.log(`Added ${quantity} ${menuItem.name} to cart`);
     }, [quantity, menuItem]);
 
-    const onSizeSelect = useCallback((size) => {
+    const onSizeSelect = useCallback((size: string) => {
         console.log(`Selected size: ${size}`);
     }, []);
 
