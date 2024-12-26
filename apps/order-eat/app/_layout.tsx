@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Slot, useRouter, usePathname } from 'expo-router';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { SideMenu } from '../components/SideMenu/side-menu';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -42,7 +36,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={DefaultTheme}>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={[styles.header, isChildRoute && styles.headerWithBackButton]}>
           {isChildRoute ? (
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -59,9 +53,10 @@ export default function RootLayout() {
             </View>
           </TouchableOpacity>
         </View>
-        <Slot />
+        <View style={styles.content}>
+          <Slot />
+        </View>
       </SafeAreaView>
-      <StatusBar style="auto" />
       {isSideMenuOpen && (
         <SideMenu
           visible={isSideMenuOpen}
@@ -82,39 +77,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    ...Platform.select({
-      web: {
-        paddingVertical: 8,
-      }
-    }),
+    height: Platform.OS === 'web' ? 64 : 56,
   },
   headerWithBackButton: {
-    justifyContent: 'flex-end',
+    justifyContent: Platform.OS === 'web'? 'space-between' : 'flex-end',
   },
   menuButton: {
     padding: 8,
     backgroundColor: '#f5f5f5',
     borderRadius: 50,
+    marginRight: 8,
   },
   backButton: {
     padding: 8,
     backgroundColor: '#f5f5f5',
     borderRadius: 50,
-    ...Platform.select({
-      ios: {
-        position: 'absolute',
-        left: 16,
-        zIndex: 10,
-      },
-      android: {
-        position: 'absolute',
-        left: 16,
-        zIndex: 10,
-      },
-      web: {
-        display: 'none',
-      },
-    }),
+    position: 'absolute',
+    left: 16,
+    zIndex: 10,
+    visibility: Platform.OS === 'web' ? 'hidden' : 'visible',
   },
   cartButton: {
     padding: 8,
@@ -137,6 +118,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  content: {
+    flex: 1,
   },
 });
 

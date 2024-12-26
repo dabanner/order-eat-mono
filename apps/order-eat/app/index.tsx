@@ -12,7 +12,6 @@ export default function Index() {
   const categories = useFoodCategoryStore((state) => state.categories);
   const restaurants = useRestaurantStore((state) => state.restaurants);
   const { user, setUser } = useUserStore();
-  //const [isSideMenuOpen, setIsSideMenuOpen] = useState(false); //Removed
   const router = useRouter();
 
   useEffect(() => {
@@ -125,13 +124,9 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     paddingTop: 0,
-    ...Platform.select({
-      web: {
-        maxWidth: '100%',
-        width: '100%',
-        marginHorizontal: 'auto',
-      },
-    }),
+    maxWidth: '100%',
+    width: '100%',
+    marginHorizontal: 'auto',
   },
   greeting: {
     fontSize: 24,
