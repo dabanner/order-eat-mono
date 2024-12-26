@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import { Slot, useRouter, usePathname } from 'expo-router';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -37,12 +37,19 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={DefaultTheme}>
       <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={[styles.header, isChildRoute && styles.headerWithBackButton]}>
+        <View style={[styles.header]}>
           {isChildRoute ? (
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
               <MaterialIcons name="arrow-back" size={24} color="#000" />
             </TouchableOpacity>
           ) : null}
+          <TouchableOpacity onPress={() => router.push('/')} style={styles.logoButton}>
+            <Image
+              source={require('../assets/images/LogoLong.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
           <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
             <MaterialIcons name="menu" size={24} color="#000" />
           </TouchableOpacity>
@@ -74,13 +81,20 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 16,
     height: Platform.OS === 'web' ? 64 : 56,
   },
-  headerWithBackButton: {
-    justifyContent: Platform.OS === 'web'? 'space-between' : 'flex-end',
+  logoButton: {
+    padding: 8,
+    position: 'absolute',
+    left: 5,
+    display: Platform.OS === 'web' ? 'flex' : 'none',
+  },
+  logoImage: {
+    width: 160,
+    display: Platform.OS === 'web' ? 'flex' : 'none',
   },
   menuButton: {
     padding: 8,
