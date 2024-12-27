@@ -1,5 +1,5 @@
 {
-  "name": "orderEat",
+  "name": "order-eat",
   "private": true,
   "scripts": {
     "build": "turbo build",

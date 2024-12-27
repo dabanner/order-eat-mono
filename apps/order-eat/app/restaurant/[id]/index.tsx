@@ -141,6 +141,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
-  },
+  }
 });
 
