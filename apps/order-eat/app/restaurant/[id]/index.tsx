@@ -9,7 +9,6 @@ import { RestaurantHeader } from '@/components/RestaurantHeader';
 import { ImageGallery } from '@/components/ImageGallery';
 import { CategoryList } from '@/components/CategoryList';
 import { MenuList } from '@/components/MenuList';
-import { Map } from '@/components/Map';
 
 export default function RestaurantScreen() {
   const { id } = useLocalSearchParams();
@@ -89,15 +88,6 @@ export default function RestaurantScreen() {
           selectedCategory={selectedFoodCategory}
           onItemClick={handleMenuItemClick}
         />
-        <View style={styles.mapContainer}>
-          <Text style={styles.sectionTitle}>Location</Text>
-          <Text style={styles.address}>{restaurant.address}</Text>
-          <Map 
-            latitude={restaurant.latitude} 
-            longitude={restaurant.longitude} 
-            name={restaurant.name} 
-          />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -151,18 +141,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
-  },
-  mapContainer: {
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  address: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
+  }
 });
 
