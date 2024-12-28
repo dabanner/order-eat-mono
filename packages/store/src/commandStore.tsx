@@ -15,22 +15,35 @@ export interface Command {
   reservationDetails: ReservationDetails;
   menuItems: (MenuItem & { quantity: number })[];
   totalAmount: number;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
 }
 
 interface CommandStore {
   currentCommand: Command | null;
+  pendingCommands: Command[];
+  confirmedCommands: Command[];
   setCurrentCommand: (command: Command | null) => void;
   updateReservationDetails: (details: Partial<ReservationDetails>) => void;
   addMenuItem: (item: MenuItem) => void;
   removeMenuItem: (itemId: string) => void;
   updateMenuItemQuantity: (itemId: string, quantity: number) => void;
   clearCommand: () => void;
+  addCommand: (command: Command) => void;
 }
 
 export const useCommandStore = create<CommandStore>((set) => ({
   currentCommand: null,
+  pendingCommands: [],
+  confirmedCommands: [],
   setCurrentCommand: (command) => set({ currentCommand: command }),
+  addCommand: (command) => set((state) => {
+    if (command.status === 'pending') {
+      return { pendingCommands: [...state.pendingCommands, command] };
+    } else if (command.status === 'confirmed') {
+      return { confirmedCommands: [...state.confirmedCommands, command] };
+    }
+    return state;
+  }),
   updateReservationDetails: (details) =>
     set((state) => ({
       currentCommand: state.currentCommand

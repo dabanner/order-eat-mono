@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { FoodCategory } from '@/store/foodCaregoryStore';
+import { FoodCategory } from '@repo/store/src/foodCaregoryStore';
 
 interface CategoryListProps {
   categories: FoodCategory[];
