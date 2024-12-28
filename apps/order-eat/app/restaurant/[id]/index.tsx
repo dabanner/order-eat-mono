@@ -91,7 +91,8 @@ export default function RestaurantScreen() {
           selectedCategory={selectedFoodCategory}
           onItemClick={handleMenuItemClick}
         />
-        <Footer
+      </ScrollView>
+      <Footer
           text="Make Reservation"
           counter={1}
           buttonText="Reserve Now"
@@ -100,7 +101,6 @@ export default function RestaurantScreen() {
           onClickButton={() => setIsReservationPopupVisible(true)}
           hideCounter
         />
-      </ScrollView>
       <ReservationPopup
         visible={isReservationPopupVisible}
         onClose={() => setIsReservationPopupVisible(false)}

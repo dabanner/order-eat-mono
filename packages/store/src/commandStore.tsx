@@ -16,6 +16,7 @@ export interface Command {
   menuItems: (MenuItem & { quantity: number })[];
   totalAmount: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  type: 'indoor' | 'outdoor';
 }
 
 interface CommandStore {
