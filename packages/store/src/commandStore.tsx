@@ -5,7 +5,8 @@ export interface ReservationDetails {
   date: string;
   time: string;
   numberOfPersons: number;
-  isIndoor: boolean;
+  type: 'takeaway' | 'dinein';
+  wantToPreOrder: boolean;
 }
 
 export interface Command {
@@ -16,7 +17,7 @@ export interface Command {
   menuItems: (MenuItem & { quantity: number })[];
   totalAmount: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  type: 'indoor' | 'outdoor';
+  type: 'takeaway' | 'dinein';
 }
 
 interface CommandStore {

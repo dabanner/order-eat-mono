@@ -104,10 +104,6 @@ export default function RestaurantScreen() {
       <ReservationPopup
         visible={isReservationPopupVisible}
         onClose={() => setIsReservationPopupVisible(false)}
-        onSubmit={(details) => {
-          console.log('Reservation details:', details);
-          setIsReservationPopupVisible(false);
-        }}
       />
     </SafeAreaView>
   );
