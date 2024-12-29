@@ -7,6 +7,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { SideMenu } from '../components/SideMenu/side-menu';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCommandStore } from '@repo/store/src/commandStore';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,6 +18,7 @@ export default function RootLayout() {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { pendingCommands, confirmedCommands } = useCommandStore();
 
   useEffect(() => {
     if (loaded) {
@@ -33,6 +35,7 @@ export default function RootLayout() {
   };
 
   const isChildRoute = pathname.split('/').length > 2;
+  const totalCommands = pendingCommands.length + confirmedCommands.length;
 
   return (
     <ThemeProvider value={DefaultTheme}>
@@ -53,11 +56,13 @@ export default function RootLayout() {
           <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
             <MaterialIcons name="menu" size={24} color="#000" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cartButton}>
+          <TouchableOpacity style={styles.cartButton} onPress={() => router.push('/reservation')}>
             <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>2</Text>
-            </View>
+            {totalCommands > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{totalCommands}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
         <View style={styles.content}>

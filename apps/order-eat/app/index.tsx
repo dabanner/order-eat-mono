@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 import { useFoodCategoryStore } from '@repo/store/src/foodCaregoryStore';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { useUserStore } from '@repo/store/src/userStore';
-import { SideMenu } from '../components/SideMenu/side-menu';
 
 export default function Index() {
   const categories = useFoodCategoryStore((state) => state.categories);
@@ -108,7 +107,6 @@ export default function Index() {
           </View>
         </View>
       </ScrollView>
-      {/*Removed SideMenu component*/}
     </SafeAreaView>
   );
 }

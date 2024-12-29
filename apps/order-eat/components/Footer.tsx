@@ -9,6 +9,7 @@ interface FooterProps {
     updateText: (text: string) => void;
     updateCounter: (increment: boolean) => void;
     onClickButton: () => void;
+    hideCounter?: boolean;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -18,6 +19,7 @@ export const Footer: React.FC<FooterProps> = ({
     updateText,
     updateCounter,
     onClickButton,
+    hideCounter,
 }) => {
     return (
         <View style={styles.footerContainer}>
@@ -26,21 +28,23 @@ export const Footer: React.FC<FooterProps> = ({
                     <View style={styles.textContainer}>
                         <Text style={styles.price}>{text}</Text>
                     </View>
-                    <View style={styles.quantityContainer}>
-                        <TouchableOpacity
-                            style={styles.quantityButton}
-                            onPress={() => updateCounter(false)}
-                        >
-                            <MaterialIcons name="remove" size={20} color="white" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantity}>{counter}</Text>
-                        <TouchableOpacity
-                            style={styles.quantityButton}
-                            onPress={() => updateCounter(true)}
-                        >
-                            <MaterialIcons name="add" size={20} color="white" />
-                        </TouchableOpacity>
-                    </View>
+                    {!hideCounter && (
+                        <View style={styles.quantityContainer}>
+                            <TouchableOpacity
+                                style={styles.quantityButton}
+                                onPress={() => updateCounter(false)}
+                            >
+                                <MaterialIcons name="remove" size={20} color="white" />
+                            </TouchableOpacity>
+                            <Text style={styles.quantity}>{counter}</Text>
+                            <TouchableOpacity
+                                style={styles.quantityButton}
+                                onPress={() => updateCounter(true)}
+                            >
+                                <MaterialIcons name="add" size={20} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
                 <TouchableOpacity style={styles.addButton} onPress={onClickButton}>
                     <Text style={styles.addButtonText}>{buttonText}</Text>
