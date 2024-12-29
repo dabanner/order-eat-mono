@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFoodCategoryStore, FoodCategory } from '@repo/store/src/foodCaregoryStore';
 import { RestaurantHeader } from '@/components/RestaurantHeader';
 import { ImageGallery } from '@/components/ImageGallery';
-import { CategoryList } from '@/components/CategoryList';
 import { MenuList } from '@/components/MenuList';
 import { Footer } from '@/components/Footer';
 
@@ -79,17 +78,17 @@ export default function RestaurantScreen() {
           </View>
         </View>
         {Platform.OS !== 'web' && <RestaurantHeader restaurant={restaurant} />}
-        <CategoryList 
-          categories={categories} 
-          selectedCategory={selectedFoodCategory} 
-          onSelectCategory={handleCategorySelect} 
-        />
         <MenuList 
           menuItems={filteredMenuItems} 
+          categories={categories}
           selectedCategory={selectedFoodCategory}
+          onCategorySelect={handleCategorySelect}
           onItemClick={handleMenuItemClick}
+          restaurant={restaurant}
+          showAddButton={false}
         />
-        <Footer
+      </ScrollView>
+      <Footer
           text="Make Reservation"
           counter={1}
           buttonText="Reserve Now"
@@ -98,7 +97,6 @@ export default function RestaurantScreen() {
           onClickButton={() => router.push(`/restaurant/${id}/reservation`)}
           hideCounter
         />
-      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -106,11 +104,10 @@ export default function RestaurantScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-
+    backgroundColor: '#fff',
   },
   container: {
     flex: 1,
-
   },
   header: {
     position: 'relative',
