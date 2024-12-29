@@ -37,7 +37,7 @@ export default function ReservationPage() {
         },
         menuItems: [] as (MenuItem & { quantity: number })[],
         totalAmount: 0,
-        status: 'pending' as const,
+        status: 'pending' as 'pending' | 'confirmed',
         type: 'dinein' as const,
       };
     }
@@ -117,9 +117,11 @@ export default function ReservationPage() {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
-    } else {
+    } 
+    else {
+      command.status = 'confirmed';
       addCommand(command);
-      router.replace(`/restaurant/${id}`);
+      router.replace(`/reservation`);
     }
   };
 
@@ -183,7 +185,7 @@ export default function ReservationPage() {
         {renderCurrentStep()}
       </ScrollView>
       <Footer
-        text={currentStep === 1 ? `Total: $${command.totalAmount.toFixed(2)}` : currentStep === steps.length - 1 ? 'Confirm Reservation' : 'Next Step'}
+        text={currentStep === 1 ? `Total: $${command.totalAmount.toFixed(2)}` : currentStep === steps.length - 1 ? 'See your reservations' : 'Next Step'}
         buttonText={currentStep === 0 ? 'Start Reservation' : 'Continue'}
         onClickButton={handleNext}
         updateText={() => {}}
@@ -199,11 +201,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    ...Platform.select({
-      web: {
-        marginBottom: 200,
-      },
-    }),
+
   },
   content: {
     flex: 1,
@@ -212,6 +210,11 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     flex: 1,
+    ...Platform.select({
+      web: {
+        marginBottom: 200,
+      },
+    }),
   }
 });
 

@@ -78,7 +78,8 @@ export default function RestaurantScreen() {
           </View>
         </View>
         {Platform.OS !== 'web' && <RestaurantHeader restaurant={restaurant} />}
-        <MenuList 
+        <View style={styles.menuList}>
+                  <MenuList 
           menuItems={filteredMenuItems} 
           categories={categories}
           selectedCategory={selectedFoodCategory}
@@ -87,6 +88,7 @@ export default function RestaurantScreen() {
           restaurant={restaurant}
           showAddButton={false}
         />
+        </View>
       </ScrollView>
       <Footer
           text="Make Reservation"
@@ -105,9 +107,11 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
+    
   },
   container: {
     flex: 1,
+    
   },
   header: {
     position: 'relative',
@@ -149,6 +153,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
+  },
+  menuList: {
+    marginHorizontal: 20,
+    marginBottom: Platform.OS === 'web' ? 200 : 0,
   },
 });
 

@@ -56,7 +56,7 @@ export default function RootLayout() {
           <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
             <MaterialIcons name="menu" size={24} color="#000" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cartButton}>
+          <TouchableOpacity style={styles.cartButton} onPress={() => router.push('/reservation')}>
             <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
             {totalCommands > 0 && (
               <View style={styles.cartBadge}>

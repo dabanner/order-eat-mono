@@ -11,8 +11,7 @@ interface ConfirmationProps {
 }
 
 export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command }) => {
-  // Log the entire command for debugging
-  console.log('Reservation Command:', JSON.stringify(command, null, 2));
+  console.log('Reservation Command:', command);
 
   return (
     <View style={styles.container}>
