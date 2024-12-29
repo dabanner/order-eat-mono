@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
@@ -9,7 +9,6 @@ import { RestaurantHeader } from '@/components/RestaurantHeader';
 import { ImageGallery } from '@/components/ImageGallery';
 import { CategoryList } from '@/components/CategoryList';
 import { MenuList } from '@/components/MenuList';
-import { ReservationPopup } from '@/components/ReservationPopup';
 import { Footer } from '@/components/Footer';
 
 export default function RestaurantScreen() {
@@ -17,7 +16,6 @@ export default function RestaurantScreen() {
   const { restaurants } = useRestaurantStore();
   const { getFoodCategoryById } = useFoodCategoryStore();
   const [selectedFoodCategory, setSelectedFoodCategory] = useState<FoodCategory | null>(null);
-  const [isReservationPopupVisible, setIsReservationPopupVisible] = useState(false);
   const router = useRouter();
 
   const restaurant = useMemo(() => restaurants?.find((r) => r.id === id), [restaurants, id]);
@@ -91,20 +89,16 @@ export default function RestaurantScreen() {
           selectedCategory={selectedFoodCategory}
           onItemClick={handleMenuItemClick}
         />
-      </ScrollView>
-      <Footer
+        <Footer
           text="Make Reservation"
           counter={1}
           buttonText="Reserve Now"
           updateText={() => {}}
           updateCounter={() => {}}
-          onClickButton={() => setIsReservationPopupVisible(true)}
+          onClickButton={() => router.push(`/restaurant/${id}/reservation`)}
           hideCounter
         />
-      <ReservationPopup
-        visible={isReservationPopupVisible}
-        onClose={() => setIsReservationPopupVisible(false)}
-      />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -112,10 +106,11 @@ export default function RestaurantScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+
   },
   container: {
     flex: 1,
+
   },
   header: {
     position: 'relative',

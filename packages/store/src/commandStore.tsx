@@ -25,12 +25,12 @@ interface CommandStore {
   pendingCommands: Command[];
   confirmedCommands: Command[];
   setCurrentCommand: (command: Command | null) => void;
-  updateReservationDetails: (details: Partial<ReservationDetails>) => void;
+  updateReservationDetails: (commandId: string, details: Partial<ReservationDetails>) => void;
   addMenuItem: (item: MenuItem) => void;
   removeMenuItem: (itemId: string) => void;
   updateMenuItemQuantity: (itemId: string, quantity: number) => void;
   clearCommand: () => void;
-  addCommand: (command: Partial<Command>) => string;
+  addCommand: (command: Omit<Command, 'id'>) => string;
 }
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -40,30 +40,24 @@ export const useCommandStore = create<CommandStore>((set) => ({
   pendingCommands: [],
   confirmedCommands: [],
   setCurrentCommand: (command) => set({ currentCommand: command }),
-  addCommand: (command: Partial<Command>) => {
-    const newCommand: Command = {
-      ...command,
-      id: generateId(),
-      status: 'pending',
-      menuItems: [],
-      totalAmount: 0,
-    } as Command;
-
+  updateReservationDetails: (commandId, details) =>
     set((state) => ({
-      pendingCommands: [...state.pendingCommands, newCommand],
-    }));
-
-    return newCommand.id!=null?newCommand.id:'';
-  },
-  updateReservationDetails: (details) =>
-    set((state) => ({
-      currentCommand: state.currentCommand
-        ? {
-            ...state.currentCommand,
-            reservationDetails: { ...state.currentCommand.reservationDetails, ...details },
-          }
-        : null,
+      pendingCommands: state.pendingCommands.map((command) =>
+        command.id === commandId
+          ? {
+              ...command,
+              reservationDetails: { ...command.reservationDetails, ...details },
+            }
+          : command
+      ),
     })),
+  addCommand: (command) => {
+    const id = generateId();
+    set((state) => ({
+      pendingCommands: [...state.pendingCommands, { ...command, id }],
+    }));
+    return id;
+  },
   addMenuItem: (item) =>
     set((state) => {
       if (!state.currentCommand) return { currentCommand: null };
