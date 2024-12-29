@@ -23,6 +23,8 @@
   ],
   "dependencies": {
     "expo-barcode-scanner": "^13.0.1",
-    "expo-camera": "~16.0.9"
+    "expo-camera": "~16.0.9",
+    "expo-notifications": "~0.29.11",
+    "expo-location": "~18.0.4"
   }
 }
