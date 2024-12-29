@@ -30,22 +30,31 @@ interface CommandStore {
   removeMenuItem: (itemId: string) => void;
   updateMenuItemQuantity: (itemId: string, quantity: number) => void;
   clearCommand: () => void;
-  addCommand: (command: Command) => void;
+  addCommand: (command: Partial<Command>) => string;
 }
+
+const generateId = () => Math.random().toString(36).substr(2, 9);
 
 export const useCommandStore = create<CommandStore>((set) => ({
   currentCommand: null,
   pendingCommands: [],
   confirmedCommands: [],
   setCurrentCommand: (command) => set({ currentCommand: command }),
-  addCommand: (command) => set((state) => {
-    if (command.status === 'pending') {
-      return { pendingCommands: [...state.pendingCommands, command] };
-    } else if (command.status === 'confirmed') {
-      return { confirmedCommands: [...state.confirmedCommands, command] };
-    }
-    return state;
-  }),
+  addCommand: (command: Partial<Command>) => {
+    const newCommand: Command = {
+      ...command,
+      id: generateId(),
+      status: 'pending',
+      menuItems: [],
+      totalAmount: 0,
+    } as Command;
+
+    set((state) => ({
+      pendingCommands: [...state.pendingCommands, newCommand],
+    }));
+
+    return newCommand.id!=null?newCommand.id:'';
+  },
   updateReservationDetails: (details) =>
     set((state) => ({
       currentCommand: state.currentCommand
