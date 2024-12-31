@@ -133,15 +133,15 @@ export default function ReservationPage() {
     }
   };
 
-  const handleUpdateReservationDetails = (details: Partial<typeof command.reservationDetails>) => {
-    setCommand(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        reservationDetails: { ...prev.reservationDetails, ...details },
-      };
-    });
-  };
+  const handleUpdateReservationDetails = useCallback((details: Partial<typeof command.reservationDetails>) => {
+  setCommand(prev => {
+    if (!prev) return prev;
+    return {
+      ...prev,
+      reservationDetails: { ...prev.reservationDetails, ...details },
+    };
+  });
+}, []);
 
   const renderCurrentStep = () => {
     if (currentStep === 0) {
