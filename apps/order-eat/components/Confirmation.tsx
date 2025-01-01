@@ -17,29 +17,8 @@ export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command 
   console.log('Reservation Command:', command);
 
     const qrCodeSize = Math.min(Dimensions.get('window').width * 0.3, 250);
-  
-  const compressData = (data: Command): string => {
-    try {
-      // Convert to JSON string
-      const jsonString = JSON.stringify(data);
-      
-      // Compress using pako
-      const compressed = pako.deflate(jsonString);
-      
-      // Convert to Base64 for QR code compatibility
-      return Base64.encode(String.fromCharCode.apply(null, compressed));
-    } catch (error) {
-      console.error('Compression failed:', error);
-      return '';
-    }
-  };
 
-  const qrData = compressData(command);
 
-  console.log(qrData.length)
-  console.log(qrData)
-
-  const getFallbackData = (command: Command): string => {
     const essentialData = {
       id: command.id,
       userId: command.userId,
@@ -50,10 +29,8 @@ export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command 
       type: command.type,
       itemCount: command.menuItems.length,
     };
-    return JSON.stringify(essentialData);
-  };
+    const finalData =  JSON.stringify(essentialData);
 
-  const finalData = qrData.length > 4000 ? getFallbackData(command) : qrData;
 
   console.log(finalData)
 
