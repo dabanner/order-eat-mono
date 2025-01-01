@@ -1,9 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions } from 'react-native';
 import { Restaurant } from '@repo/store/src/restaurantStore';
 import { Command } from '@repo/store/src/commandStore';
 import { RestaurantHeader } from './RestaurantHeader';
 import { MaterialIcons } from '@expo/vector-icons';
+import QRCode from 'react-native-qrcode-svg';
+import pako from 'pako';
+import Base64 from 'js-base64';
 
 interface ConfirmationProps {
   restaurant: Restaurant;
@@ -12,6 +15,47 @@ interface ConfirmationProps {
 
 export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command }) => {
   console.log('Reservation Command:', command);
+
+    const qrCodeSize = Math.min(Dimensions.get('window').width * 0.3, 250);
+  
+  const compressData = (data: Command): string => {
+    try {
+      // Convert to JSON string
+      const jsonString = JSON.stringify(data);
+      
+      // Compress using pako
+      const compressed = pako.deflate(jsonString);
+      
+      // Convert to Base64 for QR code compatibility
+      return Base64.encode(String.fromCharCode.apply(null, compressed));
+    } catch (error) {
+      console.error('Compression failed:', error);
+      return '';
+    }
+  };
+
+  const qrData = compressData(command);
+
+  console.log(qrData.length)
+  console.log(qrData)
+
+  const getFallbackData = (command: Command): string => {
+    const essentialData = {
+      id: command.id,
+      userId: command.userId,
+      restaurantId: command.restaurant.id, // Assuming restaurant has an id
+      reservationTime: command.reservationDetails.time, // Assuming this exists
+      totalAmount: command.totalAmount,
+      status: command.status,
+      type: command.type,
+      itemCount: command.menuItems.length,
+    };
+    return JSON.stringify(essentialData);
+  };
+
+  const finalData = qrData.length > 4000 ? getFallbackData(command) : qrData;
+
+  console.log(finalData)
 
   return (
     <View style={styles.container}>
@@ -26,7 +70,13 @@ export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command 
 
         <View style={styles.qrSection}>
           <View style={styles.qrPlaceholder}>
-            <Text style={styles.qrText}>QR Code</Text>
+             <QRCode
+          value={finalData}
+          size={qrCodeSize}
+          backgroundColor="white"
+          color="black"
+        />
+            <Text style={styles.qrText}></Text>
             <Text style={styles.qrSubtext}>Show this at the restaurant</Text>
           </View>
         </View>
