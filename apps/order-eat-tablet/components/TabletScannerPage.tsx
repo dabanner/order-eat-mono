@@ -1,47 +1,92 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions, Linking, Modal } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions, Modal } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 
 const { width } = Dimensions.get('window');
 
-// Custom Alert Component
-const CustomAlert = ({ visible, url, onNavigate, onRetake, onCancel }) => (
-    <Modal
-        transparent={true}
-        visible={visible}
-        animationType="fade"
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.alertBox}>
-          <Text style={styles.alertTitle}>QR Code Detected</Text>
-          <Text style={styles.alertMessage}>Would you like to navigate to:</Text>
-          <Text style={styles.urlText}>{url}</Text>
-          <View style={styles.alertButtonContainer}>
-            <TouchableOpacity
-                style={[styles.alertButton, styles.navigateButton]}
-                onPress={onNavigate}
-            >
-              <Text style={styles.alertButtonText}>Navigate</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={[styles.alertButton, styles.retakeButton]}
-                onPress={onRetake}
-            >
-              <Text style={styles.alertButtonText}>Retake</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={[styles.alertButton, styles.cancelButton]}
-                onPress={onCancel}
-            >
-              <Text style={styles.alertButtonText}>Cancel</Text>
-            </TouchableOpacity>
+const CustomAlert = ({ visible, data, onConfirm, onRetake, onCancel }) => {
+  let reservationData;
+  try {
+    reservationData = JSON.parse(data || '{}');
+    console.log("reservation data : ", reservationData);
+  } catch (error) {
+    return null;
+  }
+
+  if (!data) return null;
+
+  return (
+      <Modal
+          transparent={true}
+          visible={visible}
+          animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.alertBox}>
+            <Text style={styles.alertTitle}>Reservation Details</Text>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>ID:</Text>
+              <Text style={styles.detailText}>{reservationData.id}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Time:</Text>
+              <Text style={styles.detailText}>
+                {new Date(reservationData.reservationTime).toLocaleString()}
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Status:</Text>
+              <Text style={[styles.detailText, styles.statusText]}>
+                {reservationData.status}
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Type:</Text>
+              <Text style={styles.detailText}>{reservationData.type}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Items:</Text>
+              <Text style={styles.detailText}>{reservationData.itemCount}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Amount:</Text>
+              <Text style={styles.detailText}>
+                ${reservationData.totalAmount.toFixed(2)}
+              </Text>
+            </View>
+
+            <View style={styles.alertButtonContainer}>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.navigateButton]}
+                  onPress={onConfirm}
+              >
+                <Text style={styles.alertButtonText}>Confirm</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.retakeButton]}
+                  onPress={onRetake}
+              >
+                <Text style={styles.alertButtonText}>Scan Again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.cancelButton]}
+                  onPress={onCancel}
+              >
+                <Text style={styles.alertButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
-);
+      </Modal>
+  );
+};
 
-// Component for native scanner
 const NativeScanner = ({ onScan, onClose, scanned }) => (
     <View style={styles.scannerContainer}>
       <View style={styles.cameraWrapper}>
@@ -61,15 +106,14 @@ const NativeScanner = ({ onScan, onClose, scanned }) => (
     </View>
 );
 
-// Component for manual code entry
 const ManualEntry = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
     <View style={styles.manualEntryContainer}>
       <TextInput
           style={styles.input}
           onChangeText={onCodeChange}
           value={code}
-          placeholder="Enter URL manually"
-          keyboardType="url"
+          placeholder="Enter reservation code manually"
+          keyboardType="default"
           autoCapitalize="none"
       />
       <TouchableOpacity style={styles.button} onPress={onSubmit}>
@@ -81,13 +125,12 @@ const ManualEntry = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
     </View>
 );
 
-// Custom hook for scanner functionality
 const useScanner = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const [scannedUrl, setScannedUrl] = useState('');
+  const [scannedData, setScannedData] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -100,27 +143,14 @@ const useScanner = () => {
     setShowScanner(true);
     setScanned(false);
     setShowAlert(false);
-    setScannedUrl('');
+    setScannedData('');
   };
 
   const closeScanner = () => {
     setShowScanner(false);
     setScanned(false);
     setShowAlert(false);
-    setScannedUrl('');
-  };
-
-  const handleUrl = async (url) => {
-    try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        alert('Cannot open this URL');
-      }
-    } catch (error) {
-      alert('An error occurred while opening the URL');
-    }
+    setScannedData('');
   };
 
   return {
@@ -128,17 +158,15 @@ const useScanner = () => {
     hasPermission,
     scanned,
     showAlert,
-    scannedUrl,
+    scannedData,
     setScanned,
     setShowAlert,
-    setScannedUrl,
+    setScannedData,
     openScanner,
     closeScanner,
-    handleUrl,
   };
 };
 
-// Main component
 export default function TabletScannerPage() {
   const [manualCode, setManualCode] = useState('');
   const {
@@ -146,32 +174,43 @@ export default function TabletScannerPage() {
     hasPermission,
     scanned,
     showAlert,
-    scannedUrl,
+    scannedData,
     setScanned,
     setShowAlert,
-    setScannedUrl,
+    setScannedData,
     openScanner,
     closeScanner,
-    handleUrl,
   } = useScanner();
 
   const handleBarCodeScanned = ({ type, data }) => {
-    if (!scanned) {
+    if (scanned) return;
+
+    try {
+      const parsedData = JSON.parse(data);
+      const requiredFields = ['id', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+
+      if (!requiredFields.every(field => field in parsedData)) {
+        throw new Error('Missing required reservation fields');
+      }
+
       setScanned(true);
-      setScannedUrl(data);
+      setScannedData(data);
       setShowAlert(true);
+    } catch (error) {
+      alert('Invalid reservation QR code');
+      setScanned(false);
     }
   };
 
-  const handleNavigate = () => {
-    handleUrl(scannedUrl);
+  const handleConfirm = () => {
+    console.log('Reservation confirmed:', JSON.parse(scannedData));
     closeScanner();
   };
 
   const handleRetake = () => {
     setScanned(false);
     setShowAlert(false);
-    setScannedUrl('');
+    setScannedData('');
   };
 
   const handleCancel = () => {
@@ -180,11 +219,22 @@ export default function TabletScannerPage() {
 
   const handleManualSubmit = () => {
     if (manualCode.trim()) {
-      setScannedUrl(manualCode);
-      setShowAlert(true);
-      setManualCode('');
+      try {
+        const parsedData = JSON.parse(manualCode);
+        const requiredFields = ['id', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+
+        if (!requiredFields.every(field => field in parsedData)) {
+          throw new Error('Missing required reservation fields');
+        }
+
+        setScannedData(manualCode);
+        setShowAlert(true);
+        setManualCode('');
+      } catch (error) {
+        alert('Invalid reservation code format');
+      }
     } else {
-      alert('Please enter a URL');
+      alert('Please enter a reservation code');
     }
   };
 
@@ -219,8 +269,8 @@ export default function TabletScannerPage() {
         </View>
         <CustomAlert
             visible={showAlert}
-            url={scannedUrl}
-            onNavigate={handleNavigate}
+            data={scannedData}
+            onConfirm={handleConfirm}
             onRetake={handleRetake}
             onCancel={handleCancel}
         />
@@ -228,7 +278,6 @@ export default function TabletScannerPage() {
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -336,16 +385,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
   },
-  urlText: {
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  detailLabel: {
     fontSize: 16,
-    color: '#007AFF',
-    marginBottom: 20,
-    textAlign: 'center',
+    fontWeight: '600',
+    color: '#666',
+  },
+  detailText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  statusText: {
+    color: '#4CAF50',
+    fontWeight: '600',
   },
   alertButtonContainer: {
     width: '100%',
     flexDirection: 'column',
     gap: 10,
+    marginTop: 20,
   },
   alertButton: {
     width: '100%',
