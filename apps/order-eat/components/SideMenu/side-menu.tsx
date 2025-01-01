@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
@@ -10,6 +10,7 @@ import {
 } from '@expo/vector-icons';
 import { useUserStore } from '@repo/store/src/userStore';
 import { useRouter } from 'expo-router';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 
 interface SideMenuProps {
   visible: boolean;
@@ -44,6 +45,8 @@ const IconComponent: React.FC<{ item: MenuItem }> = ({ item }) => {
 export function SideMenu({ visible, onClose }: SideMenuProps) {
   const { user, logout } = useUserStore();
   const router = useRouter();
+  const translateX = useSharedValue(360);
+  const opacity = useSharedValue(1);
 
   const handleLogout = () => {
     logout();
@@ -84,21 +87,39 @@ export function SideMenu({ visible, onClose }: SideMenuProps) {
     }
   ];
 
+  useEffect(() => {
+    translateX.value = withTiming(visible ? 0 : 360, {
+      duration: 300,
+      easing: Easing.out(Easing.cubic),
+    });
+    opacity.value = withTiming(visible ? 1 : 0, {
+      duration: 300,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [visible]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+      opacity: opacity.value,
+    };
+  });
+
   if (!visible) return null;
 
   return (
     <View style={styles.overlay}>
-      <View style={styles.menuContainer}>
+      <Animated.View style={[styles.menuContainer, animatedStyle]}>
         <SafeAreaView style={styles.content}>
           <ScrollView>
             {/* Header */}
             <View style={styles.header}>
-              <TouchableOpacity onPress={onClose}>
-                <Ionicons name="chevron-back" size={24} color="#000" />
-              </TouchableOpacity>
-              <Text style={styles.headerTitle}>Profile</Text>
               <TouchableOpacity>
                 <Feather name="more-horizontal" size={24} color="#000" />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Profile</Text>
+              <TouchableOpacity onPress={onClose}>
+                <Ionicons name="chevron-forward" size={24} color="#000" />
               </TouchableOpacity>
             </View>
 
@@ -134,7 +155,7 @@ export function SideMenu({ visible, onClose }: SideMenuProps) {
             ))}
           </ScrollView>
         </SafeAreaView>
-      </View>
+      </Animated.View>
       <TouchableOpacity style={styles.dismissArea} onPress={onClose} />
     </View>
   );
@@ -149,7 +170,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     zIndex: 1000,
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
   },
   dismissArea: {
     flex: 1,
@@ -161,15 +182,17 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: -2, height: 0 },
+        shadowOffset: { width: 2, height: 0 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
+        paddingTop: 24,
       },
       android: {
         elevation: 8,
+        paddingTop: 24,
       },
       web: {
-        boxShadow: '-2px 0px 8px rgba(0, 0, 0, 0.1)',
+        boxShadow: '2px 0px 8px rgba(0, 0, 0, 0.1)',
         '@media (min-width: 768px)': {
           width: '30%',
           maxWidth: 400,

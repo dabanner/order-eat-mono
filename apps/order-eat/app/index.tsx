@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons, Ionicons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useFoodCategoryStore } from '@repo/store/src/foodCaregoryStore';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { useUserStore } from '@repo/store/src/userStore';
-import { SideMenu } from '../components/SideMenu/side-menu';
 
-export default function HomeScreen() {
+export default function Index() {
   const categories = useFoodCategoryStore((state) => state.categories);
   const restaurants = useRestaurantStore((state) => state.restaurants);
   const { user, setUser } = useUserStore();
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,17 +19,12 @@ export default function HomeScreen() {
     }
   }, [user, setUser]);
 
-  const openSideMenu = () => {
-    setIsSideMenuOpen(true);
-  };
-
   const handleRestaurantPress = (restaurantId: string) => {
     router.push({
       pathname: "/restaurant/[id]",
       params: { id: restaurantId }
     });
   };
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -40,26 +33,6 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={Platform.OS === 'web'}
       >
         <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
-              <MaterialIcons name="menu" size={24} color="#000" />
-            </TouchableOpacity>
-            <View style={styles.deliverTo}>
-              <Text style={styles.deliverToLabel}>DELIVER TO</Text>
-              <View style={styles.locationRow}>
-                <Text style={styles.location}>Halal Lab office</Text>
-                <MaterialIcons name="keyboard-arrow-down" size={24} color="#000" />
-              </View>
-            </View>
-            <TouchableOpacity style={styles.cartButton}>
-              <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
-              <View style={styles.cartBadge}>
-                <Text style={styles.cartBadgeText}>2</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-
           {/* Greeting */}
           <Text style={styles.greeting}>Hey {user?.name}, <Text style={styles.greetingTime}>Good Afternoon!</Text></Text>
 
@@ -134,12 +107,6 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-      {isSideMenuOpen && (
-        <SideMenu
-          visible={isSideMenuOpen}
-          onClose={() => setIsSideMenuOpen(false)}
-        />
-      )}
     </SafeAreaView>
   );
 }
@@ -154,63 +121,10 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-    ...Platform.select({
-      web: {
-maxWidth: '100%',
-        width: '100%',
-        marginHorizontal: 'auto',
-      },
-    }),
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  menuButton: {
-    padding: 8,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 50,
-  },
-  deliverTo: {
-    flex: 1,
-    marginHorizontal: 16,
-  },
-  deliverToLabel: {
-    fontSize: 12,
-    color: '#FF8C00',
-    fontWeight: '600',
-  },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  location: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  cartButton: {
-    padding: 8,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 50,
-    position: 'relative',
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: '#FF8C00',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cartBadgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
+    paddingTop: 0,
+    maxWidth: '100%',
+    width: '100%',
+    marginHorizontal: 'auto',
   },
   greeting: {
     fontSize: 24,
@@ -384,18 +298,5 @@ maxWidth: '100%',
   time: {
     marginLeft: 16,
   },
-  deliveryContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  deliveryText: {
-    marginLeft: 4,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  timeText: {
-    marginLeft: 4,
-  },
 });
+

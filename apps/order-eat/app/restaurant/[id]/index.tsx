@@ -2,13 +2,13 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRestaurantStore } from '@repo/store/src/restaurantStore'
+import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFoodCategoryStore, FoodCategory } from '@repo/store/src/foodCaregoryStore';
 import { RestaurantHeader } from '@/components/RestaurantHeader';
 import { ImageGallery } from '@/components/ImageGallery';
-import { CategoryList } from '@/components/CategoryList';
 import { MenuList } from '@/components/MenuList';
+import { Footer } from '@/components/Footer';
 
 export default function RestaurantScreen() {
   const { id } = useLocalSearchParams();
@@ -63,12 +63,6 @@ export default function RestaurantScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={() => router.back()}
-          >
-            <MaterialIcons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
           <TouchableOpacity style={styles.favoriteButton}>
             <MaterialIcons name="favorite" size={24} color="#FF8C00" />
           </TouchableOpacity>
@@ -84,17 +78,27 @@ export default function RestaurantScreen() {
           </View>
         </View>
         {Platform.OS !== 'web' && <RestaurantHeader restaurant={restaurant} />}
-        <CategoryList 
-          categories={categories} 
-          selectedCategory={selectedFoodCategory} 
-          onSelectCategory={handleCategorySelect} 
-        />
-        <MenuList 
+        <View style={styles.menuList}>
+                  <MenuList 
           menuItems={filteredMenuItems} 
+          categories={categories}
           selectedCategory={selectedFoodCategory}
+          onCategorySelect={handleCategorySelect}
           onItemClick={handleMenuItemClick}
+          restaurant={restaurant}
+          showAddButton={false}
         />
+        </View>
       </ScrollView>
+      <Footer
+          text="Make Reservation"
+          counter={1}
+          buttonText="Reserve Now"
+          updateText={() => {}}
+          updateCounter={() => {}}
+          onClickButton={() => router.push(`/restaurant/${id}/reservation`)}
+          hideCounter
+        />
     </SafeAreaView>
   );
 }
@@ -103,9 +107,11 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
+    
   },
   container: {
     flex: 1,
+    
   },
   header: {
     position: 'relative',
@@ -131,20 +137,6 @@ const styles = StyleSheet.create({
     flex: 2,
     paddingLeft: Platform.OS === 'web' ? 40 : 0,
   },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 50,
-    zIndex: 10,
-    ...Platform.select({
-      web: {
-        display: 'none',
-      },
-    }),
-  },
   favoriteButton: {
     position: 'absolute',
     top: 20,
@@ -161,6 +153,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
+  },
+  menuList: {
+    marginHorizontal: 20,
+    marginBottom: Platform.OS === 'web' ? 200 : 0,
   },
 });
 

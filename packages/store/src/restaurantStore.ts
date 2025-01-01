@@ -71,6 +71,9 @@ export interface Restaurant {
   description: string;
   shortDescription: string;
   menuItems: MenuItem[];
+  address: string;
+  latitude: number; 
+  longitude: number;
 }
 
 interface RestaurantStore {
@@ -95,6 +98,9 @@ const initialRestaurants: Restaurant[] = [
     ],
     description: 'Authentic Italian pizzas and pasta made with love and tradition.',
     shortDescription: 'Pizza - Pasta - Tiramisu',
+    address: '123 avenue Saint-Philippe, 06410 BIOT',
+    latitude: 43.617667, 
+    longitude: 7.080314, 
     menuItems: [
       {
         id: 'p1',
@@ -385,6 +391,9 @@ const initialRestaurants: Restaurant[] = [
     ],
     description: 'Juicy burgers and crispy fries for the perfect comfort meal.',
     shortDescription: 'Burgers - Fries - Milkshakes',
+    address: '12 rue Henry Pointcare, 06410 BIOT',
+    latitude: 43.6234781,
+    longitude: 7.0458129,
     menuItems: [
       {
         id: 'b1',

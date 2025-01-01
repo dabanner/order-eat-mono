@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, useWindowDimensions, Dimensions } from 'react-native';
-import { DetailedNutritionInfo } from '../store/restaurantStore';
+import { DetailedNutritionInfo } from '@repo/store/src/restaurantStore';
 
 interface NutritionDisplayProps {
   nutrition: DetailedNutritionInfo;
