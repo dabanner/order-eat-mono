@@ -11,7 +11,9 @@ export default function ReservationsPage() {
   const allCommands = [...pendingCommands, ...confirmedCommands];
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
+    const [month, day, year] = date.split("/").map((val)=> parseInt(val));
+
+    return new Date(year, month-1, day).toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
