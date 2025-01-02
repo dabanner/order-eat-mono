@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 
 interface Step {
   title: string;
@@ -9,18 +9,27 @@ interface Step {
 interface ReservationStepperProps {
   steps: Step[];
   currentStep: number;
+  onStepClick: (step: number) => void;
 }
 
-export const ReservationStepper: React.FC<ReservationStepperProps> = ({ steps, currentStep }) => {
+export const ReservationStepper: React.FC<ReservationStepperProps> = ({ steps, currentStep, onStepClick }) => {
   return (
     <View style={styles.container}>
       {steps.map((step, index) => (
         <View key={index} style={styles.stepContainer}>
-          <View style={[styles.stepCircle, index <= currentStep && styles.activeStep]}>
+          <TouchableOpacity 
+            key={index}
+            onPress={() => index < currentStep ? onStepClick(index) : undefined}
+            style={[
+              styles.stepCircle,
+              index <= currentStep && styles.activeStep,
+              index < currentStep && styles.clickableStep
+            ]}
+          >
             <Text style={[styles.stepNumber, index <= currentStep && styles.activeStepNumber]}>
               {index + 1}
             </Text>
-          </View>
+          </TouchableOpacity>
           <Text style={[styles.stepTitle, index <= currentStep && styles.activeStepTitle]}>
             {step.title}
           </Text>
@@ -53,6 +62,13 @@ const styles = StyleSheet.create({
   activeStep: {
     backgroundColor: '#FF8C00',
   },
+  clickableStep: {
+    ...Platform.select({
+      web: {
+        cursor: 'pointer',
+      },
+    }),
+  },
   stepNumber: {
     color: '#666',
     fontSize: 14,
@@ -77,6 +93,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 2,
     backgroundColor: '#E5E7EB',
+    zIndex: -1,
   },
   activeStepLine: {
     backgroundColor: '#FF8C00',
