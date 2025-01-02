@@ -41,7 +41,7 @@ const CustomAlert = ({ visible, data, onConfirm, onRetake, onCancel, isLoading }
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Time:</Text>
               <Text style={styles.detailText}>
-                {new Date(reservationData.reservationTime).toLocaleString()}
+                {reservationData.reservationTime}
               </Text>
             </View>
 
