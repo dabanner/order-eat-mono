@@ -1,3 +1,4 @@
+/*
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Dimensions, Modal, Alert } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
@@ -24,122 +25,13 @@ const CustomAlert = ({ visible, data, onConfirm, onRetake, onCancel, isLoading }
   if (!data) return null;
 
   return (
-      <Modal
-          transparent={true}
-          visible={visible}
-          animationType="fade"
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.alertBox}>
-            <Text style={styles.alertTitle}>Reservation Details</Text>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>ID:</Text>
-              <Text style={styles.detailText}>{reservationData.id}</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Time:</Text>
-              <Text style={styles.detailText}>
-                {reservationData.reservationTime}
-              </Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Status:</Text>
-              <Text style={[styles.detailText, styles.statusText]}>
-                {reservationData.status}
-              </Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Type:</Text>
-              <Text style={styles.detailText}>{reservationData.type}</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Items:</Text>
-              <Text style={styles.detailText}>{reservationData.itemCount}</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Amount:</Text>
-              <Text style={styles.detailText}>
-                ${reservationData.totalAmount.toFixed(2)}
-              </Text>
-            </View>
-
-            <View style={styles.alertButtonContainer}>
-              <TouchableOpacity
-                  style={[styles.alertButton, styles.navigateButton]}
-                  onPress={onConfirm}
-                  disabled={isLoading}
-              >
-                <Text style={styles.alertButtonText}>
-                  {isLoading ? 'Processing...' : 'Confirm'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                  style={[styles.alertButton, styles.retakeButton]}
-                  onPress={onRetake}
-                  disabled={isLoading}
-              >
-                <Text style={styles.alertButtonText}>Scan Again</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                  style={[styles.alertButton, styles.cancelButton]}
-                  onPress={onCancel}
-                  disabled={isLoading}
-              >
-                <Text style={styles.alertButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
   );
 };
 
 const NativeScanner = ({ onScan, onClose, scanned }) => (
-    <View style={styles.scannerContainer}>
-      <View style={styles.scanFrameContainer}>
-        <View style={styles.cameraWrapper}>
-          <CameraView
-              style={styles.camera}
-              onBarcodeScanned={scanned ? undefined : onScan}
-              barcodeScannerSettings={{
-                barcodeTypes: ['qr'],
-              }}
-          />
-          <View style={styles.cornerTL} />
-          <View style={styles.cornerTR} />
-          <View style={styles.cornerBL} />
-          <View style={styles.cornerBR} />
-        </View>
-      </View>
-      <TouchableOpacity style={styles.button} onPress={onClose}>
-        <Text style={styles.buttonText}>Close Scanner</Text>
-      </TouchableOpacity>
-    </View>
 );
 
 const ManualEntry = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
-    <View style={styles.manualEntryContainer}>
-      <TextInput
-          style={styles.input}
-          onChangeText={onCodeChange}
-          value={code}
-          placeholder="Enter reservation code manually"
-          keyboardType="default"
-          autoCapitalize="none"
-      />
-      <TouchableOpacity style={styles.button} onPress={onSubmit}>
-        <Text style={styles.buttonText}>Submit</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={onScannerOpen}>
-        <Text style={styles.buttonText}>Scan QR Code</Text>
-      </TouchableOpacity>
-    </View>
 );
 
 const useScanner = () => {
@@ -295,6 +187,315 @@ export default function TabletScannerPage() {
         <View style={styles.container}>
           <Text>No access to camera</Text>
         </View>
+    );
+  }
+
+  return (
+  );
+}
+
+*/
+
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Dimensions, Modal, Alert } from 'react-native';
+import { Camera, CameraView } from 'expo-camera';
+import { ReservationData, CustomAlertProps, NativeScannerProps, ManualEntryProps, ScannerHook, StylesType } from './types';
+
+const { width, height } = Dimensions.get('window');
+
+const colors: Record<string, string> = {
+  orange: '#FF7622',
+  onyx: '#121223',
+  evergreen: '#059C6A',
+  lightSlate: '#A0A5BA',
+  dorian: '#F0F5FA',
+  cloud: '#FAFCFE',
+};
+
+const CustomAlert: React.FC<CustomAlertProps> = ({ visible, data, onConfirm, onRetake, onCancel, isLoading }) => {
+  let reservationData: ReservationData | null = null;
+  try {
+    reservationData = JSON.parse(data || '{}') as ReservationData;
+  } catch (error) {
+    return null;
+  }
+
+  if (!data) return null;
+
+  return (
+      <Modal
+          transparent={true}
+          visible={visible}
+          animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.alertBox}>
+            <Text style={styles.alertTitle}>Reservation Details</Text>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>ID:</Text>
+              <Text style={styles.detailText}>{reservationData.id}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Time:</Text>
+              <Text style={styles.detailText}>
+                {reservationData.reservationTime}
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Status:</Text>
+              <Text style={[styles.detailText, styles.statusText]}>
+                {reservationData.status}
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Type:</Text>
+              <Text style={styles.detailText}>{reservationData.type}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Items:</Text>
+              <Text style={styles.detailText}>{reservationData.itemCount}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Amount:</Text>
+              <Text style={styles.detailText}>
+                ${reservationData.totalAmount.toFixed(2)}
+              </Text>
+            </View>
+
+            <View style={styles.alertButtonContainer}>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.navigateButton]}
+                  onPress={onConfirm}
+                  disabled={isLoading}
+              >
+                <Text style={styles.alertButtonText}>
+                  {isLoading ? 'Processing...' : 'Confirm'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.retakeButton]}
+                  onPress={onRetake}
+                  disabled={isLoading}
+              >
+                <Text style={styles.alertButtonText}>Scan Again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.cancelButton]}
+                  onPress={onCancel}
+                  disabled={isLoading}
+              >
+                <Text style={styles.alertButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+  );
+};
+
+const NativeScanner: React.FC<NativeScannerProps> = ({ onScan, onClose, scanned }) => (
+    <View style={styles.scannerContainer}>
+      <View style={styles.scanFrameContainer}>
+        <View style={styles.cameraWrapper}>
+          <CameraView
+              style={styles.camera}
+              onBarcodeScanned={scanned ? undefined : onScan}
+              barcodeScannerSettings={{
+                barcodeTypes: ['qr'],
+              }}
+          />
+          <View style={styles.cornerTL} />
+          <View style={styles.cornerTR} />
+          <View style={styles.cornerBL} />
+          <View style={styles.cornerBR} />
+        </View>
+      </View>
+      <TouchableOpacity style={styles.button} onPress={onClose}>
+        <Text style={styles.buttonText}>Close Scanner</Text>
+      </TouchableOpacity>
+    </View>
+  // ... (rest of the NativeScanner component remains the same)
+);
+
+const ManualEntry: React.FC<ManualEntryProps> = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
+    <View style={styles.manualEntryContainer}>
+      <TextInput
+          style={styles.input}
+          onChangeText={onCodeChange}
+          value={code}
+          placeholder="Enter reservation code manually"
+          keyboardType="default"
+          autoCapitalize="none"
+      />
+      <TouchableOpacity style={styles.button} onPress={onSubmit}>
+        <Text style={styles.buttonText}>Submit</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={onScannerOpen}>
+        <Text style={styles.buttonText}>Scan QR Code</Text>
+      </TouchableOpacity>
+    </View>
+  // ... (rest of the ManualEntry component remains the same)
+);
+
+const useScanner = (): ScannerHook => {
+  const [showScanner, setShowScanner] = useState<boolean>(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [scanned, setScanned] = useState<boolean>(false);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [scannedData, setScannedData] = useState<string>('');
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  const openScanner = (): void => {
+    setShowScanner(true);
+    setScanned(false);
+    setShowAlert(false);
+    setScannedData('');
+  };
+
+  const closeScanner = (): void => {
+    setShowScanner(false);
+    setScanned(false);
+    setShowAlert(false);
+    setScannedData('');
+  };
+
+  return {
+    showScanner,
+    hasPermission,
+    scanned,
+    showAlert,
+    scannedData,
+    setScanned,
+    setShowAlert,
+    setScannedData,
+    openScanner,
+    closeScanner,
+  };
+};
+
+export default function TabletScannerPage(): JSX.Element {
+  const [manualCode, setManualCode] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const {
+    showScanner,
+    hasPermission,
+    scanned,
+    showAlert,
+    scannedData,
+    setScanned,
+    setShowAlert,
+    setScannedData,
+    openScanner,
+    closeScanner,
+  } = useScanner();
+
+  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }): void => {
+    if (scanned) return;
+
+    try {
+      const parsedData = JSON.parse(data) as ReservationData;
+      const requiredFields: (keyof ReservationData)[] = ['id', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+
+      if (!requiredFields.every(field => field in parsedData)) {
+        throw new Error('Missing required reservation fields');
+      }
+
+      setScanned(true);
+      setScannedData(data);
+      setShowAlert(true);
+    } catch (error) {
+      setScanned(true);
+      Alert.alert(
+        'Invalid QR Code',
+        'This QR code is not a valid reservation code.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setScanned(false);
+              closeScanner();
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  };
+
+  const handleConfirm = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Reservation confirmed:', JSON.parse(scannedData) as ReservationData);
+      Alert.alert('Success', 'Reservation confirmed successfully!');
+    } catch (error) {
+      console.error('Error confirming reservation:', error);
+      Alert.alert('Error', 'Failed to confirm reservation. Please try again.');
+    } finally {
+      setIsLoading(false);
+      closeScanner();
+    }
+  };
+
+  const handleRetake = (): void => {
+    setScanned(false);
+    setShowAlert(false);
+    setScannedData('');
+  };
+
+  const handleCancel = (): void => {
+    closeScanner();
+  };
+
+  const handleManualSubmit = (): void => {
+    if (manualCode.trim()) {
+      try {
+        const parsedData = JSON.parse(manualCode) as ReservationData;
+        const requiredFields: (keyof ReservationData)[] = ['id', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+
+        if (!requiredFields.every(field => field in parsedData)) {
+          throw new Error('Missing required reservation fields');
+        }
+
+        setScannedData(manualCode);
+        setShowAlert(true);
+        setManualCode('');
+      } catch (error) {
+        Alert.alert(
+          'Invalid Code',
+          'Please enter a valid reservation code.',
+          [{ text: 'OK' }],
+          { cancelable: false }
+        );
+      }
+    } else {
+      Alert.alert(
+        'Empty Code',
+        'Please enter a reservation code.',
+        [{ text: 'OK' }],
+        { cancelable: false }
+      );
+    }
+  };
+
+  if (hasPermission === false) {
+    return (
+      <View style={styles.container}>
+        <Text>No access to camera</Text>
+      </View>
     );
   }
 
@@ -549,3 +750,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+
