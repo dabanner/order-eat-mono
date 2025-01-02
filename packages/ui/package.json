@@ -1,0 +1,25 @@
+{
+  "name": "@repo/ui",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc"
+  },
+  "exports": {
+    "./side-menu": {
+      "types": "./src/side-menu.ts",
+      "default": "./dist/side-menu.js"
+    },
+    "./topbar": {
+      "types": "./src/topbar.ts",
+      "default": "./dist/topbar.js"
+    }
+  },
+  "dependencies": {
+    "@repo/store": "*"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "typescript": "latest"
+  }
+}
