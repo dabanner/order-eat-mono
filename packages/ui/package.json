@@ -13,6 +13,10 @@
     "./topbar": {
       "types": "./src/topbar.ts",
       "default": "./dist/topbar.js"
+    },
+    "./categories": {
+      "types": "./src/categories.ts",
+      "default": "./dist/categories.js"
     }
   },
   "dependencies": {
