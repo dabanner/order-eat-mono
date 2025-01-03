@@ -123,7 +123,6 @@ const NativeScanner: React.FC<NativeScannerProps> = ({ onScan, onClose, scanned 
         <Text style={styles.buttonText}>Close Scanner</Text>
       </TouchableOpacity>
     </View>
-  // ... (rest of the NativeScanner component remains the same)
 );
 
 const ManualEntry: React.FC<ManualEntryProps> = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
@@ -143,7 +142,6 @@ const ManualEntry: React.FC<ManualEntryProps> = ({ code, onCodeChange, onSubmit,
         <Text style={styles.buttonText}>Scan QR Code</Text>
       </TouchableOpacity>
     </View>
-  // ... (rest of the ManualEntry component remains the same)
 );
 
 const useScanner = (): ScannerHook => {
@@ -320,6 +318,7 @@ export default function TabletScannerPage(): JSX.Element {
 
   return (
       <View style={styles.container}>
+        {/* Keep the logo section */}
         <View style={styles.logoContainer}>
           <Image
               source={require('@/assets/images/logo.png')}
@@ -363,7 +362,7 @@ export default function TabletScannerPage(): JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cloud,
+    backgroundColor: '#fff',
   },
   logoContainer: {
     alignItems: 'center',
