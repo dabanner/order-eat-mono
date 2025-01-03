@@ -20,7 +20,6 @@ export default function ReservationPage() {
   const { restaurants } = useRestaurantStore();
   const { getFoodCategoryById } = useFoodCategoryStore();
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory | null>(null);
-
   const restaurant = restaurants.find(r => r.id === id);
 
   const [command, setCommand] = useState(() => {
@@ -32,7 +31,7 @@ export default function ReservationPage() {
           date: new Date().toLocaleDateString(),
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           numberOfPersons: 1,
-          type: 'dinein' as const,
+          type: 'dinein' as 'dinein' | 'takeaway',
           wantToPreOrder: false,
         },
         menuItems: [] as (MenuItem & { quantity: number })[],
@@ -109,7 +108,7 @@ export default function ReservationPage() {
 
   const steps = [
     { title: 'Info', component: ReservationForm },
-    { title: 'Menu', component: 'menu' },
+    { title: 'Menu', component: MenuList },
     { title: 'Payment', component: PaymentForm },
     { title: 'Confirm', component: Confirmation },
   ];
@@ -181,7 +180,15 @@ export default function ReservationPage() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content}>
-        <ReservationStepper steps={steps} currentStep={currentStep} />
+        <ReservationStepper 
+          steps={steps} 
+          currentStep={currentStep} 
+          onStepClick={(step) => {
+            if (step < currentStep) {
+              setCurrentStep(step);
+            }
+          }}
+        />
         {renderCurrentStep()}
       </ScrollView>
       <Footer
