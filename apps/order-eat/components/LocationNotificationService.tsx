@@ -1,34 +1,71 @@
 import { useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
+import * as TaskManager from 'expo-task-manager';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { Platform } from "react-native";
+import { useCommandStore } from '@repo/store/src/commandStore';
+
+type LocationTaskData = {
+    locations: Array<{
+        coords: {
+            latitude: number;
+            longitude: number;
+            altitude: number | null;
+            accuracy: number | null;
+            altitudeAccuracy: number | null;
+            heading: number | null;
+            speed: number | null;
+        };
+        timestamp: number;
+    }>;
+};
+
+type LocationTaskError = {
+    message: string;
+};
 
 interface Coordinates {
     latitude: number;
     longitude: number;
 }
 
-interface LocationSubscription {
-    remove: () => void;
+interface NotificationSettings {
+    ios?: {
+        sound: boolean;
+        badge: boolean;
+        alert: boolean;
+    };
+    android?: {
+        channelId: string;
+        channelName: string;
+        sound: string;
+        priority: Notifications.AndroidNotificationPriority;
+        vibrate: boolean;
+    };
 }
 
-// Platform-specific configurations
-const CONFIG = {
-    NOTIFICATION_DISTANCE: 1000, // meters - increased for better testing
+interface Config {
+    NOTIFICATION_DISTANCE: number;
+    LOCATION_SETTINGS: Location.LocationTaskOptions;
+    NOTIFICATION_SETTINGS: NotificationSettings;
+    MAX_NOTIFICATION_FREQUENCY: number;
+}
+
+const LOCATION_TASK_NAME = 'background-location-task';
+
+const CONFIG: Config = {
+    NOTIFICATION_DISTANCE: 1000,
     LOCATION_SETTINGS: {
-        ios: {
-            accuracy: Location.Accuracy.BestForNavigation,
-            distanceInterval: 2, // More frequent updates
-            timeInterval: 1000, // Check every second
-            mayShowUserSettingsDialog: true,
+        accuracy: Location.Accuracy.BestForNavigation,
+        distanceInterval: 2,
+        timeInterval: 1000,
+        foregroundService: {
+            notificationTitle: "Location Tracking Active",
+            notificationBody: "Tracking your location to notify you about nearby restaurants",
+            notificationColor: "#FF231F7C",
         },
-        android: {
-            accuracy: Location.Accuracy.BestForNavigation, // Using best accuracy for both platforms
-            distanceInterval: 2,
-            timeInterval: 1000,
-            mayShowUserSettingsDialog: true,
-        }
+        mayShowUserSettingsDialog: true,
     },
     NOTIFICATION_SETTINGS: {
         ios: {
@@ -42,66 +79,41 @@ const CONFIG = {
             sound: 'default',
             priority: Notifications.AndroidNotificationPriority.MAX,
             vibrate: true,
-        }
-    },
-    MAX_NOTIFICATION_FREQUENCY: 30 * 1000, // 30 seconds for testing
-    DEBUG: true // Enable detailed logging
-} as const;
+        },
+        default: {},
+    } as NotificationSettings,
+    MAX_NOTIFICATION_FREQUENCY: 30 * 1000,
+};
 
-// Setup platform-specific notification channels
-async function setupNotificationChannels() {
-    if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync(CONFIG.NOTIFICATION_SETTINGS.android.channelId, {
-            name: CONFIG.NOTIFICATION_SETTINGS.android.channelName,
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: '#FF231F7C',
-            enableVibrate: true,
-            enableLights: true,
-        });
-        CONFIG.DEBUG && console.log('[LocationService] Android notification channel setup complete');
+TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }: { 
+    data: LocationTaskData; 
+    error: LocationTaskError | null;
+}) => {
+    if (error) {
+        console.error('[BackgroundLocation] Task error:', error);
+        return;
     }
-}
 
-// Configure notifications handler with platform-specific settings
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: Platform.OS === 'ios',
-        priority: Platform.OS === 'android' ? CONFIG.NOTIFICATION_SETTINGS.android.priority : undefined,
-    }),
+    const { locations } = data;
+    const restaurant = useRestaurantStore.getState().selectedRestaurant;
+    
+    if (!restaurant || !locations || locations.length === 0) return;
+
+    const distance = calculateDistance(
+        locations[0].coords,
+        {
+            latitude: restaurant.latitude,
+            longitude: restaurant.longitude,
+        }
+    );
+
+    if (distance <= CONFIG.NOTIFICATION_DISTANCE) {
+        await schedulePushNotification(
+            `${restaurant.name} Nearby!`,
+            `You're ${Math.round(distance)}m away. Check out our special menu!`
+        );
+    }
 });
-
-async function schedulePushNotification(title: string, body: string): Promise<void> {
-    try {
-        const notificationContent: any = {
-            title,
-            body,
-            data: { type: 'location', timestamp: new Date().toISOString() },
-        };
-
-        if (Platform.OS === 'ios') {
-            notificationContent.sound = CONFIG.NOTIFICATION_SETTINGS.ios.sound;
-            notificationContent.badge = 1;
-        } else {
-            notificationContent.android = {
-                channelId: CONFIG.NOTIFICATION_SETTINGS.android.channelId,
-                priority: CONFIG.NOTIFICATION_SETTINGS.android.priority,
-                vibrate: true,
-            };
-        }
-
-        await Notifications.scheduleNotificationAsync({
-            content: notificationContent,
-            trigger: null,
-        });
-
-        CONFIG.DEBUG && console.log('[LocationService] Notification scheduled:', { title, body });
-    } catch (error) {
-        console.error('[LocationService] Failed to schedule notification:', error);
-    }
-}
 
 function calculateDistance(coords1: Coordinates, coords2: Coordinates): number {
     const toRad = (x: number): number => (x * Math.PI) / 180;
@@ -120,187 +132,97 @@ function calculateDistance(coords1: Coordinates, coords2: Coordinates): number {
     return R * c;
 }
 
-async function requestLocationPermission(): Promise<boolean> {
-    try {
-        CONFIG.DEBUG && console.log('[LocationService] Checking location services...');
-
-        const serviceEnabled = await Location.hasServicesEnabledAsync();
-        if (!serviceEnabled) {
-            console.warn('[LocationService] Location services are not enabled. Please enable them in your device settings.');
-            return false;
-        }
-
-        CONFIG.DEBUG && console.log('[LocationService] Requesting foreground permission...');
-        const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
-        if (foregroundStatus !== 'granted') {
-            console.warn('[LocationService] Location permission denied. Please enable location access for this app.');
-            return false;
-        }
-
-        CONFIG.DEBUG && console.log('[LocationService] Requesting background permission...');
-        const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
-        if (backgroundStatus !== 'granted') {
-            // We can continue without background permission, but log a warning
-            console.warn('[LocationService] Background location permission denied. Location updates may be limited when app is in background.');
-        }
-
-        CONFIG.DEBUG && console.log('[LocationService] Location permissions granted');
-        return true;
-    } catch (error) {
-        console.error('[LocationService] Error requesting location permission:', error);
-        return false;
+async function setupNotifications(): Promise<void> {
+    if (Platform.OS === 'android') {
+        console.log(CONFIG)
+        await Notifications.setNotificationChannelAsync(
+            CONFIG.NOTIFICATION_SETTINGS.android!.channelId,
+            {
+                name: CONFIG.NOTIFICATION_SETTINGS.android!.channelName,
+                importance: Notifications.AndroidImportance.MAX,
+                vibrationPattern: [0, 250, 250, 250],
+                lightColor: '#FF231F7C',
+                enableVibrate: true,
+                enableLights: true,
+            }
+        );
     }
+
+    await Notifications.requestPermissionsAsync();
 }
 
-export function LocationNotificationService(): null {
-    const { selectedRestaurant } = useRestaurantStore();
-    const lastNotificationTime = useRef<number>(0);
-    const locationSubscriptionRef = useRef<LocationSubscription | null>(null);
-    const notificationSetupDone = useRef<boolean>(false);
+async function schedulePushNotification(title: string, body: string): Promise<void> {
+    const notificationContent: Notifications.NotificationContentInput = {
+        title,
+        body,
+        data: { type: 'location', timestamp: new Date().toISOString() },
+        ...(Platform.OS === 'android' ? {
+            sound: true,
+            android: {
+                channelId: CONFIG.NOTIFICATION_SETTINGS.android!.channelId,
+                priority: CONFIG.NOTIFICATION_SETTINGS.android!.priority,
+                vibrate: true,
+            }
+        } : {
+            sound: true,
+            badge: 1,
+        })
+    };
+
+    await Notifications.scheduleNotificationAsync({
+        content: notificationContent,
+        trigger: null,
+    });
+}
+
+export function BackgroundLocationService(): null {
+    const { pendingCommands, confirmedCommands } = useCommandStore();
+    const isTracking = useRef<boolean>(false);
+
+    const currentCommand = [...pendingCommands, confirmedCommands].pop();
 
     useEffect(() => {
-        console.log('[LocationService] Effect triggered');
-        console.log('[LocationService] Selected restaurant state:', selectedRestaurant?.name || 'none');
-
-        schedulePushNotification('Welcome to OrderEat!', 'We will notify you when you are near a restaurant.');
-
-        let notificationSubscription: Notifications.Subscription;
         let isMounted = true;
 
-        const setupNotifications = async (): Promise<void> => {
-            console.log('[LocationService] Setting up notifications');
-            if (notificationSetupDone.current) {
-                console.log('[LocationService] Notifications already setup');
-                return;
-            }
-
+        const startBackgroundTracking = async (): Promise<void> => {
+            console.log('tracking ...')
             try {
-                if (Platform.OS === 'android') {
-                    await setupNotificationChannels();
+                const { status: foreground } = await Location.requestForegroundPermissionsAsync();
+                const { status: background } = await Location.requestBackgroundPermissionsAsync();
+
+                console.log("foreground", foreground);
+                console.log("background", background);
+                
+                if (foreground !== 'granted' || background !== 'granted') {
+                    console.warn('[BackgroundLocation] Location permissions denied');
+                    return;
                 }
 
-                const settings = await Notifications.getPermissionsAsync();
-                console.log('[LocationService] Current notification settings:', settings);
-
-                if (!settings.granted) {
-                    console.log('[LocationService] Requesting notification permissions');
-                    const permissionOptions = Platform.OS === 'ios' ? {
-                        ios: {
-                            allowAlert: true,
-                            allowBadge: true,
-                            allowSound: true,
-                            allowAnnouncements: true,
-                        }
-                    } : undefined;
-
-                    const { status } = await Notifications.requestPermissionsAsync(permissionOptions);
-                    console.log('[LocationService] Notification permission status:', status);
-
-                    if (status !== 'granted') {
-                        console.warn('[LocationService] Notification permissions denied');
-                        return;
-                    }
+                console.log("background", background);
+                await setupNotifications();
+                
+                console.log("background", background);
+                if (!isTracking.current) {
+                    await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, CONFIG.LOCATION_SETTINGS);
+                    isTracking.current = true;
                 }
-
-                notificationSetupDone.current = true;
-                console.log('[LocationService] Notifications setup complete');
-
-                notificationSubscription = Notifications.addNotificationReceivedListener(notification => {
-                    console.log('[LocationService] Notification received:', notification);
-                });
             } catch (error) {
-                console.error('[LocationService] Error setting up notifications:', error);
+                console.error('[BackgroundLocation] Error starting tracking:', error);
             }
         };
 
-        const startLocationTracking = async (): Promise<void> => {
-            if (!selectedRestaurant) {
-                console.log('[LocationService] No restaurant selected, skipping location tracking');
-                return;
-            }
-
-            console.log('[LocationService] Selected restaurant:', {
-                name: selectedRestaurant.name,
-                latitude: selectedRestaurant.latitude,
-                longitude: selectedRestaurant.longitude
-            });
-
-            try {
-                const hasPermission = await requestLocationPermission();
-                if (!hasPermission) return;
-
-                if (locationSubscriptionRef.current) {
-                    locationSubscriptionRef.current.remove();
-                }
-
-                const initialLocation = await Location.getCurrentPositionAsync({
-                    accuracy: Platform.OS === 'ios'
-                        ? CONFIG.LOCATION_SETTINGS.ios.accuracy
-                        : CONFIG.LOCATION_SETTINGS.android.accuracy,
-                });
-                console.log('[LocationService] Initial location:', initialLocation);
-
-                const locationSettings = Platform.OS === 'ios'
-                    ? CONFIG.LOCATION_SETTINGS.ios
-                    : CONFIG.LOCATION_SETTINGS.android;
-
-                console.log('[LocationService] Starting location watching with settings:', locationSettings);
-                const subscription = await Location.watchPositionAsync(
-                    locationSettings,
-                    (location) => {
-                        if (!isMounted || !selectedRestaurant) return;
-
-                        const distance = calculateDistance(
-                            location.coords,
-                            {
-                                latitude: selectedRestaurant.latitude,
-                                longitude: selectedRestaurant.longitude,
-                            }
-                        );
-
-                        console.log('[LocationService] Location update:', {
-                            currentLat: location.coords.latitude,
-                            currentLon: location.coords.longitude,
-                            distance: Math.round(distance),
-                            restaurant: selectedRestaurant.name
-                        });
-
-                        const currentTime = Date.now();
-                        const timeSinceLastNotification = currentTime - lastNotificationTime.current;
-
-                        if (distance <= CONFIG.NOTIFICATION_DISTANCE &&
-                            timeSinceLastNotification >= CONFIG.MAX_NOTIFICATION_FREQUENCY) {
-                            console.log('[LocationService] Triggering notification for restaurant:', selectedRestaurant.name);
-                            schedulePushNotification(
-                                `${selectedRestaurant.name} Nearby!`,
-                                `You're ${Math.round(distance)}m away from ${selectedRestaurant.name}. Check out our special menu!`
-                            );
-                            lastNotificationTime.current = currentTime;
-                        }
-                    }
-                );
-
-                locationSubscriptionRef.current = subscription;
-                console.log('[LocationService] Location tracking started successfully');
-            } catch (error) {
-                console.error('[LocationService] Error in location tracking:', error);
-            }
-        };
-
-        setupNotifications();
-        startLocationTracking();
+        if (currentCommand && isMounted) {
+            startBackgroundTracking();
+        }
 
         return () => {
-            console.log('[LocationService] Cleaning up location service');
             isMounted = false;
-            if (locationSubscriptionRef.current) {
-                locationSubscriptionRef.current.remove();
-            }
-            if (notificationSubscription) {
-                Notifications.removeNotificationSubscription(notificationSubscription);
+            if (isTracking.current) {
+                Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+                isTracking.current = false;
             }
         };
-    }, [selectedRestaurant]);
+    }, [currentCommand]);
 
     return null;
 }

@@ -392,8 +392,8 @@ const initialRestaurants: Restaurant[] = [
     description: 'Juicy burgers and crispy fries for the perfect comfort meal.',
     shortDescription: 'Burgers - Fries - Milkshakes',
     address: '12 rue Henry Pointcare, 06410 BIOT',
-    latitude: 43.6234781,
-    longitude: 7.0458129,
+    latitude: 34.0720208,
+    longitude: -6.7956928,
     menuItems: [
       {
         id: 'b1',

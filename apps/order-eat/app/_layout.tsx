@@ -9,7 +9,7 @@ import { SideMenu } from '../components/SideMenu/side-menu';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
 import 'react-native-reanimated';
-import { LocationNotificationService } from '@/components/LocationNotificationService';
+import { BackgroundLocationService } from '@/components/LocationNotificationService';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,7 +43,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={DefaultTheme}>
-        <LocationNotificationService />
+        <BackgroundLocationService />
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={[styles.header]}>
           {isChildRoute ? (
