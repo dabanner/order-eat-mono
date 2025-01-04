@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsc --watch",
+    "tunnel": "tsc --watch",
     "build": "tsc"
   },
   "exports": {

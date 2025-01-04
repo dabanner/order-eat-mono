@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Dimensions, Modal, Alert } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import { ReservationData, CustomAlertProps, NativeScannerProps, ManualEntryProps, ScannerHook, StylesType } from './types';
+import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
@@ -122,7 +123,6 @@ const NativeScanner: React.FC<NativeScannerProps> = ({ onScan, onClose, scanned 
         <Text style={styles.buttonText}>Close Scanner</Text>
       </TouchableOpacity>
     </View>
-  // ... (rest of the NativeScanner component remains the same)
 );
 
 const ManualEntry: React.FC<ManualEntryProps> = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
@@ -142,7 +142,6 @@ const ManualEntry: React.FC<ManualEntryProps> = ({ code, onCodeChange, onSubmit,
         <Text style={styles.buttonText}>Scan QR Code</Text>
       </TouchableOpacity>
     </View>
-  // ... (rest of the ManualEntry component remains the same)
 );
 
 const useScanner = (): ScannerHook => {
@@ -203,6 +202,8 @@ export default function TabletScannerPage(): JSX.Element {
     closeScanner,
   } = useScanner();
 
+  const router = useRouter();
+
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }): void => {
     if (scanned) return;
 
@@ -242,13 +243,27 @@ export default function TabletScannerPage(): JSX.Element {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       console.log('Reservation confirmed:', JSON.parse(scannedData) as ReservationData);
-      Alert.alert('Success', 'Reservation confirmed successfully!');
+       Alert.alert(
+      'Success', 
+      'Reservation confirmed successfully!',
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            router.push('/restaurant');
+          }
+        }
+      ]
+    );
     } catch (error) {
       console.error('Error confirming reservation:', error);
       Alert.alert('Error', 'Failed to confirm reservation. Please try again.');
     } finally {
       setIsLoading(false);
       closeScanner();
+       router.push({
+      pathname: "/restaurant",
+    });
     }
   };
 
@@ -303,6 +318,7 @@ export default function TabletScannerPage(): JSX.Element {
 
   return (
       <View style={styles.container}>
+        {/* Keep the logo section */}
         <View style={styles.logoContainer}>
           <Image
               source={require('@/assets/images/logo.png')}
@@ -346,7 +362,7 @@ export default function TabletScannerPage(): JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cloud,
+    backgroundColor: '#fff',
   },
   logoContainer: {
     alignItems: 'center',

@@ -1,60 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
-import { Slot, useRouter, usePathname } from 'expo-router';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
 import { SideMenu } from './side-menu';
 
-export default function TopBar() {
-    const [loaded] = useFonts({
-        SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    });
+
+interface TopBarProps {
+    onBack?: () => void;
+    onHome?: () => void;
+    onActionButton?: () => void;
+    isChildRoute?: boolean;
+    isPhone?: boolean;
+}
+
+export default function TopBar({
+    onBack,
+    onHome,
+    onActionButton,
+    isChildRoute,
+    isPhone
+}: TopBarProps) {
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-    const router = useRouter();
-    const pathname = usePathname();
     const { pendingCommands, confirmedCommands } = useCommandStore();
-
-    useEffect(() => {
-        if (loaded) {
-            SplashScreen.hideAsync();
-        }
-    }, [loaded]);
-
-    if (!loaded) {
-        return null;
-    }
 
     const openSideMenu = () => {
         setIsSideMenuOpen(true);
     };
 
-    const isChildRoute = pathname.split('/').length > 2;
     const totalCommands = pendingCommands.length + confirmedCommands.length;
-
 
     return (
         <>
-            <SafeAreaView style={styles.container} edges={['top']}>
+            <SafeAreaView edges={['top']}>
                 <View style={[styles.header]}>
-                    {isChildRoute ? (
-                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    {isChildRoute && onBack ? (
+                        <TouchableOpacity onPress={onBack} style={styles.backButton}>
                             <MaterialIcons name="arrow-back" size={24} color="#000" />
                         </TouchableOpacity>
                     ) : null}
-                    <TouchableOpacity onPress={() => router.push('/')} style={styles.logoButton}>
+                    <TouchableOpacity onPress={onHome} style={styles.logoButton}>
                         <Image
                             source={require('../assets/images/LogoLong.png')}
                             style={styles.logoImage}
                             resizeMode="contain"
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
-                        <MaterialIcons name="menu" size={24} color="#000" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.cartButton} onPress={() => router.push('/reservation')}>
+                    {isPhone ? (
+
+                        <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
+                            <MaterialIcons name="menu" size={24} color="#000" />
+                        </TouchableOpacity>
+                    ) : null }
+                    <TouchableOpacity
+                        style={styles.cartButton}
+                        onPress={onActionButton}
+                    >
                         <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
                         {totalCommands > 0 && (
                             <View style={styles.cartBadge}>
@@ -62,9 +63,6 @@ export default function TopBar() {
                             </View>
                         )}
                     </TouchableOpacity>
-                </View>
-                <View style={styles.content}>
-                    <Slot />
                 </View>
             </SafeAreaView>
             {isSideMenuOpen && (
@@ -74,7 +72,7 @@ export default function TopBar() {
                 />
             )}
         </>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
