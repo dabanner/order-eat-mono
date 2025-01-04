@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, ScrollView } from 'react-native';
-import { MenuItem, Restaurant } from '@repo/store/src/restaurantStore';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import { MenuItem as MenuItemType, Restaurant } from '@repo/store/src/restaurantStore';
 import { FoodCategory } from '@repo/store/src/foodCaregoryStore';
-import { MaterialIcons } from '@expo/vector-icons';
 import { MenuItemModal } from './MenuItemModal';
+import { MenuItem } from '@repo/ui/src/MenuItem'
 
 interface MenuListProps {
-  menuItems: MenuItem[];
+  menuItems: MenuItemType[];
   categories: FoodCategory[];
   selectedCategory: FoodCategory | null;
   onCategorySelect: (category: FoodCategory | null) => void;
   onItemClick: (itemId: string) => void;
-  selectedItems?: (MenuItem & { quantity: number })[];
+  selectedItems?: (MenuItemType & { quantity: number })[];
   restaurant: Restaurant;
   showAddButton?: boolean;
 }
@@ -26,7 +26,7 @@ export function MenuList({
   restaurant,
   showAddButton = false 
 }: MenuListProps) {
-  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
+  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItemType | null>(null);
 
   return (
     <View style={styles.container}>
@@ -60,43 +60,14 @@ export function MenuList({
         {menuItems.map((item) => {
           const selectedItem = selectedItems.find(si => si.id === item.id);
           return (
-            <TouchableOpacity
+            <MenuItem
               key={item.id}
-              style={styles.menuItem}
+              item={item}
               onPress={() => setSelectedMenuItem(item)}
-            >
-              <Image
-                source={{ uri: item.images[0] }}
-                style={styles.itemImage}
-              />
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemDescription} numberOfLines={2}>
-                  {item.description}
-                </Text>
-                <View style={styles.priceContainer}>
-                  <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
-                  {showAddButton && (
-                    <View style={styles.quantityContainer}>
-                      {selectedItem && (
-                        <View style={styles.quantityBadge}>
-                          <Text style={styles.quantityText}>{selectedItem.quantity}</Text>
-                        </View>
-                      )}
-                      <TouchableOpacity
-                        style={styles.addButton}
-                        onPress={(e) => {
-                          e.stopPropagation();
-                          onItemClick(item.id);
-                        }}
-                      >
-                        <MaterialIcons name="add" size={24} color="#fff" />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
+              onAddClick={() => onItemClick(item.id)}
+              quantity={selectedItem?.quantity}
+              showAddButton={showAddButton}
+            />
           );
         })}
       </View>
@@ -144,88 +115,10 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   grid: {
-    ...Platform.select({
-      web: {
-        display: 'grid' as any,
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: 16,
-      },
-      default: {
-        flexDirection: 'column' as 'column',
-      },
-    }),
-  },
-  menuItem: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: Platform.OS === 'web' ? 0 : 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-      web: {
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-      },
-    }),
-  },
-  itemImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
-  },
-  itemInfo: {
-    padding: 16,
-  },
-  itemName: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  itemDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  priceContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  itemPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FF8C00',
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quantityBadge: {
-    backgroundColor: '#FF8C00',
-    borderRadius: 12,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 8,
-  },
-  quantityText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  addButton: {
-    backgroundColor: '#FF8C00',
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
 

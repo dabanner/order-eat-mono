@@ -8,15 +8,19 @@
   },
   "exports": {
     "./side-menu": {
-      "types": "./src/side-menu.ts",
+      "types": "./src/side-menu.tsx",
       "default": "./dist/side-menu.js"
     },
     "./topbar": {
-      "types": "./src/topbar.ts",
+      "types": "./src/topbar.tsx",
       "default": "./dist/topbar.js"
     },
+    "./menu-item": {
+      "types": "./src/MenuItem.tsx",
+      "default": "./dist/MenuItem.js"
+    },
     "./categories": {
-      "types": "./src/categories.ts",
+      "types": "./src/categories.tsx",
       "default": "./dist/categories.js"
     }
   },
