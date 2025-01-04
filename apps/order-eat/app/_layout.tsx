@@ -8,6 +8,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SideMenu } from '../components/SideMenu/side-menu';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
+import 'react-native-reanimated';
+import { LocationNotificationService } from '@/components/LocationNotificationService';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,6 +32,8 @@ export default function RootLayout() {
     return null;
   }
 
+  console.log('[DEBUG] App component rendering');
+
   const openSideMenu = () => {
     setIsSideMenuOpen(true);
   };
@@ -39,6 +43,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={DefaultTheme}>
+        <LocationNotificationService />
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={[styles.header]}>
           {isChildRoute ? (

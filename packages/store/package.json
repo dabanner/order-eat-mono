@@ -21,6 +21,10 @@
     "./userStore": {
       "types": "./src/userStore.ts",
       "default": "./dist/userStore.js"
+    },
+    "./restaurantsLocation": {
+      "types": "./src/restaurantsLocation.ts",
+      "default": "./dist/restaurantsLocation.js"
     }
   },
   "devDependencies": {
