@@ -11,14 +11,16 @@ interface TopBarProps {
     onHome?: () => void;
     onActionButton?: () => void;
     isChildRoute?: boolean;
+    isPhone?: boolean;
 }
 
 export default function TopBar({
-                                   onBack,
-                                   onHome,
-                                   onActionButton,
-                                   isChildRoute
-                               }: TopBarProps) {
+    onBack,
+    onHome,
+    onActionButton,
+    isChildRoute,
+    isPhone
+}: TopBarProps) {
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
     const { pendingCommands, confirmedCommands } = useCommandStore();
 
@@ -44,9 +46,12 @@ export default function TopBar({
                             resizeMode="contain"
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
-                        <MaterialIcons name="menu" size={24} color="#000" />
-                    </TouchableOpacity>
+                    {isPhone ? (
+
+                        <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
+                            <MaterialIcons name="menu" size={24} color="#000" />
+                        </TouchableOpacity>
+                    ) : null }
                     <TouchableOpacity
                         style={styles.cartButton}
                         onPress={onActionButton}

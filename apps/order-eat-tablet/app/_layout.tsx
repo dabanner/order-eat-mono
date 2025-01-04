@@ -5,7 +5,6 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { Slot, useRouter, usePathname } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import TopBar from "@repo/ui/src/topbar";
 
 SplashScreen.preventAutoHideAsync();
 

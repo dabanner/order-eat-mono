@@ -37,6 +37,7 @@ export default function RootLayout() {
                 onHome={() => router.push('/')}
                 onActionButton={() => router.push('/reservation')}
                 isChildRoute={isChildRoute}
+                isPhone={true}
             />
             <View style={styles.content}>
               <Slot />
