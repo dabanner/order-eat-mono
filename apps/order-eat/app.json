@@ -9,7 +9,13 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs access to location when open to find nearby restaurants.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to location in the background to notify you about nearby restaurants.",
+        "NSLocationAlwaysUsageDescription": "This app needs access to location in the background to notify you about nearby restaurants.",
+        "UIBackgroundModes": ["location", "fetch"]
+      }
     },
     "android": {
       "adaptiveIcon": {
