@@ -2,6 +2,7 @@ import { StyleProp, ViewStyle } from 'react-native';
 
 export interface ReservationData {
   id: string;
+  restaurantId: string;
   reservationTime: string;
   status: string;
   type: string;

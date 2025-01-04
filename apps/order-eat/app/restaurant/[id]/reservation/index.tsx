@@ -25,6 +25,7 @@ export default function ReservationPage() {
   const [command, setCommand] = useState(() => {
     if (restaurant) {
       return {
+        id: Math.random().toString(36).substr(2, 9),
         restaurant,
         userId: 'user123',
         reservationDetails: {

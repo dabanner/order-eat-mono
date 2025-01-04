@@ -209,7 +209,7 @@ export default function TabletScannerPage(): JSX.Element {
 
     try {
       const parsedData = JSON.parse(data) as ReservationData;
-      const requiredFields: (keyof ReservationData)[] = ['id', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+      const requiredFields: (keyof ReservationData)[] = ['id', 'restaurantId', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
 
       if (!requiredFields.every(field => field in parsedData)) {
         throw new Error('Missing required reservation fields');
@@ -281,7 +281,7 @@ export default function TabletScannerPage(): JSX.Element {
     if (manualCode.trim()) {
       try {
         const parsedData = JSON.parse(manualCode) as ReservationData;
-        const requiredFields: (keyof ReservationData)[] = ['id', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+        const requiredFields: (keyof ReservationData)[] = ['id', 'restaurantId', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
 
         if (!requiredFields.every(field => field in parsedData)) {
           throw new Error('Missing required reservation fields');
