@@ -5,8 +5,6 @@ import { Command } from '@repo/store/src/commandStore';
 import { RestaurantHeader } from './RestaurantHeader';
 import { MaterialIcons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
-import pako from 'pako';
-import Base64 from 'js-base64';
 
 interface ConfirmationProps {
   restaurant: Restaurant;
