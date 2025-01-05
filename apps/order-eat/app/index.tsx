@@ -9,7 +9,6 @@ import { useUserStore } from '@repo/store/src/userStore';
 import Categories from "@repo/ui/src/categories"
 
 export default function Index() {
-  const categories = useFoodCategoryStore((state) => state.categories);
   const restaurants = useRestaurantStore((state) => state.restaurants);
   const { user, setUser } = useUserStore();
   const router = useRouter();

@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Image, Platform, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { ThemedView } from "@/components/ui/ThemedView";
 import { ThemedText } from "@/components/ui/ThemedText";
-import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import { CheckboxWithLabel } from "@/components/ui/CheckboxWithLabel";
 import { SocialButton } from "@/components/ui/SocialButton";
 import { InputField } from "@/components/ui/InputField";
 import { Divider } from "@/components/ui/Divider";
 import { useRouter } from 'expo-router';
-import { useUserStore} from "@repo/store/src/userStore";
+import { useUserStore } from "@repo/store/src/userStore";
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -19,13 +18,11 @@ export default function LoginScreen() {
     const setUser = useUserStore((state) => state.setUser);
 
     const handleLogin = () => {
-        // TODO: Implement actual login logic
         setUser();
         router.replace('/');
     };
 
     const handleForgotPassword = () => {
-        // TODO
         console.log('Forgot password pressed');
     };
 
@@ -34,132 +31,123 @@ export default function LoginScreen() {
     };
 
     const handleSocialLogin = (provider: 'google' | 'apple') => {
-        // TODO
         console.log(`${provider} login pressed`);
     };
 
     return (
         <ThemedView style={styles.container}>
-            <ParallaxScrollView
-                headerBackgroundColor={{ light: '#121223', dark: '#121223' }}
-                headerImage={
-                    <ThemedView style={styles.headerContainer}>
-                        <Image
-                            source={require('@/assets/images/motif1.png')}
-                            style={styles.motif1}
-                        />
-                        <View style={styles.headerContent}>
-                            <ThemedText style={styles.headerTitle}>Log In</ThemedText>
-                            <ThemedText style={styles.headerSubtitle}>
-                                Please sign in to your existing account
-                            </ThemedText>
-                        </View>
-                        <Image
-                            source={require('@/assets/images/motif2.png')}
-                            style={styles.motif2}
-                        />
-                    </ThemedView>
-                }
+            <ScrollView 
+                contentContainerStyle={styles.scrollContent}
+                style={styles.scrollView}
             >
-                <ThemedView style={styles.formContainer}>
-                    <ScrollView contentContainerStyle={styles.scrollContent}>
-                        <View>
-                            <InputField
-                                label="EMAIL"
-                                placeholder="Enter your email"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                value={email}
-                                onChangeText={setEmail}
-                            />
-
-                            <InputField
-                                label="PASSWORD"
-                                placeholder="Enter your password"
-                                secureTextEntry={!showPassword}
-                                value={password}
-                                onChangeText={setPassword}
-                                rightIcon={
-                                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                                        <ThemedText style={{ color: '#707070' }}>{showPassword ? 'Hide' : 'Show'}</ThemedText>
-                                    </TouchableOpacity>
-                                }
-                            />
-                        </View>
-
-                        <View style={styles.rememberForgotContainer}>
-                            <CheckboxWithLabel
-                                label="Remember me"
-                                checked={rememberMe}
-                                onValueChange={setRememberMe}
-                            />
-                            <TouchableOpacity onPress={handleForgotPassword}>
-                                <ThemedText style={styles.forgotPassword}>Forgot Password?</ThemedText>
+                <View style={styles.headerContainer}>
+                    <Image
+                        source={require('@/assets/images/motif1.png')}
+                        style={styles.motif1}
+                    />
+                    <View style={styles.headerContent}>
+                        <ThemedText style={styles.headerTitle}>Log In</ThemedText>
+                        <ThemedText style={styles.headerSubtitle}>
+                            Please sign in to your existing account
+                        </ThemedText>
+                    </View>
+                    <Image
+                        source={require('@/assets/images/motif2.png')}
+                        style={styles.motif2}
+                    />
+                </View>
+                <View style={styles.formContainer}>
+                    <InputField
+                        label="EMAIL"
+                        placeholder="Enter your email"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        value={email}
+                        onChangeText={setEmail}
+                    />
+                    <InputField
+                        label="PASSWORD"
+                        placeholder="Enter your password"
+                        secureTextEntry={!showPassword}
+                        value={password}
+                        onChangeText={setPassword}
+                        rightIcon={
+                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                <ThemedText style={{ color: '#707070' }}>{showPassword ? 'Hide' : 'Show'}</ThemedText>
                             </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                            <ThemedText style={styles.loginButtonText}>LOG IN</ThemedText>
+                        }
+                    />
+                    <View style={styles.rememberForgotContainer}>
+                        <CheckboxWithLabel
+                            label="Remember me"
+                            checked={rememberMe}
+                            onValueChange={setRememberMe}
+                        />
+                        <TouchableOpacity onPress={handleForgotPassword}>
+                            <ThemedText style={styles.forgotPassword}>Forgot Password?</ThemedText>
                         </TouchableOpacity>
-
-                        <View style={styles.signupContainer}>
-                            <ThemedText style={styles.signupText}>Don't have an account? </ThemedText>
-                            <TouchableOpacity onPress={handleSignUp}>
-                                <ThemedText style={styles.signupLink}>SIGN UP</ThemedText>
-                            </TouchableOpacity>
-                        </View>
-
-                        <Divider text="Or" />
-
-                        <View style={styles.socialContainer}>
-                            <SocialButton
-                                source={require('@/assets/images/gmail.png')}
-                                style={styles.gmail}
-                                onPress={() => handleSocialLogin('google')}
-                            />
-                            <SocialButton
-                                source={require('@/assets/images/apple.png')}
-                                style={[styles.apple]}
-                                onPress={() => handleSocialLogin('apple')}
-                            />
-                        </View>
-                    </ScrollView>
-                </ThemedView>
-            </ParallaxScrollView>
+                    </View>
+                    <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                        <ThemedText style={styles.loginButtonText}>LOG IN</ThemedText>
+                    </TouchableOpacity>
+                    <View style={styles.signupContainer}>
+                        <ThemedText style={styles.signupText}>Don't have an account? </ThemedText>
+                        <TouchableOpacity onPress={handleSignUp}>
+                            <ThemedText style={styles.signupLink}>SIGN UP</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                    <Divider text="Or" />
+                    <View style={styles.socialContainer}>
+                        <SocialButton
+                            source={require('@/assets/images/gmail.png')}
+                            style={styles.gmail}
+                            onPress={() => handleSocialLogin('google')}
+                        />
+                        <SocialButton
+                            source={require('@/assets/images/apple.png')}
+                            style={styles.apple}
+                            onPress={() => handleSocialLogin('apple')}
+                        />
+                    </View>
+                </View>
+            </ScrollView>
         </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    scrollView: {
         flex: 1,
     },
+    scrollContent: {
+        flexGrow: 1,
+        backgroundColor: '#121223',
+        justifyContent: 'flex-start',
+    },
+    container: {
+        flex: 1,
+        backgroundColor: '#121223',
+    },
     headerContainer: {
-        height: 250, // Consistent height for both screens
-        justifyContent: 'flex-start', // Changed from center
+        height: 250,
+        justifyContent: 'flex-start',
         alignItems: 'center',
         backgroundColor: '#121223',
         paddingTop: Platform.select({
-            ios: 60, // Account for iOS status bar
-            android: 50, // Account for Android status bar
+            ios: 60,
+            android: 50,
             default: 40,
         }),
     },
     headerContent: {
         alignItems: 'center',
-        height: 80, // Explicit height for the content
-        justifyContent: 'center',
-        marginTop: Platform.select({
-            ios: 40,
-            android: 40,
-            default: 40,
-        }),
+        marginTop: 40,
     },
     headerTitle: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#FFFFFF',
-        marginBottom: 8, // Add consistent spacing
+        marginBottom: 8,
     },
     headerSubtitle: {
         fontSize: 16,
@@ -181,29 +169,13 @@ const styles = StyleSheet.create({
         height: 250,
     },
     formContainer: {
-        backgroundColor: '#FFFFFF',
+        flex: 1,
         padding: 34,
-        ...Platform.select({
-            ios: {
-                borderTopLeftRadius: 24,
-                borderTopRightRadius: 24,
-            },
-            android: {
-                borderTopLeftRadius: 24,
-                borderTopRightRadius: 24,
-            },
-            web: {
-                borderTopLeftRadius: 54,
-                borderTopRightRadius: 54,
-                borderBottomLeftRadius: 54,
-                borderBottomRightRadius: 54,
-                marginHorizontal: 450,
-            },
-        }),
-    },
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'space-between',
+        backgroundColor: '#FFFFFF',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        marginTop: -24, 
+        marginHorizontal: Platform.OS == 'web' ? '20%' : 0,
     },
     rememberForgotContainer: {
         flexDirection: 'row',
@@ -252,4 +224,3 @@ const styles = StyleSheet.create({
         backgroundColor: '#dcdcdc',
     },
 });
-

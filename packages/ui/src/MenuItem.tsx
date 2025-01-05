@@ -7,18 +7,18 @@ interface MenuItemProps {
   item: MenuItemType;
   onPress: () => void;
   onAddClick: () => void;
-  quantity?: number;
   showAddButton?: boolean;
   isKidsMode?: boolean;
+  quantity: number;
 }
 
 export function MenuItem({ 
   item, 
   onPress, 
-  onAddClick, 
-  quantity, 
+  onAddClick,
   showAddButton = false, 
-  isKidsMode = false 
+  isKidsMode = false,
+  quantity
 }: MenuItemProps) {
   return (
     <TouchableOpacity 
@@ -60,7 +60,7 @@ export function MenuItem({
           </Text>
           {showAddButton && (
             <View style={styles.quantityContainer}>
-              {quantity !== undefined && quantity > 0 && (
+              {quantity > 0 && (
                 <View style={[
                   styles.quantityBadge,
                   isKidsMode && styles.kidsQuantityBadge

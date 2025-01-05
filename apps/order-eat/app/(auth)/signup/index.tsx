@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import {Image, Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
+import { Image, Platform, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { ThemedView } from "@/components/ui/ThemedView";
 import { ThemedText } from "@/components/ui/ThemedText";
-import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import { InputField } from "@/components/ui/InputField";
 import { useRouter } from 'expo-router';
-import { useUserStore} from "@repo/store/src/userStore";
+import { useUserStore } from "@repo/store/src/userStore";
 
 export default function SignUpScreen() {
     const [name, setName] = useState('');
@@ -18,12 +17,10 @@ export default function SignUpScreen() {
     const setUser = useUserStore((state) => state.setUser);
 
     const handleSignup = () => {
-        // TODO: Implement actual signup logic
         if (password === repeatPassword) {
             setUser();
             router.replace('/');
         } else {
-            // TODO
             console.log('Passwords do not match');
         }
     };
@@ -34,115 +31,114 @@ export default function SignUpScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <ParallaxScrollView
-                headerBackgroundColor={{ light: '#121223', dark: '#121223' }}
-                headerImage={
-                    <ThemedView style={styles.headerContainer}>
-                        <Image
-                            source={require('@/assets/images/motif1.png')}
-                            style={styles.motif1}
-                        />
-                        <View style={styles.headerContent}>
-                            <ThemedText style={styles.headerTitle}>Sign Up</ThemedText>
-                            <ThemedText style={styles.headerSubtitle}>
-                                Please sign up to get started
-                            </ThemedText>
-                        </View>
-                        <Image
-                            source={require('@/assets/images/motif2.png')}
-                            style={styles.motif2}
-                        />
-                    </ThemedView>
-                }
+            <ScrollView 
+                contentContainerStyle={styles.scrollContent}
+                style={styles.scrollView}
             >
-                <ThemedView style={styles.formContainer}>
-                    <View>
-                        <InputField
-                            label="FULL NAME"
-                            placeholder="Enter your full name"
-                            value={name}
-                            onChangeText={setName}
-                        />
-                        <InputField
-                            label="EMAIL"
-                            placeholder="Enter your email"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            value={email}
-                            onChangeText={setEmail}
-                        />
-                        <InputField
-                            label="PASSWORD"
-                            placeholder="Enter your password"
-                            secureTextEntry={!showPassword}
-                            value={password}
-                            onChangeText={setPassword}
-                            rightIcon={
-                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                                    <ThemedText style={{ color: '#707070'}} >{showPassword ? 'Hide' : 'Show'}</ThemedText>
-                                </TouchableOpacity>
-                            }
-                        />
-                        <InputField
-                            label="REPEAT PASSWORD"
-                            placeholder="Repeat your password"
-                            secureTextEntry={!showRepeatPassword}
-                            value={repeatPassword}
-                            onChangeText={setRepeatPassword}
-                            rightIcon={
-                                <TouchableOpacity onPress={() => setShowRepeatPassword(!showRepeatPassword)}>
-                                    <ThemedText style={{ color: '#707070'}} >{showRepeatPassword ? 'Hide' : 'Show'}</ThemedText>
-                                </TouchableOpacity>
-                            }
-                        />
+                <View style={styles.headerContainer}>
+                    <Image
+                        source={require('@/assets/images/motif1.png')}
+                        style={styles.motif1}
+                    />
+                    <View style={styles.headerContent}>
+                        <ThemedText style={styles.headerTitle}>Sign Up</ThemedText>
+                        <ThemedText style={styles.headerSubtitle}>
+                            Please sign up to get started
+                        </ThemedText>
                     </View>
-
+                    <Image
+                        source={require('@/assets/images/motif2.png')}
+                        style={styles.motif2}
+                    />
+                </View>
+                <View style={styles.formContainer}>
+                    <InputField
+                        label="FULL NAME"
+                        placeholder="Enter your full name"
+                        value={name}
+                        onChangeText={setName}
+                    />
+                    <InputField
+                        label="EMAIL"
+                        placeholder="Enter your email"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        value={email}
+                        onChangeText={setEmail}
+                    />
+                    <InputField
+                        label="PASSWORD"
+                        placeholder="Enter your password"
+                        secureTextEntry={!showPassword}
+                        value={password}
+                        onChangeText={setPassword}
+                        rightIcon={
+                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                <ThemedText style={{ color: '#707070' }}>{showPassword ? 'Hide' : 'Show'}</ThemedText>
+                            </TouchableOpacity>
+                        }
+                    />
+                    <InputField
+                        label="REPEAT PASSWORD"
+                        placeholder="Repeat your password"
+                        secureTextEntry={!showRepeatPassword}
+                        value={repeatPassword}
+                        onChangeText={setRepeatPassword}
+                        rightIcon={
+                            <TouchableOpacity onPress={() => setShowRepeatPassword(!showRepeatPassword)}>
+                                <ThemedText style={{ color: '#707070' }}>{showRepeatPassword ? 'Hide' : 'Show'}</ThemedText>
+                            </TouchableOpacity>
+                        }
+                    />
                     <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
                         <ThemedText style={styles.signupButtonText}>Sign Up</ThemedText>
                     </TouchableOpacity>
-
                     <View style={styles.loginContainer}>
                         <ThemedText style={styles.loginText}>Do you have an account? </ThemedText>
                         <TouchableOpacity onPress={handleLogin}>
                             <ThemedText style={styles.loginLink}>LOG IN</ThemedText>
                         </TouchableOpacity>
                     </View>
-                </ThemedView>
-            </ParallaxScrollView>
+                </View>
+            </ScrollView>
         </ThemedView>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    scrollView: {
         flex: 1,
     },
+    scrollContent: {
+        flexGrow: 1,
+        backgroundColor: '#121223',
+        justifyContent: 'flex-start',
+    },
+    container: {
+        flex: 1,
+        backgroundColor: '#121223',
+    },
     headerContainer: {
-        height: 250, // Consistent height for both screens
-        justifyContent: 'flex-start', // Changed from center
+        height: 250,
+        justifyContent: 'flex-start',
         alignItems: 'center',
         backgroundColor: '#121223',
         paddingTop: Platform.select({
-            ios: 60, // Account for iOS status bar
-            android: 50, // Account for Android status bar
+            ios: 60,
+            android: 50,
             default: 40,
         }),
     },
     headerContent: {
         alignItems: 'center',
-        height: 80, // Explicit height for the content
-        justifyContent: 'center',
-        marginTop: Platform.select({
-            ios: 40,
-            android: 40,
-            default: 40,
-        }),
+        marginTop: 40,
     },
     headerTitle: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#FFFFFF',
-        marginBottom: 8, // Add consistent spacing
+        marginBottom: 8,
+        padding: 8,
     },
     headerSubtitle: {
         fontSize: 16,
@@ -164,25 +160,13 @@ const styles = StyleSheet.create({
         height: 250,
     },
     formContainer: {
+        flex: 1,
         padding: 34,
         backgroundColor: '#FFFFFF',
-        ...Platform.select({
-            ios: {
-                borderTopLeftRadius: 24,
-                borderTopRightRadius: 24,
-            },
-            android: {
-                borderTopLeftRadius: 24,
-                borderTopRightRadius: 24,
-            },
-            web: {
-                borderTopLeftRadius: 54,
-                borderTopRightRadius: 54,
-                borderBottomLeftRadius: 54,
-                borderBottomRightRadius: 54,
-                marginHorizontal: 450,
-            },
-        }),
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        marginTop: -24,
+        marginHorizontal: Platform.OS === 'web' ? '20%' : 0,
     },
     signupButton: {
         backgroundColor: '#F4804F',
@@ -211,4 +195,3 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
 });
-
