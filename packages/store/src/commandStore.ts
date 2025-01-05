@@ -5,11 +5,33 @@ interface DetailedNutritionInfo {
     fiber: number;
     servingSize: string;
     description: string;
-    details: string;
-    calories: number;
-    protein: number;
-    carbohydrates: number;
-    fat: number;
+    details: {
+        totalFat: {
+            value: number;
+            saturatedFat: number;
+            transFat: number;
+        };
+        totalCarbohydrates: {
+            value: number;
+            fiber: number;
+            sugars: number;
+        };
+        protein: {
+            value: number;
+            source: string;
+        };
+        minerals: {
+            sodium: number;
+            potassium: number;
+            calcium: number;
+            iron: number;
+        };
+        vitamins: {
+            vitaminA: number;
+            vitaminC: number;
+            vitaminD: number;
+        };
+    };
 }
 
 export interface ReservationDetails {
@@ -225,6 +247,7 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
 
         set((state) => ({
             pendingCommands: [...state.pendingCommands, newCommand],
+            currentCommand: newCommand,
         }));
 
         return id;
@@ -256,7 +279,7 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
 
     addMenuItem: (item) =>
         set((state) => {
-            if (!state.currentCommand) return { currentCommand: null };
+            if (!state.currentCommand) return state;
             const existingItem = state.currentCommand.menuItems.find((i) => i.id === item.id);
             let updatedMenuItems;
             if (existingItem) {
@@ -267,42 +290,54 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
                 updatedMenuItems = [...state.currentCommand.menuItems, { ...item, quantity: 1 }];
             }
             const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const updatedCommand = {
+                ...state.currentCommand,
+                menuItems: updatedMenuItems,
+                totalAmount,
+            };
             return {
-                currentCommand: {
-                    ...state.currentCommand,
-                    menuItems: updatedMenuItems,
-                    totalAmount,
-                },
+                currentCommand: updatedCommand,
+                pendingCommands: state.pendingCommands.map((command) =>
+                    command.id === updatedCommand.id ? updatedCommand : command
+                ),
             };
         }),
 
     removeMenuItem: (itemId) =>
         set((state) => {
-            if (!state.currentCommand) return { currentCommand: null };
+            if (!state.currentCommand) return state;
             const updatedMenuItems = state.currentCommand.menuItems.filter((item) => item.id !== itemId);
             const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const updatedCommand = {
+                ...state.currentCommand,
+                menuItems: updatedMenuItems,
+                totalAmount,
+            };
             return {
-                currentCommand: {
-                    ...state.currentCommand,
-                    menuItems: updatedMenuItems,
-                    totalAmount,
-                },
+                currentCommand: updatedCommand,
+                pendingCommands: state.pendingCommands.map((command) =>
+                    command.id === updatedCommand.id ? updatedCommand : command
+                ),
             };
         }),
 
     updateMenuItemQuantity: (itemId, quantity) =>
         set((state) => {
-            if (!state.currentCommand) return { currentCommand: null };
+            if (!state.currentCommand) return state;
             const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
                 item.id === itemId ? { ...item, quantity } : item
             );
             const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const updatedCommand = {
+                ...state.currentCommand,
+                menuItems: updatedMenuItems,
+                totalAmount,
+            };
             return {
-                currentCommand: {
-                    ...state.currentCommand,
-                    menuItems: updatedMenuItems,
-                    totalAmount,
-                },
+                currentCommand: updatedCommand,
+                pendingCommands: state.pendingCommands.map((command) =>
+                    command.id === updatedCommand.id ? updatedCommand : command
+                ),
             };
         }),
 
