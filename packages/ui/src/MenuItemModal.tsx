@@ -383,11 +383,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 25,
     backgroundColor: '#F8F9FB',
+    textAlign: 'center',
   },
   kidsSizeButton: {
     width: 60,
     height: 60,
     borderRadius: 30,
+    textAlign: 'center',
     backgroundColor: '#fff',
     borderWidth: 2,
     borderColor: '#ffa26d',

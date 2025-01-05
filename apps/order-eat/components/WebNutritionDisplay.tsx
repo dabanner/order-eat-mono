@@ -4,7 +4,7 @@ import { DetailedNutritionInfo } from '@repo/store/src/restaurantStore';
 
 interface NutritionDisplayProps {
   nutrition: DetailedNutritionInfo;
-  image: string;
+  image: number;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -32,7 +32,7 @@ export function WebNutritionDisplay({ nutrition, image }: NutritionDisplayProps)
           <View style={styles.circle}>
             <View style={styles.imageContainer}>
               <Image
-                source={{ uri: image }}
+                source={image}
                 style={styles.image}
               />
             </View>
