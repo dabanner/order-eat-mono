@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Image,
   ListRenderItem,
-  ImageSourcePropType,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MenuItem } from '@repo/store/src/restaurantStore';
@@ -58,7 +57,7 @@ const QuantityControls: React.FC<QuantityControlsProps> = ({ itemId, quantity, o
 const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange }) => (
   <View style={styles.itemContainer}>
     <Image
-      source={{ uri: item.images[0] } as ImageSourcePropType}
+     source={{ uri: item.images[0] }}
       style={styles.itemImage}
     />
     
