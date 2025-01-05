@@ -1,8 +1,16 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Restaurant, MenuItem } from './restaurantStore.js';
 
-const STORAGE_KEY = 'order-eat-reservations';
+interface DetailedNutritionInfo {
+    fiber: number;
+    servingSize: string;
+    description: string;
+    details: string;
+    calories: number;
+    protein: number;
+    carbohydrates: number;
+    fat: number;
+}
 
 export interface ReservationDetails {
     date: string;
@@ -23,7 +31,7 @@ export interface Command {
     type: 'takeaway' | 'dinein';
 }
 
-// Mock reservation data for fallback
+// Mock reservation data
 const MOCK_RESERVATIONS: Record<string, Command> = {
     "mock_reservation_1": {
         id: "mock_reservation_1",
@@ -54,33 +62,115 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
             {
                 id: "p2",
                 name: "Pepperoni Pizza",
-                price: 14.99,
                 description: "Pizza topped with pepperoni and mozzarella",
-                preparationTime: 20,
-                quantity: 3,
+                price: 14.99,
+                images: [
+                    "https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D"
+                ],
                 foodCategoryId: "f1",
                 mealTypeId: "m1",
-                images: [],
-                allergens: [],
-                keyIngredients: [],
-                nutrition: {},
-                sizes: []
+                preparationTime: 20,
+                quantity: 3,
+                sizes: ["10\"", "14\"", "16\""],
+                keyIngredients: [
+                    { name: "Pepperoni", icon: "drumstick-bite", isAllergy: false },
+                    { name: "Mozzarella", icon: "cheese", isAllergy: true },
+                    { name: "Tomato Sauce", icon: "pepper-hot", isAllergy: false }
+                ],
+                allergens: ["dairy", "gluten", "pork"],
+                nutrition: {
+                    carbs: 65,
+                    proteins: 18,
+                    calories: 750,
+                    fats: 12,
+                    fiber: 2,
+                    servingSize: "14\" pizza (300g serving)",
+                    description: "Our classic Pepperoni Pizza is a perfect balance of flavors, featuring our signature tomato sauce, mozzarella cheese, and premium pepperoni slices on our hand-tossed crust.",
+                    details: {
+                        totalFat: {
+                            value: 12,
+                            saturatedFat: 5,
+                            transFat: 0
+                        },
+                        totalCarbohydrates: {
+                            value: 65,
+                            fiber: 2,
+                            sugars: 4
+                        },
+                        protein: {
+                            value: 18,
+                            source: "mozzarella cheese and pepperoni"
+                        },
+                        minerals: {
+                            sodium: 1200,
+                            potassium: 280,
+                            calcium: 20,
+                            iron: 15
+                        },
+                        vitamins: {
+                            vitaminA: 10,
+                            vitaminC: 8,
+                            vitaminD: 4
+                        }
+                    }
+                }
             },
             {
                 id: "p1",
                 name: "Pizza Calzone European",
-                price: 32,
                 description: "Pizza folded in half with chicken, mushrooms, and cheese",
+                price: 32,
+                images: [
+                    "https://cdn.tasteatlas.com/Images/Dishes/2bfdf993487d4995b8ed4ce3e99c5703.jpg"
+                ],
+                foodCategoryId: "f1",
+                mealTypeId: "m1",
                 preparationTime: 20,
                 quantity: 1,
                 selectedSize: "14\"",
-                foodCategoryId: "f1",
-                mealTypeId: "m1",
-                images: [],
-                allergens: [],
-                keyIngredients: [],
-                nutrition: {},
-                sizes: []
+                sizes: ["10\"", "14\"", "16\""],
+                keyIngredients: [
+                    { name: "Chicken", icon: "drumstick-bite", isAllergy: false },
+                    { name: "Mushrooms", icon: "seedling", isAllergy: false },
+                    { name: "Mozzarella", icon: "cheese", isAllergy: true }
+                ],
+                allergens: ["dairy", "gluten"],
+                nutrition: {
+                    carbs: 89,
+                    proteins: 12.2,
+                    calories: 850,
+                    fats: 10.4,
+                    fiber: 2.5,
+                    servingSize: "14\" calzone (350g serving)",
+                    description: "This handcrafted Italian calzone delivers a perfect blend of proteins and carbohydrates.",
+                    details: {
+                        totalFat: {
+                            value: 10.4,
+                            saturatedFat: 4.2,
+                            transFat: 0
+                        },
+                        totalCarbohydrates: {
+                            value: 89,
+                            fiber: 2.5,
+                            sugars: 3.2
+                        },
+                        protein: {
+                            value: 12.2,
+                            source: "free-range chicken and fresh mozzarella"
+                        },
+                        minerals: {
+                            sodium: 980,
+                            potassium: 320,
+                            calcium: 15,
+                            iron: 10
+                        },
+                        vitamins: {
+                            vitaminA: 8,
+                            vitaminC: 12,
+                            vitaminD: 6
+                        }
+                    }
+                }
             }
         ],
         reservationDetails: {
@@ -105,37 +195,10 @@ interface CommandStore {
     clearCommand: () => void;
     addCommand: (command: Omit<Command, 'id'>) => string;
     confirmCommand: (commandId: string) => void;
-    getCommandById: (commandId: string) => Promise<Command | undefined>;
+    getCommandById: (commandId: string) => Command | undefined;
 }
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
-
-const saveToStorage = async (commands: Record<string, Command>) => {
-    try {
-        const jsonValue = JSON.stringify(commands);
-        await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
-        console.log('Successfully saved to storage');
-    } catch (error) {
-        console.error('Error saving to storage:', error);
-    }
-};
-
-const loadFromStorage = async (): Promise<Record<string, Command>> => {
-    try {
-        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-        return jsonValue != null ? JSON.parse(jsonValue) : {};
-    } catch (error) {
-        console.error('Error loading from storage:', error);
-        return {};
-    }
-};
-
-// Initialize storage
-let reservationsDB: Record<string, Command> = {};
-loadFromStorage().then(data => {
-    reservationsDB = data;
-    console.log('Loaded reservations from storage:', Object.keys(data).length);
-});
 
 export const useCommandStore = create<CommandStore>((set, get) => ({
     currentCommand: null,
@@ -160,13 +223,8 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
         const id = generateId();
         const newCommand = { ...command, id };
 
-        reservationsDB[id] = newCommand;
-        saveToStorage(reservationsDB);
-        console.log('Added new command:', newCommand);
-
         set((state) => ({
             pendingCommands: [...state.pendingCommands, newCommand],
-            currentCommand: { ...command, id },
         }));
 
         return id;
@@ -184,10 +242,6 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
                 status: 'confirmed' as const
             };
 
-            reservationsDB[commandId] = confirmedCommand;
-            saveToStorage(reservationsDB);
-            console.log('Updated command:', confirmedCommand);
-
             return {
                 pendingCommands: state.pendingCommands.filter(cmd => cmd.id !== commandId),
                 currentCommand: null,
@@ -195,34 +249,14 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
             };
         }),
 
-    async getCommandById(commandId) {
+    getCommandById(commandId) {
         console.log('Searching for command:', commandId);
-
-        // Check storage first
-        const stored = await loadFromStorage();
-        const command = stored[commandId];
-
-        if (command) {
-            console.log('Found command in storage:', command);
-
-            // Update local state
-            set(state => ({
-                confirmedCommands: [
-                    ...state.confirmedCommands.filter(cmd => cmd.id !== commandId),
-                    command
-                ]
-            }));
-
-            return command;
-        }
-
-        console.log('Command not found in storage, returning mock data');
         return MOCK_RESERVATIONS.mock_reservation_1;
     },
 
     addMenuItem: (item) =>
         set((state) => {
-            if (!state.currentCommand) return state;
+            if (!state.currentCommand) return { currentCommand: null };
             const existingItem = state.currentCommand.menuItems.find((i) => i.id === item.id);
             let updatedMenuItems;
             if (existingItem) {
@@ -233,57 +267,44 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
                 updatedMenuItems = [...state.currentCommand.menuItems, { ...item, quantity: 1 }];
             }
             const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const updatedCommand = {
-                ...state.currentCommand,
-                menuItems: updatedMenuItems,
-                totalAmount,
-            };
             return {
-                currentCommand: updatedCommand,
-                pendingCommands: state.pendingCommands.map((command) =>
-                    command.id === updatedCommand.id ? updatedCommand : command
-                ),
+                currentCommand: {
+                    ...state.currentCommand,
+                    menuItems: updatedMenuItems,
+                    totalAmount,
+                },
             };
         }),
 
     removeMenuItem: (itemId) =>
         set((state) => {
-            if (!state.currentCommand) return state;
+            if (!state.currentCommand) return { currentCommand: null };
             const updatedMenuItems = state.currentCommand.menuItems.filter((item) => item.id !== itemId);
             const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const updatedCommand = {
-                ...state.currentCommand,
-                menuItems: updatedMenuItems,
-                totalAmount,
-            };
             return {
-                currentCommand: updatedCommand,
-                pendingCommands: state.pendingCommands.map((command) =>
-                    command.id === updatedCommand.id ? updatedCommand : command
-                ),
+                currentCommand: {
+                    ...state.currentCommand,
+                    menuItems: updatedMenuItems,
+                    totalAmount,
+                },
             };
         }),
 
     updateMenuItemQuantity: (itemId, quantity) =>
         set((state) => {
-            if (!state.currentCommand) return state;
+            if (!state.currentCommand) return { currentCommand: null };
             const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
                 item.id === itemId ? { ...item, quantity } : item
             );
             const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const updatedCommand = {
-                ...state.currentCommand,
-                menuItems: updatedMenuItems,
-                totalAmount,
-            };
             return {
-                currentCommand: updatedCommand,
-                pendingCommands: state.pendingCommands.map((command) =>
-                    command.id === updatedCommand.id ? updatedCommand : command
-                ),
+                currentCommand: {
+                    ...state.currentCommand,
+                    menuItems: updatedMenuItems,
+                    totalAmount,
+                },
             };
         }),
 
     clearCommand: () => set({ currentCommand: null }),
 }));
-
