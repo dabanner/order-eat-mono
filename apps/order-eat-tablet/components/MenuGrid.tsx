@@ -5,6 +5,7 @@ import { MenuItem as MenuItemComponent } from '@repo/ui/src/MenuItem';
 import { useFoodCategoryStore } from '@repo/store/src/foodCaregoryStore';
 import { MenuItemModal } from '@repo/ui/src/MenuItemModal';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
+import { useCommandStore } from '@repo/store/src/commandStore';
 
 interface MenuGridProps {
     menuItems: MenuItem[];
@@ -14,6 +15,7 @@ interface MenuGridProps {
 
 export default function MenuGrid({ menuItems, isKidsMode, restaurant }: MenuGridProps) {
     const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
+    const { addMenuItem, currentCommand } = useCommandStore();
 
     const groupedItems = menuItems.reduce((acc, item) => {
         if (!acc[item.foodCategoryId]) {
@@ -31,6 +33,15 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant }: MenuGrid
     const getCategoryEmoji = (categoryId: string) => {
         const category = useFoodCategoryStore.getState().getFoodCategoryById(categoryId);
         return category?.emoji;
+    };
+
+    const handleAddMenuItem = (item: MenuItem) => {
+        console.log('[CURRENT COMMAND]', currentCommand);
+        addMenuItem(item);
+    };
+
+    const getItemQuantity = (itemId: string) => {
+        return currentCommand?.menuItems.find(item => item.id === itemId)?.quantity || 0;
     };
 
     return (
@@ -66,9 +77,10 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant }: MenuGrid
                                 key={item.id}
                                 item={item}
                                 onPress={() => setSelectedMenuItem(item)}
-                                onAddClick={() => {}}
+                                onAddClick={() => handleAddMenuItem(item)}
                                 showAddButton={true}
                                 isKidsMode={isKidsMode}
+                                quantity={getItemQuantity(item.id)}
                             />
                         ))}
                     </View>
@@ -82,10 +94,10 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant }: MenuGrid
                     menuItem={selectedMenuItem}
                     restaurant={restaurant}
                     onAddToOrder={() => {
-                        // Ajoutez ici la logique pour ajouter au panier
+                        handleAddMenuItem(selectedMenuItem);
                         setSelectedMenuItem(null);
                     }}
-                    quantity={0}
+                    quantity={getItemQuantity(selectedMenuItem.id)}
                     showAddButton={true}
                     isKidsMode={isKidsMode}
                 />

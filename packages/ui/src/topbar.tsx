@@ -28,13 +28,13 @@ export default function TopBar({
     onKidsModeToggle
 }: TopBarProps) {
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-    const { pendingCommands, confirmedCommands } = useCommandStore();
+    const { currentCommand } = useCommandStore();
 
     const openSideMenu = () => {
         setIsSideMenuOpen(true);
     };
 
-    const totalCommands = pendingCommands.length + confirmedCommands.length;
+    const totalItems = currentCommand ? currentCommand.menuItems.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
     return (
         <>
@@ -58,15 +58,14 @@ export default function TopBar({
                             onPress={onActionButton}
                         >
                         <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
-                        {totalCommands > 0 && (
+                        {totalItems > 0 && (
                             <View style={styles.cartBadge}>
-                                <Text style={styles.cartBadgeText}>{totalCommands}</Text>
+                                <Text style={styles.cartBadgeText}>{totalItems}</Text>
                             </View>
                         )}
                     </TouchableOpacity>
                     ) : null }
                     {isPhone ? (
-
                         <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
                             <MaterialIcons name="menu" size={24} color="#000" />
                         </TouchableOpacity>
