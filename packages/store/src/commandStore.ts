@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { Restaurant, MenuItem } from './restaurantStore.js';
 
+export interface WaitstaffRequest {
+  type: 'checkout' | 'water' | 'other';
+  status: 'pending' | 'completed';
+  timestamp: string;
+}
+
 interface DetailedNutritionInfo {
     fiber: number;
     servingSize: string;
@@ -51,6 +57,9 @@ export interface Command {
     totalAmount: number;
     status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
     type: 'takeaway' | 'dinein';
+    paidItems: (MenuItem & { quantity: number })[];
+    unpaidItems: (MenuItem & { quantity: number })[];
+    waitstaffRequests: WaitstaffRequest[];
 }
 
 // Mock reservation data
@@ -92,7 +101,65 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 foodCategoryId: "f1",
                 mealTypeId: "m1",
                 preparationTime: 20,
-                quantity: 3,
+                quantity: 1, // Changed to 1 as 2 are paid
+                sizes: ["10\"", "14\"", "16\""],
+                keyIngredients: [
+                    { name: "Pepperoni", icon: "drumstick-bite", isAllergy: false },
+                    { name: "Mozzarella", icon: "cheese", isAllergy: true },
+                    { name: "Tomato Sauce", icon: "pepper-hot", isAllergy: false }
+                ],
+                allergens: ["dairy", "gluten", "pork"],
+                nutrition: {
+                    carbs: 65,
+                    proteins: 18,
+                    calories: 750,
+                    fats: 12,
+                    fiber: 2,
+                    servingSize: "14\" pizza (300g serving)",
+                    description: "Our classic Pepperoni Pizza is a perfect balance of flavors, featuring our signature tomato sauce, mozzarella cheese, and premium pepperoni slices on our hand-tossed crust.",
+                    details: {
+                        totalFat: {
+                            value: 12,
+                            saturatedFat: 5,
+                            transFat: 0
+                        },
+                        totalCarbohydrates: {
+                            value: 65,
+                            fiber: 2,
+                            sugars: 4
+                        },
+                        protein: {
+                            value: 18,
+                            source: "mozzarella cheese and pepperoni"
+                        },
+                        minerals: {
+                            sodium: 1200,
+                            potassium: 280,
+                            calcium: 20,
+                            iron: 15
+                        },
+                        vitamins: {
+                            vitaminA: 10,
+                            vitaminC: 8,
+                            vitaminD: 4
+                        }
+                    }
+                }
+            }
+        ],
+        paidItems: [
+            {
+                id: "p2",
+                name: "Pepperoni Pizza",
+                description: "Pizza topped with pepperoni and mozzarella",
+                price: 14.99,
+                images: [
+                    "https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D"
+                ],
+                foodCategoryId: "f1",
+                mealTypeId: "m1",
+                preparationTime: 20,
+                quantity: 2, // Two pizzas paid
                 sizes: ["10\"", "14\"", "16\""],
                 keyIngredients: [
                     { name: "Pepperoni", icon: "drumstick-bite", isAllergy: false },
@@ -195,6 +262,8 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 }
             }
         ],
+        unpaidItems: [], 
+        waitstaffRequests: [], 
         reservationDetails: {
             date: "01/05/2025",
             time: "13:30",
@@ -218,6 +287,10 @@ interface CommandStore {
     addCommand: (command: Omit<Command, 'id'>) => string;
     confirmCommand: (commandId: string) => void;
     getCommandById: (commandId: string) => Command | undefined;
+    moveItemToPaid: (itemId: string) => void;
+    moveItemToUnpaid: (itemId: string) => void;
+    addWaitstaffRequest: (type: WaitstaffRequest['type']) => void;
+    completeWaitstaffRequest: (timestamp: string) => void;
 }
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -343,4 +416,94 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
         }),
 
     clearCommand: () => set({ currentCommand: null }),
+
+    moveItemToPaid: (itemId: string) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+
+      const item = state.currentCommand.menuItems.find((i) => i.id === itemId);
+      if (!item) return state;
+
+      const updatedCommand = {
+        ...state.currentCommand,
+        paidItems: [...(state.currentCommand.paidItems || []), item],
+        menuItems: state.currentCommand.menuItems.filter((i) => i.id !== itemId),
+      };
+
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
+
+  moveItemToUnpaid: (itemId: string) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+
+      const item = state.currentCommand.paidItems?.find((i) => i.id === itemId);
+      if (!item) return state;
+
+      const updatedCommand = {
+        ...state.currentCommand,
+        menuItems: [...state.currentCommand.menuItems, item],
+        paidItems: state.currentCommand.paidItems?.filter((i) => i.id !== itemId) || [],
+      };
+
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
+
+  addWaitstaffRequest: (type: WaitstaffRequest['type']) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+
+      const newRequest: WaitstaffRequest = {
+        type,
+        status: 'pending' as const,
+        timestamp: new Date().toISOString(),
+      };
+
+      const updatedCommand = {
+        ...state.currentCommand,
+        waitstaffRequests: [
+          ...(state.currentCommand.waitstaffRequests || []),
+          newRequest,
+        ],
+      };
+
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
+
+  completeWaitstaffRequest: (timestamp: string) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+
+      const updatedCommand = {
+        ...state.currentCommand,
+        waitstaffRequests: state.currentCommand.waitstaffRequests?.map((request) =>
+          request.timestamp === timestamp
+            ? { ...request, status: 'completed' as const }
+            : request
+        ) || [],
+      };
+
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
 }));
+
