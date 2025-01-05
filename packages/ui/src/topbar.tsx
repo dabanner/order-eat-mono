@@ -58,22 +58,6 @@ export default function TopBar({
                             <MaterialIcons name="menu" size={24} color="#000" />
                         </TouchableOpacity>
                     ) : null }
-                    { isTablet ? (
-                        <View style={styles.rightSection}>
-                            <View style={styles.kidsModeContainer}>
-                            <CustomSwitch 
-                                buttonColor={'#FFFFFF'}
-                                switchBackgroundColor={'#BB4430'}
-                                onSwitchBackgroundColor={'#7EBDC2'}
-                                switchLeftText={"👨‍🦱"}
-                                switchRightText={"👶"}
-                                onSwitch={() => onKidsModeToggle?.(true)}
-                                onSwitchReverse={() => onKidsModeToggle?.(false)}
-                                startOnLeft={false}
-                                />
-                            </View>
-                        </View>
-                    ) : null }
                     { !isKidsMode ? (
                         <TouchableOpacity
                             style={styles.cartButton}
@@ -86,6 +70,22 @@ export default function TopBar({
                             </View>
                         )}
                     </TouchableOpacity>
+                    ) : null }
+                    { isTablet ? (
+                        <View style={styles.rightSection}>
+                            <View style={styles.kidsModeContainer}>
+                            <CustomSwitch 
+                                buttonColor={'#FFFFFF'}
+                                switchBackgroundColor={'#BB4430'}
+                                onSwitchBackgroundColor={'#7EBDC2'}
+                                switchLeftText={"‍👶"}
+                                switchRightText={"👨"}
+                                onSwitch={() => onKidsModeToggle?.(true)}
+                                onSwitchReverse={() => onKidsModeToggle?.(false)}
+                                startOnLeft={false}
+                                />
+                            </View>
+                        </View>
                     ) : null }
                 </View>
             </SafeAreaView>
