@@ -5,14 +5,13 @@ import { MenuItem } from '@repo/store/src/restaurantStore';
 import { QuantityControls } from './QuantityControls';
 
 interface ItemCardProps {
-  item: MenuItem & { quantity: number };
+  item: MenuItem & { quantity: number; paid: boolean };
   onQuantityChange: (itemId: string, currentQuantity: number, increment: number) => void;
-  onPaymentStatusChange?: () => void;
-  isPaid?: boolean;
+  onPaymentStatusChange: () => void;
 }
 
-export const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange, onPaymentStatusChange, isPaid }) => (
-  <View style={[styles.itemContainer, isPaid && styles.paidItemContainer]}>
+export const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange, onPaymentStatusChange }) => (
+  <View style={[styles.itemContainer, item.paid && styles.paidItemContainer]}>
     <Image
       source={{ uri: item.images[0] }}
       style={styles.itemImage}
@@ -29,20 +28,18 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange, onPa
             itemId={item.id}
             quantity={item.quantity}
             onQuantityChange={onQuantityChange}
-            isPaid={isPaid}
+            isPaid={item.paid}
           />
-          {isPaid && onPaymentStatusChange && (
-            <TouchableOpacity
-              style={[styles.paymentStatusButton, isPaid && styles.paidButton]}
-              onPress={onPaymentStatusChange}
-            >
-              <MaterialIcons 
-                name="check-circle" 
-                size={24} 
-                color="#4CAF50" 
-              />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={[styles.paymentStatusButton, item.paid && styles.paidButton]}
+            onPress={onPaymentStatusChange}
+          >
+            <MaterialIcons 
+              name={item.paid ? "check-circle" : "radio-button-unchecked"} 
+              size={24} 
+              color={item.paid ? "#4CAF50" : "#FF9800"} 
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -114,3 +111,4 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
+

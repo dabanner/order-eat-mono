@@ -5,7 +5,7 @@ interface QuantityControlsProps {
   itemId: string;
   quantity: number;
   onQuantityChange: (itemId: string, currentQuantity: number, increment: number) => void;
-  isPaid?: boolean;
+  isPaid: boolean;
 }
 
 export const QuantityControls: React.FC<QuantityControlsProps> = ({ itemId, quantity, onQuantityChange, isPaid }) => (
