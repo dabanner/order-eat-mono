@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions } from 'react-native';
 import { Restaurant } from '@repo/store/src/restaurantStore';
 import { Command } from '@repo/store/src/commandStore';
 import { RestaurantHeader } from './RestaurantHeader';
 import { MaterialIcons } from '@expo/vector-icons';
+import QRCode from 'react-native-qrcode-svg';
 
 interface ConfirmationProps {
   restaurant: Restaurant;
@@ -12,6 +13,24 @@ interface ConfirmationProps {
 
 export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command }) => {
   console.log('Reservation Command:', command);
+
+    const qrCodeSize = Math.min(Dimensions.get('window').width * 0.3, 250);
+
+
+    const essentialData = {
+      id: command.id,
+      userId: command.userId,
+      restaurantId: command.restaurant.id, // Assuming restaurant has an id
+      reservationTime: command.reservationDetails.time, // Assuming this exists
+      totalAmount: command.totalAmount,
+      status: command.status,
+      type: command.type,
+      itemCount: command.menuItems.length,
+    };
+    const finalData =  JSON.stringify(essentialData);
+
+
+  console.log(finalData)
 
   return (
     <View style={styles.container}>
@@ -26,7 +45,13 @@ export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command 
 
         <View style={styles.qrSection}>
           <View style={styles.qrPlaceholder}>
-            <Text style={styles.qrText}>QR Code</Text>
+             <QRCode
+          value={finalData}
+          size={qrCodeSize}
+          backgroundColor="white"
+          color="black"
+        />
+            <Text style={styles.qrText}></Text>
             <Text style={styles.qrSubtext}>Show this at the restaurant</Text>
           </View>
         </View>

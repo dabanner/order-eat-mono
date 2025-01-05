@@ -6,7 +6,7 @@ import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFoodCategoryStore, FoodCategory } from '@repo/store/src/foodCaregoryStore';
 import { RestaurantHeader } from '@/components/RestaurantHeader';
-import { ImageGallery } from '@/components/ImageGallery';
+import { ImageGallery } from '@repo/ui/src/ImageGallery';
 import { MenuList } from '@/components/MenuList';
 import { Footer } from '@/components/Footer';
 

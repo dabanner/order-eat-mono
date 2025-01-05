@@ -1,75 +1,138 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions, Linking, Modal } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Dimensions, Modal, Alert } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
+import { ReservationData, CustomAlertProps, NativeScannerProps, ManualEntryProps, ScannerHook, StylesType } from './types';
+import { useRouter } from 'expo-router';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-// Custom Alert Component
-const CustomAlert = ({ visible, url, onNavigate, onRetake, onCancel }) => (
-    <Modal
-        transparent={true}
-        visible={visible}
-        animationType="fade"
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.alertBox}>
-          <Text style={styles.alertTitle}>QR Code Detected</Text>
-          <Text style={styles.alertMessage}>Would you like to navigate to:</Text>
-          <Text style={styles.urlText}>{url}</Text>
-          <View style={styles.alertButtonContainer}>
-            <TouchableOpacity
-                style={[styles.alertButton, styles.navigateButton]}
-                onPress={onNavigate}
-            >
-              <Text style={styles.alertButtonText}>Navigate</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={[styles.alertButton, styles.retakeButton]}
-                onPress={onRetake}
-            >
-              <Text style={styles.alertButtonText}>Retake</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={[styles.alertButton, styles.cancelButton]}
-                onPress={onCancel}
-            >
-              <Text style={styles.alertButtonText}>Cancel</Text>
-            </TouchableOpacity>
+const colors: Record<string, string> = {
+  orange: '#FF7622',
+  onyx: '#121223',
+  evergreen: '#059C6A',
+  lightSlate: '#A0A5BA',
+  dorian: '#F0F5FA',
+  cloud: '#FAFCFE',
+};
+
+const CustomAlert: React.FC<CustomAlertProps> = ({ visible, data, onConfirm, onRetake, onCancel, isLoading }) => {
+  let reservationData: ReservationData | null = null;
+  try {
+    reservationData = JSON.parse(data || '{}') as ReservationData;
+  } catch (error) {
+    return null;
+  }
+
+  if (!data) return null;
+
+  return (
+      <Modal
+          transparent={true}
+          visible={visible}
+          animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.alertBox}>
+            <Text style={styles.alertTitle}>Reservation Details</Text>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>ID:</Text>
+              <Text style={styles.detailText}>{reservationData.id}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Time:</Text>
+              <Text style={styles.detailText}>
+                {reservationData.reservationTime}
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Status:</Text>
+              <Text style={[styles.detailText, styles.statusText]}>
+                {reservationData.status}
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Type:</Text>
+              <Text style={styles.detailText}>{reservationData.type}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Items:</Text>
+              <Text style={styles.detailText}>{reservationData.itemCount}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Amount:</Text>
+              <Text style={styles.detailText}>
+                ${reservationData.totalAmount.toFixed(2)}
+              </Text>
+            </View>
+
+            <View style={styles.alertButtonContainer}>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.navigateButton]}
+                  onPress={onConfirm}
+                  disabled={isLoading}
+              >
+                <Text style={styles.alertButtonText}>
+                  {isLoading ? 'Processing...' : 'Confirm'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.retakeButton]}
+                  onPress={onRetake}
+                  disabled={isLoading}
+              >
+                <Text style={styles.alertButtonText}>Scan Again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[styles.alertButton, styles.cancelButton]}
+                  onPress={onCancel}
+                  disabled={isLoading}
+              >
+                <Text style={styles.alertButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
-);
+      </Modal>
+  );
+};
 
-// Component for native scanner
-const NativeScanner = ({ onScan, onClose, scanned }) => (
+const NativeScanner: React.FC<NativeScannerProps> = ({ onScan, onClose, scanned }) => (
     <View style={styles.scannerContainer}>
-      <View style={styles.cameraWrapper}>
-        <CameraView
-            style={styles.camera}
-            onBarcodeScanned={scanned ? undefined : onScan}
-            barcodeScannerSettings={{
-              barcodeTypes: ['qr'],
-            }}
-        />
+      <View style={styles.scanFrameContainer}>
+        <View style={styles.cameraWrapper}>
+          <CameraView
+              style={styles.camera}
+              onBarcodeScanned={scanned ? undefined : onScan}
+              barcodeScannerSettings={{
+                barcodeTypes: ['qr'],
+              }}
+          />
+          <View style={styles.cornerTL} />
+          <View style={styles.cornerTR} />
+          <View style={styles.cornerBL} />
+          <View style={styles.cornerBR} />
+        </View>
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={onClose}>
-          <Text style={styles.buttonText}>Close Scanner</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.button} onPress={onClose}>
+        <Text style={styles.buttonText}>Close Scanner</Text>
+      </TouchableOpacity>
     </View>
 );
 
-// Component for manual code entry
-const ManualEntry = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
+const ManualEntry: React.FC<ManualEntryProps> = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
     <View style={styles.manualEntryContainer}>
       <TextInput
           style={styles.input}
           onChangeText={onCodeChange}
           value={code}
-          placeholder="Enter URL manually"
-          keyboardType="url"
+          placeholder="Enter reservation code manually"
+          keyboardType="default"
           autoCapitalize="none"
       />
       <TouchableOpacity style={styles.button} onPress={onSubmit}>
@@ -81,13 +144,12 @@ const ManualEntry = ({ code, onCodeChange, onSubmit, onScannerOpen }) => (
     </View>
 );
 
-// Custom hook for scanner functionality
-const useScanner = () => {
-  const [showScanner, setShowScanner] = useState(false);
-  const [hasPermission, setHasPermission] = useState(null);
-  const [scanned, setScanned] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [scannedUrl, setScannedUrl] = useState('');
+const useScanner = (): ScannerHook => {
+  const [showScanner, setShowScanner] = useState<boolean>(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [scanned, setScanned] = useState<boolean>(false);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [scannedData, setScannedData] = useState<string>('');
 
   useEffect(() => {
     (async () => {
@@ -96,31 +158,18 @@ const useScanner = () => {
     })();
   }, []);
 
-  const openScanner = () => {
+  const openScanner = (): void => {
     setShowScanner(true);
     setScanned(false);
     setShowAlert(false);
-    setScannedUrl('');
+    setScannedData('');
   };
 
-  const closeScanner = () => {
+  const closeScanner = (): void => {
     setShowScanner(false);
     setScanned(false);
     setShowAlert(false);
-    setScannedUrl('');
-  };
-
-  const handleUrl = async (url) => {
-    try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        alert('Cannot open this URL');
-      }
-    } catch (error) {
-      alert('An error occurred while opening the URL');
-    }
+    setScannedData('');
   };
 
   return {
@@ -128,86 +177,165 @@ const useScanner = () => {
     hasPermission,
     scanned,
     showAlert,
-    scannedUrl,
+    scannedData,
     setScanned,
     setShowAlert,
-    setScannedUrl,
+    setScannedData,
     openScanner,
     closeScanner,
-    handleUrl,
   };
 };
 
-// Main component
-export default function TabletScannerPage() {
-  const [manualCode, setManualCode] = useState('');
+export default function TabletScannerPage(): JSX.Element {
+  const [manualCode, setManualCode] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
     showScanner,
     hasPermission,
     scanned,
     showAlert,
-    scannedUrl,
+    scannedData,
     setScanned,
     setShowAlert,
-    setScannedUrl,
+    setScannedData,
     openScanner,
     closeScanner,
-    handleUrl,
   } = useScanner();
 
-  const handleBarCodeScanned = ({ type, data }) => {
-    if (!scanned) {
+  const router = useRouter();
+
+  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }): void => {
+    if (scanned) return;
+
+    try {
+      const parsedData = JSON.parse(data) as ReservationData;
+      const requiredFields: (keyof ReservationData)[] = ['id', 'restaurantId', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+
+      if (!requiredFields.every(field => field in parsedData)) {
+        throw new Error('Missing required reservation fields');
+      }
+
       setScanned(true);
-      setScannedUrl(data);
+      setScannedData(data);
       setShowAlert(true);
+    } catch (error) {
+      setScanned(true);
+      Alert.alert(
+        'Invalid QR Code',
+        'This QR code is not a valid reservation code.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setScanned(false);
+              closeScanner();
+            },
+          },
+        ],
+        { cancelable: false }
+      );
     }
   };
 
-  const handleNavigate = () => {
-    handleUrl(scannedUrl);
-    closeScanner();
+  const handleConfirm = async (): Promise<void> => {
+    setIsLoading(true);
+    const reservationData = JSON.parse(scannedData) as ReservationData;
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Reservation confirmed:', reservationData);
+       Alert.alert(
+      'Success', 
+      'Reservation confirmed successfully!',
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            router.push(`/restaurant?id=${reservationData.restaurantId}`);
+          }
+        }
+      ]
+    );
+    } catch (error) {
+      console.error('Error confirming reservation:', error);
+      Alert.alert('Error', 'Failed to confirm reservation. Please try again.');
+    } finally {
+      setIsLoading(false);
+      closeScanner();
+       router.push(`/restaurant?id=${reservationData.restaurantId}`);
+    }
   };
 
-  const handleRetake = () => {
+  const handleRetake = (): void => {
     setScanned(false);
     setShowAlert(false);
-    setScannedUrl('');
+    setScannedData('');
   };
 
-  const handleCancel = () => {
+  const handleCancel = (): void => {
     closeScanner();
   };
 
-  const handleManualSubmit = () => {
+  const handleManualSubmit = (): void => {
     if (manualCode.trim()) {
-      setScannedUrl(manualCode);
-      setShowAlert(true);
-      setManualCode('');
+      try {
+        const parsedData = JSON.parse(manualCode) as ReservationData;
+        const requiredFields: (keyof ReservationData)[] = ['id', 'restaurantId', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+
+        if (!requiredFields.every(field => field in parsedData)) {
+          throw new Error('Missing required reservation fields');
+        }
+
+        setScannedData(manualCode);
+        setShowAlert(true);
+        setManualCode('');
+      } catch (error) {
+        Alert.alert(
+          'Invalid Code',
+          'Please enter a valid reservation code.',
+          [{ text: 'OK' }],
+          { cancelable: false }
+        );
+      }
     } else {
-      alert('Please enter a URL');
+      Alert.alert(
+        'Empty Code',
+        'Please enter a reservation code.',
+        [{ text: 'OK' }],
+        { cancelable: false }
+      );
     }
   };
 
   if (hasPermission === false) {
     return (
-        <View style={styles.container}>
-          <Text>No access to camera</Text>
-        </View>
+      <View style={styles.container}>
+        <Text>No access to camera</Text>
+      </View>
     );
   }
 
   return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Tablet Scanner</Text>
+        {/* Keep the logo section */}
+        <View style={styles.logoContainer}>
+          <Image
+              source={require('@/assets/images/Logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+          />
         </View>
+
         <View style={styles.content}>
           {showScanner ? (
-              <NativeScanner
-                  onScan={handleBarCodeScanned}
-                  onClose={closeScanner}
-                  scanned={scanned}
-              />
+              <>
+                <Text style={styles.scannerTitle}>Scan QR Code Of Your Order</Text>
+                <NativeScanner
+                    onScan={handleBarCodeScanned}
+                    onClose={closeScanner}
+                    scanned={scanned}
+                />
+              </>
           ) : (
               <ManualEntry
                   code={manualCode}
@@ -217,52 +345,132 @@ export default function TabletScannerPage() {
               />
           )}
         </View>
+
         <CustomAlert
             visible={showAlert}
-            url={scannedUrl}
-            onNavigate={handleNavigate}
+            data={scannedData}
+            onConfirm={handleConfirm}
             onRetake={handleRetake}
             onCancel={handleCancel}
+            isLoading={isLoading}
         />
       </View>
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  logoImage: {
+    width: width * 0.6,
+    height: 120,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   scannerContainer: {
-    width: width * 0.8,
-    height: "70%",
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    width: width * 0.9,
     alignItems: 'center',
-    padding: 20,
+  },
+  scanFrameContainer: {
+    width: Math.min(width * 0.9, height * 0.5),
+    aspectRatio: 1,
+    marginBottom: 20,
   },
   cameraWrapper: {
-    width: '50%',
-    aspectRatio: 1,
+    width: '100%',
+    height: '100%',
     borderRadius: 20,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#F4804F',
+    backgroundColor: colors.dorian,
+    position: 'relative',
   },
   camera: {
     width: '100%',
     height: '100%',
   },
-  buttonContainer: {
-    width: '100%',
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  cornerTL: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderColor: colors.orange,
+    borderLeftWidth: 3,
+    borderTopWidth: 3,
+    borderTopLeftRadius: 20,
+  },
+  cornerTR: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderColor: colors.orange,
+    borderRightWidth: 3,
+    borderTopWidth: 3,
+    borderTopRightRadius: 20,
+  },
+  cornerBL: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderColor: colors.orange,
+    borderLeftWidth: 3,
+    borderBottomWidth: 3,
+    borderBottomLeftRadius: 20,
+  },
+  cornerBR: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderColor: colors.orange,
+    borderRightWidth: 3,
+    borderBottomWidth: 3,
+    borderBottomRightRadius: 20,
+  },
+  manualEntryContainer: {
+    width: width * 0.8,
     alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 180,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  input: {
+    width: '100%',
+    height: 50,
+    backgroundColor: "#b8b8b8",
+    borderColor: colors.orange,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    fontSize: 18,
+    marginBottom: 20,
   },
   button: {
-    backgroundColor: '#F4804F',
+    backgroundColor: colors.orange,
     height: 48,
     borderRadius: 8,
     paddingVertical: 12,
@@ -272,39 +480,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    height: 60,
-    backgroundColor: '#F4804F',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  manualEntryContainer: {
-    width: width * 0.8,
-    alignItems: 'center',
-  },
-  input: {
-    width: '100%',
-    height: 50,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 18,
-    marginBottom: 20,
-  },
   buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  scannerTitle: {
+    fontSize: 18,
+    color: colors.onyx,
+    textAlign: 'center',
+    marginBottom: 20,
   },
   modalOverlay: {
     flex: 1,
@@ -332,20 +517,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  alertMessage: {
-    fontSize: 16,
-    marginBottom: 10,
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  urlText: {
+  detailLabel: {
     fontSize: 16,
-    color: '#007AFF',
-    marginBottom: 20,
-    textAlign: 'center',
+    fontWeight: '600',
+    color: '#666',
+  },
+  detailText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  statusText: {
+    color: colors.evergreen,
+    fontWeight: '600',
   },
   alertButtonContainer: {
     width: '100%',
     flexDirection: 'column',
     gap: 10,
+    marginTop: 20,
   },
   alertButton: {
     width: '100%',
@@ -355,10 +553,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   navigateButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.evergreen,
   },
   retakeButton: {
-    backgroundColor: '#F4804F',
+    backgroundColor: colors.orange,
   },
   cancelButton: {
     backgroundColor: '#FF3B30',
@@ -369,3 +567,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+

@@ -5,11 +5,11 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { SideMenu } from '../components/SideMenu/side-menu';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
 import 'react-native-reanimated';
 import { LocationNotificationService } from '@/components/LocationNotificationService';
+import { SideMenu } from '@repo/ui/src/side-menu';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -147,4 +147,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-

@@ -1,32 +1,9 @@
-import React, { useEffect} from 'react';
+import React from 'react';
 import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useFoodCategoryStore } from '@repo/store/src/foodCaregoryStore';
-import { useRestaurantStore } from '@repo/store/src/restaurantStore';
-import { useUserStore } from '@repo/store/src/userStore';
-import Categories from "@repo/ui/src/categories"
+import TabletScannerPage from '@/components/TabletScannerPage';
 
 export default function Index() {
-  const categories = useFoodCategoryStore((state) => state.categories);
-  const restaurants = useRestaurantStore((state) => state.restaurants);
-  const { user, setUser } = useUserStore();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!user) {
-      setUser();
-    }
-  }, [user, setUser]);
-
-  const handleRestaurantPress = (restaurantId: string) => {
-    router.push({
-      pathname: "/restaurant/[id]",
-      params: { id: restaurantId }
-    });
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView 
@@ -34,53 +11,7 @@ export default function Index() {
         showsVerticalScrollIndicator={Platform.OS === 'web'}
       >
         <View style={styles.content}>
-          {/* Greeting */}
-          <Text style={styles.greeting}>Hey {user?.name}, <Text style={styles.greetingTime}>Good Afternoon!</Text></Text>
-
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search dishes, restaurants"
-              placeholderTextColor="#666"
-            />
-          </View>
-
-          {/* Categories Section */}
-          <Categories></Categories>
-
-          {/* Restaurants Section */}
-          <View style={styles.categoriesHeader}>
-            <Text style={styles.sectionTitle}>Open Restaurants</Text>
-            <TouchableOpacity style={styles.seeAllContainer}>
-              <Text style={styles.seeAll}>See All</Text>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.restaurantsGrid}>
-            {restaurants.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.restaurantCard}
-                onPress={() => handleRestaurantPress(item.id)}
-              >
-                <Image
-                  source={{ uri: item.images[0] }}
-                  style={styles.restaurantImage}
-                />
-                <Text style={styles.restaurantName}>{item.name}</Text>
-                <Text style={styles.restaurantType}>{item.shortDescription}</Text>
-                <View style={styles.ratingContainer}>
-                  <MaterialIcons name="star" size={24} color="#FF8C00" />
-                  <Text style={styles.rating}>{item.rating}</Text>
-                  <MaterialIcons name="schedule" size={24} color="#FF8C00" style={styles.time} />
-                  <Text style={styles.rating}>{item.time}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <TabletScannerPage></TabletScannerPage>
         </View>
       </ScrollView>
     </SafeAreaView>
