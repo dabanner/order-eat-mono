@@ -13,7 +13,7 @@ interface ItemCardProps {
 export const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange, onPaymentStatusChange }) => (
   <View style={[styles.itemContainer, item.paid && styles.paidItemContainer]}>
     <Image
-      source={{ uri: item.images[0] }}
+      source={item.images[0]}
       style={styles.itemImage}
     />
     <View style={styles.itemDetails}>
