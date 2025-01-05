@@ -48,7 +48,7 @@ export default function RootLayout() {
     <ThemeProvider value={DefaultTheme}>
       <LocationNotificationService />
       <SafeAreaView style={styles.container} edges={['top']}>
-        <TopBar isStandard={true} isTablet={false} visible={hasTopBar} onActionButton={() => router.push('/reservation')}/>
+        <TopBar isStandard={true} isTablet={false} visible={hasTopBar} onActionButton={() => router.push('/reservation')} onHome={() => router.push('/')} />
         <View style={styles.content}>
           <Slot />
         </View>

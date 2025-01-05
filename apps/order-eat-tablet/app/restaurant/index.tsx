@@ -52,7 +52,7 @@ export default function RestaurantScreen() {
                 style={styles.container}
                 showsVerticalScrollIndicator={Platform.OS === 'web'}
             >
-                <TopBar isStandard={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode} onActionButton={() => router.push('/command')}/>
+                <TopBar visible={true} isStandard={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode} onActionButton={() => router.push('/command')}/>
                 <View style={styles.content}>
                     <Categories isKidsMode={isKidsMode}/>
                     <MenuGrid menuItems={restaurant?.menuItems || []} isKidsMode={isKidsMode} restaurant={restaurant}/>
