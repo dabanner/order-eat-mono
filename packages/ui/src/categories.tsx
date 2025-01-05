@@ -94,7 +94,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#ff7622',
-    textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
   },
   seeAllContainer: {
     flexDirection: 'row',

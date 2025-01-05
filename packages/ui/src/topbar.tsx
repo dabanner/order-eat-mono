@@ -52,12 +52,6 @@ export default function TopBar({
                             resizeMode="contain"
                         />
                     </TouchableOpacity>
-                    {isPhone ? (
-
-                        <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
-                            <MaterialIcons name="menu" size={24} color="#000" />
-                        </TouchableOpacity>
-                    ) : null }
                     { !isKidsMode ? (
                         <TouchableOpacity
                             style={styles.cartButton}
@@ -70,6 +64,12 @@ export default function TopBar({
                             </View>
                         )}
                     </TouchableOpacity>
+                    ) : null }
+                    {isPhone ? (
+
+                        <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
+                            <MaterialIcons name="menu" size={24} color="#000" />
+                        </TouchableOpacity>
                     ) : null }
                     { isTablet ? (
                         <View style={styles.rightSection}>
