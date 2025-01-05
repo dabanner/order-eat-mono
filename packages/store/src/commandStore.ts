@@ -101,7 +101,7 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 foodCategoryId: "f1",
                 mealTypeId: "m1",
                 preparationTime: 20,
-                quantity: 1, // Changed to 1 as 2 are paid
+                quantity: 1, 
                 sizes: ["10\"", "14\"", "16\""],
                 keyIngredients: [
                     { name: "Pepperoni", icon: "drumstick-bite", isAllergy: false },

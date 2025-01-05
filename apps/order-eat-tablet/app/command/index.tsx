@@ -8,11 +8,15 @@ import {
   Image,
   ListRenderItem,
   Modal,
+  SafeAreaView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MenuItem } from '@repo/store/src/restaurantStore';
 import { useCommandStore, WaitstaffRequest } from '@repo/store/src/commandStore';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { QuantityControls } from '@/components/QuantityControls';
+import { ItemCard } from '@/components/ItemCard';
+import { WaitstaffModal } from '@/components/WaitstaffModal';
 
 type OrderMenuItem = MenuItem & {
   quantity: number;
@@ -32,126 +36,6 @@ interface ItemCardProps {
   isPaid?: boolean;
 }
 
-const QuantityControls: React.FC<QuantityControlsProps> = ({ itemId, quantity, onQuantityChange, isPaid }) => (
-  <View style={styles.quantityControls}>
-    {(!isPaid&&<TouchableOpacity
-      style={styles.quantityButton}
-      onPress={() => onQuantityChange(itemId, quantity, -1)}
-    >
-      <Text style={styles.quantityButtonText}>-</Text>
-    </TouchableOpacity>
-    )}
-
-    <Text style={styles.quantityText}>{quantity}</Text>
-    
-    {(!isPaid&&<TouchableOpacity
-      style={styles.quantityButton}
-      onPress={() => onQuantityChange(itemId, quantity, 1)}
-    >
-      <Text style={styles.quantityButtonText}>+</Text>
-    </TouchableOpacity>
-    )}
-  </View>
-);
-
-const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange, onPaymentStatusChange, isPaid }) => (
-  <View style={[styles.itemContainer, isPaid && styles.paidItemContainer]}>
-    <Image
-      source={{ uri: item.images[0] }}
-      style={styles.itemImage}
-    />
-    <View style={styles.itemDetails}>
-      <Text style={styles.itemName}>{item.name}</Text>
-      <Text style={styles.itemDescription} numberOfLines={2}>
-        {item.description}
-      </Text>
-      <View style={styles.priceQuantityContainer}>
-        <Text style={styles.itemPrice}>${(item.price * item.quantity).toFixed(2)}</Text>
-        {!isPaid && (
-          <QuantityControls
-            itemId={item.id}
-            quantity={item.quantity}
-            onQuantityChange={onQuantityChange}
-            isPaid={isPaid}
-          />
-        )}
-        {isPaid && onPaymentStatusChange && (
-          <TouchableOpacity
-            style={[styles.paymentStatusButton, isPaid && styles.paidButton]}
-            onPress={onPaymentStatusChange}
-          >
-            <MaterialIcons 
-              name="check-circle" 
-              size={24} 
-              color="#4CAF50" 
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
-  </View>
-);
-
-
-const WaitstaffModal: React.FC<{
-  visible: boolean;
-  onClose: () => void;
-  onAction: (type: WaitstaffRequest['type']) => void;
-}> = ({ visible, onClose, onAction }) => (
-  <Modal
-    visible={visible}
-    transparent={true}
-    animationType="fade"
-    onRequestClose={onClose}
-  >
-    <View style={styles.modalOverlay}>
-      <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>How can we help?</Text>
-        <View style={styles.modalButtons}>
-          <TouchableOpacity
-            style={[styles.modalButton, styles.checkoutButton]}
-            onPress={() => {
-              onAction('checkout');
-              onClose();
-            }}
-          >
-            <MaterialIcons name="payment" size={24} color="#fff" />
-            <Text style={styles.modalButtonText}>Checkout</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.modalButton, styles.waterButton]}
-            onPress={() => {
-              onAction('water');
-              onClose();
-            }}
-          >
-            <MaterialCommunityIcons name="water" size={24} color="#fff" />
-            <Text style={styles.modalButtonText}>Add Water</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.modalButton, styles.otherButton]}
-            onPress={() => {
-              onAction('other');
-              onClose();
-            }}
-          >
-            <MaterialIcons name="more-horiz" size={24} color="#fff" />
-            <Text style={styles.modalButtonText}>Others</Text>
-          </TouchableOpacity>
-        </View>
-        
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={onClose}
-        >
-          <Text style={styles.closeButtonText}>Close</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </Modal>
-);
 
 export default function CommandItemsScreen() {
   const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false);
@@ -207,27 +91,33 @@ export default function CommandItemsScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={currentCommand.menuItems}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={() => (
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Unpaid Items</Text>
-            <Text style={styles.totalAmount}>
-              Total: ${currentCommand.totalAmount.toFixed(2)}
-            </Text>
-          </View>
-        )}
-        ListEmptyComponent={() => (
-          <Text style={styles.emptyText}>No unpaid items</Text>
-        )}
-      />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Your Order</Text>
+        <TouchableOpacity
+          style={styles.callWaitstaffButton}
+          onPress={() => setWaitstaffModalVisible(true)}
+        >
+          <Text style={styles.callWaitstaffButtonText}>Call Waitstaff</Text>
+        </TouchableOpacity>
+      </View>
+      <View>
+        {currentCommand.menuItems.map((item) => (
+          <ItemCard
+            key={item.id}
+            item={item}
+            onQuantityChange={handleQuantityChange}
+            onPaymentStatusChange={() => moveItemToPaid(item.id)}
+            isPaid={false}
+          />
+        ))}
+      </View>
 
       {currentCommand.paidItems && currentCommand.paidItems.length > 0 && (
         <View style={styles.paidItemsContainer}>
-          <Text style={styles.paidItemsTitle}>Paid Items</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Paid Items</Text>
+          </View>
           <FlatList
             data={currentCommand.paidItems}
             renderItem={renderPaidItem}
@@ -236,27 +126,21 @@ export default function CommandItemsScreen() {
         </View>
       )}
 
-<View style={styles.footer}>
-  <TouchableOpacity
-    style={[styles.actionButton, styles.defaultButton]}
-    onPress={handleSubmitOrder}
-  >
-    <Text style={styles.actionButtonText}>Submit Order</Text>
-  </TouchableOpacity>
-  <TouchableOpacity
-    style={[styles.actionButton, styles.outlineButton]}
-    onPress={() => setWaitstaffModalVisible(true)}
-  >
-    <Text style={styles.actionButtonText}>Call Waitstaff</Text>
-  </TouchableOpacity>
-</View>
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.defaultButton]}
+          onPress={handleSubmitOrder}
+        >
+          <Text style={styles.actionButtonText}>Submit Order</Text>
+        </TouchableOpacity>
+      </View>
 
       <WaitstaffModal
         visible={isWaitstaffModalVisible}
         onClose={() => setWaitstaffModalVisible(false)}
         onAction={addWaitstaffRequest}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -265,12 +149,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
@@ -279,12 +161,32 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#333',
+    flex: 1,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
   },
   totalAmount: {
     fontSize: 18,
     color: '#FF9800',
     fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   itemContainer: {
     flexDirection: 'row',
@@ -292,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginVertical: 4,
     marginHorizontal: 8,
-    borderRadius: 8,
+    borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -301,6 +203,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  paidItemContainer: {
+    backgroundColor: '#f9f9f9',
+    borderColor: '#4CAF50',
+    borderWidth: 1,
   },
   itemImage: {
     width: 80,
@@ -316,6 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    color: '#333',
   },
   itemDescription: {
     fontSize: 14,
@@ -332,35 +240,46 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FF9800',
   },
-  actionContainer: {
+  quantityActionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 15,
+    paddingHorizontal: 8,
+  },
+  paidQuantityControls: {
+    backgroundColor: 'transparent',
+    justifyContent: 'flex-end',
   },
   quantityButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: '#FF9800',
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   quantityText: {
     marginHorizontal: 12,
     fontSize: 16,
     fontWeight: '600',
+    color: '#333',
+  },
+  paidQuantityText: {
+    color: '#4CAF50',
   },
   paymentStatusButton: {
     padding: 4,
+    marginLeft: 8,
   },
   paidButton: {
     opacity: 0.7,
@@ -368,14 +287,6 @@ const styles = StyleSheet.create({
   paidItemsContainer: {
     marginTop: 16,
     backgroundColor: '#fff',
-    paddingVertical: 16,
-  },
-  paidItemsTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginLeft: 16,
-    marginBottom: 8,
-    color: '#4CAF50',
   },
   footer: {
     flexDirection: 'row',
@@ -408,6 +319,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
     textAlign: 'center',
+    color: '#333',
   },
   modalButtons: {
     gap: 16,
@@ -467,10 +379,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  paidItemContainer: {
-    backgroundColor: '#f9f9f9',
-    borderColor: '#4CAF50',
-    borderWidth: 1,
+  outlineButtonText: {
+    color: '#FF9800',
+  },
+  callWaitstaffButton: {
+    backgroundColor: '#FF9800',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  callWaitstaffButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
