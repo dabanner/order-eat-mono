@@ -39,7 +39,7 @@ export default function RootLayout() {
     setIsSideMenuOpen(true);
   };
 
-  const hasTopBar = !pathname.includes('/login') && !pathname.includes('/register');
+  const hasTopBar = !pathname.includes('/login') && !pathname.includes('/signup');
 
   const isChildRoute = pathname.split('/').length > 2;
   const totalCommands = pendingCommands.length + confirmedCommands.length;
