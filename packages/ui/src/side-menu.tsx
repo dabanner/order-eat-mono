@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
       },
       web: {
         boxShadow: '2px 0px 8px rgba(0, 0, 0, 0.1)',
-        '@media (min-width: 768px)': {
+        '@media (minWidth: 768px)': {
           width: '30%',
           maxWidth: 400,
         },

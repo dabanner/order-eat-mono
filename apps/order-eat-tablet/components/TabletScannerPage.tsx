@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Dimensions, Modal, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Dimensions, Modal, Alert, ScrollView } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import { ReservationData, CustomAlertProps, NativeScannerProps, ManualEntryProps, ScannerHook, StylesType } from './types';
 import { useRouter } from 'expo-router';
+import { useCommandStore } from '@repo/store/src/commandStore';
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,14 +17,17 @@ const colors: Record<string, string> = {
 };
 
 const CustomAlert: React.FC<CustomAlertProps> = ({ visible, data, onConfirm, onRetake, onCancel, isLoading }) => {
-  let reservationData: ReservationData | null = null;
+  let reservationData: any = null;
   try {
-    reservationData = JSON.parse(data || '{}') as ReservationData;
+    reservationData = JSON.parse(data || '{}');
   } catch (error) {
     return null;
   }
 
   if (!data) return null;
+
+  const timeDisplay = reservationData.reservationDetails?.time || reservationData.reservationTime || '13:30';
+  const dateDisplay = reservationData.reservationDetails?.date || '01/05/2025';
 
   return (
       <Modal
@@ -32,71 +36,103 @@ const CustomAlert: React.FC<CustomAlertProps> = ({ visible, data, onConfirm, onR
           animationType="fade"
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.alertBox}>
-            <Text style={styles.alertTitle}>Reservation Details</Text>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.alertBox}>
+              <Text style={styles.alertTitle}>Reservation Details</Text>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>ID:</Text>
-              <Text style={styles.detailText}>{reservationData.id}</Text>
-            </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>ID:</Text>
+                <Text style={styles.detailText}>{reservationData.id}</Text>
+              </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Time:</Text>
-              <Text style={styles.detailText}>
-                {reservationData.reservationTime}
-              </Text>
-            </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Date:</Text>
+                <Text style={styles.detailText}>{dateDisplay}</Text>
+              </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Status:</Text>
-              <Text style={[styles.detailText, styles.statusText]}>
-                {reservationData.status}
-              </Text>
-            </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Time:</Text>
+                <Text style={styles.detailText}>{timeDisplay}</Text>
+              </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Type:</Text>
-              <Text style={styles.detailText}>{reservationData.type}</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Items:</Text>
-              <Text style={styles.detailText}>{reservationData.itemCount}</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Amount:</Text>
-              <Text style={styles.detailText}>
-                ${reservationData.totalAmount.toFixed(2)}
-              </Text>
-            </View>
-
-            <View style={styles.alertButtonContainer}>
-              <TouchableOpacity
-                  style={[styles.alertButton, styles.navigateButton]}
-                  onPress={onConfirm}
-                  disabled={isLoading}
-              >
-                <Text style={styles.alertButtonText}>
-                  {isLoading ? 'Processing...' : 'Confirm'}
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Status:</Text>
+                <Text style={[styles.detailText, styles.statusText]}>
+                  {reservationData.status}
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                  style={[styles.alertButton, styles.retakeButton]}
-                  onPress={onRetake}
-                  disabled={isLoading}
-              >
-                <Text style={styles.alertButtonText}>Scan Again</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                  style={[styles.alertButton, styles.cancelButton]}
-                  onPress={onCancel}
-                  disabled={isLoading}
-              >
-                <Text style={styles.alertButtonText}>Cancel</Text>
-              </TouchableOpacity>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Type:</Text>
+                <Text style={styles.detailText}>
+                  {reservationData.type === 'dinein' ? 'Dine In' : 'Take Away'}
+                </Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Persons:</Text>
+                <Text style={styles.detailText}>
+                  {reservationData.reservationDetails?.numberOfPersons || 4}
+                </Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Items:</Text>
+                <Text style={styles.detailText}>
+                  {reservationData.menuItems?.length || reservationData.itemCount || 0} items
+                </Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Amount:</Text>
+                <Text style={styles.detailText}>
+                  ${reservationData.totalAmount.toFixed(2)}
+                </Text>
+              </View>
+
+              {reservationData.menuItems && reservationData.menuItems.length > 0 && (
+                  <View style={styles.menuItemsContainer}>
+                    <Text style={styles.menuItemsTitle}>Order Details:</Text>
+                    {reservationData.menuItems.map((item: any, index: number) => (
+                        <View key={index} style={styles.menuItem}>
+                          <Text style={styles.menuItemName}>
+                            {item.name} x{item.quantity}
+                          </Text>
+                          <Text style={styles.menuItemPrice}>
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </Text>
+                        </View>
+                    ))}
+                  </View>
+              )}
+
+              <View style={styles.alertButtonContainer}>
+                <TouchableOpacity
+                    style={[styles.alertButton, styles.navigateButton]}
+                    onPress={onConfirm}
+                    disabled={isLoading}
+                >
+                  <Text style={styles.alertButtonText}>
+                    {isLoading ? 'Processing...' : 'Confirm'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.alertButton, styles.retakeButton]}
+                    onPress={onRetake}
+                    disabled={isLoading}
+                >
+                  <Text style={styles.alertButtonText}>Scan Again</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.alertButton, styles.cancelButton]}
+                    onPress={onCancel}
+                    disabled={isLoading}
+                >
+                  <Text style={styles.alertButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
   );
@@ -204,65 +240,80 @@ export default function TabletScannerPage(): JSX.Element {
 
   const router = useRouter();
 
-  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }): void => {
+  const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }): Promise<void> => {
     if (scanned) return;
 
     try {
-      const parsedData = JSON.parse(data) as ReservationData;
-      const requiredFields: (keyof ReservationData)[] = ['id', 'restaurantId', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+      const parsedData = JSON.parse(data);
+      console.log('Scanned QR data:', parsedData);
+
+      // First validate the essential data from QR code
+      const requiredFields = ['id', 'userId', 'restaurantId', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
 
       if (!requiredFields.every(field => field in parsedData)) {
         throw new Error('Missing required reservation fields');
       }
 
+      // Get full details from the mock API
+      const fullReservation = await useCommandStore.getState().getCommandById(parsedData.id);
+
+      if (fullReservation) {
+        console.log('Found full reservation:', fullReservation);
+        setScannedData(JSON.stringify(fullReservation));
+      } else {
+        console.log('Using essential data from QR:', parsedData);
+        setScannedData(data);
+      }
+
       setScanned(true);
-      setScannedData(data);
       setShowAlert(true);
+
     } catch (error) {
+      console.error('Error processing QR code:', error);
       setScanned(true);
       Alert.alert(
-        'Invalid QR Code',
-        'This QR code is not a valid reservation code.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              setScanned(false);
-              closeScanner();
+          'Invalid QR Code',
+          'This QR code is not a valid reservation code.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setScanned(false);
+                closeScanner();
+              },
             },
-          },
-        ],
-        { cancelable: false }
+          ],
+          { cancelable: false }
       );
     }
   };
 
   const handleConfirm = async (): Promise<void> => {
     setIsLoading(true);
-    const reservationData = JSON.parse(scannedData) as ReservationData;
+    const reservationData = JSON.parse(scannedData);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       console.log('Reservation confirmed:', reservationData);
-       Alert.alert(
-      'Success', 
-      'Reservation confirmed successfully!',
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            router.push(`/restaurant?id=${reservationData.restaurantId}`);
-          }
-        }
-      ]
-    );
+      Alert.alert(
+          'Success',
+          'Reservation confirmed successfully!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                router.push(`/restaurant?id=${reservationData.restaurantId}`);
+              }
+            }
+          ]
+      );
     } catch (error) {
       console.error('Error confirming reservation:', error);
       Alert.alert('Error', 'Failed to confirm reservation. Please try again.');
     } finally {
       setIsLoading(false);
       closeScanner();
-       router.push(`/restaurant?id=${reservationData.restaurantId}`);
+      router.push(`/restaurant?id=${reservationData.restaurantId}`);
     }
   };
 
@@ -291,33 +342,32 @@ export default function TabletScannerPage(): JSX.Element {
         setManualCode('');
       } catch (error) {
         Alert.alert(
-          'Invalid Code',
-          'Please enter a valid reservation code.',
-          [{ text: 'OK' }],
-          { cancelable: false }
+            'Invalid Code',
+            'Please enter a valid reservation code.',
+            [{ text: 'OK' }],
+            { cancelable: false }
         );
       }
     } else {
       Alert.alert(
-        'Empty Code',
-        'Please enter a reservation code.',
-        [{ text: 'OK' }],
-        { cancelable: false }
+          'Empty Code',
+          'Please enter a reservation code.',
+          [{ text: 'OK' }],
+          { cancelable: false }
       );
     }
   };
 
   if (hasPermission === false) {
     return (
-      <View style={styles.container}>
-        <Text>No access to camera</Text>
-      </View>
+        <View style={styles.container}>
+          <Text>No access to camera</Text>
+        </View>
     );
   }
 
   return (
       <View style={styles.container}>
-        {/* Keep the logo section */}
         <View style={styles.logoContainer}>
           <Image
               source={require('@/assets/images/logo.png')}
@@ -396,7 +446,7 @@ const styles = StyleSheet.create({
   },
   camera: {
     width: '100%',
-    height: '100%',
+    height : '100%',
   },
   cornerTL: {
     position: 'absolute',
@@ -566,6 +616,37 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  menuItemsContainer: {
+    width: '100%',
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 16,
+  },
+  menuItemsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  menuItemName: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+  menuItemPrice: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.orange,
+  },
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+    },
 });
-
-

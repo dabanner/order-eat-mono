@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { View, Text, StyleSheet, Platform, Dimensions } from 'react-native';
 import { Restaurant } from '@repo/store/src/restaurantStore';
 import { Command } from '@repo/store/src/commandStore';
 import { RestaurantHeader } from './RestaurantHeader';
 import { MaterialIcons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
+import { useCommandStore } from '@repo/store/src/commandStore';
 
 interface ConfirmationProps {
   restaurant: Restaurant;
@@ -13,24 +14,34 @@ interface ConfirmationProps {
 
 export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command }) => {
   console.log('Reservation Command:', command);
+  const confirmCommand = useCommandStore(state => state.confirmCommand);
 
-    const qrCodeSize = Math.min(Dimensions.get('window').width * 0.3, 250);
+  useEffect(() => {
+    if (command.id) {
+      console.log('Storing command in confirmation:', command);
+      confirmCommand(command.id);
+
+      // Verify the command was stored
+      const storedCommand = useCommandStore.getState().getCommandById(command.id);
+      console.log('Verified stored command:', storedCommand);
+    }
+  }, [command.id]);
+
+  const qrCodeSize = Math.min(Dimensions.get('window').width * 0.3, 250);
 
 
-    const essentialData = {
-      id: command.id,
-      userId: command.userId,
-      restaurantId: command.restaurant.id, // Assuming restaurant has an id
-      reservationTime: command.reservationDetails.time, // Assuming this exists
-      totalAmount: command.totalAmount,
-      status: command.status,
-      type: command.type,
-      itemCount: command.menuItems.length,
-    };
-    const finalData =  JSON.stringify(essentialData);
-
-
-  console.log(finalData)
+  const essentialData = {
+    id: command.id,
+    userId: command.userId,
+    restaurantId: command.restaurant.id, // Assuming restaurant has an id
+    reservationTime: command.reservationDetails.time, // Assuming this exists
+    totalAmount: command.totalAmount,
+    status: command.status,
+    type: command.type,
+    itemCount: command.menuItems.length,
+  };
+  const finalData = JSON.stringify(essentialData);
+  console.log('Generated QR data:', finalData);
 
   return (
     <View style={styles.container}>
