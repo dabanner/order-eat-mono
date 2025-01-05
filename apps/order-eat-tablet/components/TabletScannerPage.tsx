@@ -320,7 +320,7 @@ export default function TabletScannerPage(): JSX.Element {
         {/* Keep the logo section */}
         <View style={styles.logoContainer}>
           <Image
-              source={require('@/assets/images/Logo.png')}
+              source={require('@/assets/images/logo.png')}
               style={styles.logoImage}
               resizeMode="contain"
           />
