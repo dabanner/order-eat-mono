@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   itemPrice: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2196F3',
+    color: '#FF9800',
   },
   quantityControls: {
     flexDirection: 'row',
