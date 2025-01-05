@@ -274,6 +274,7 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
 
     getCommandById(commandId) {
         console.log('Searching for command:', commandId);
+        set({ currentCommand: MOCK_RESERVATIONS.mock_reservation_1 });
         return MOCK_RESERVATIONS.mock_reservation_1;
     },
 

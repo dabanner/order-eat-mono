@@ -27,7 +27,7 @@ export default function TopBar({
     isTablet,
     isKidsMode,
     onKidsModeToggle,
-    visible
+    visible = true,
 }: TopBarProps) {
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
     const { currentCommand } = useCommandStore();
