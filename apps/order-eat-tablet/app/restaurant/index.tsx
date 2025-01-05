@@ -1,20 +1,18 @@
 import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, Platform, StyleSheet } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { useCommandStore, Command } from '@repo/store/src/commandStore';
-import TopBar from '@repo/ui/src/topbar';
 import Categories from '@repo/ui/src/categories';
 import MenuGrid from '@/components/MenuGrid';
+import { useThemeStore } from '@/components/theme';
 
 export default function RestaurantScreen() {
+  const kidMode = useThemeStore((state) => state.kidMode);
   const { id } = useLocalSearchParams();
   const { restaurants } = useRestaurantStore();
   const { currentCommand, setCurrentCommand, addCommand } = useCommandStore();
-  const [isKidsMode, setIsKidsMode] = React.useState(false);
-
-  const router = useRouter();
-
+  
   // Find the restaurant with the given id
   const restaurant = restaurants.find(restaurant => restaurant.id === id) || restaurants[0];
 
@@ -42,38 +40,47 @@ export default function RestaurantScreen() {
     }
   }, [currentCommand, restaurant, addCommand, setCurrentCommand]);
 
+  React.useEffect(() => {
+    console.log('Kids mode changed:', kidMode);
+  }, [kidMode]);
+
   if (!restaurant) {
     return <Text>Restaurant not found</Text>;
   }
 
   return (
-            <SafeAreaView style={styles.safeArea}>
-            <ScrollView
-                style={styles.container}
-                showsVerticalScrollIndicator={Platform.OS === 'web'}
-            >
-                <TopBar isStandard={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode} onActionButton={() => router.push('/command')}/>
-                <View style={styles.content}>
-                    <Categories isKidsMode={isKidsMode}/>
-                    <MenuGrid menuItems={restaurant?.menuItems || []} isKidsMode={isKidsMode} restaurant={restaurant}/>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={Platform.OS === 'web'}
+      >
+        <View style={styles.content}>
+          <Categories isKidsMode={kidMode} />
+          <MenuGrid 
+            menuItems={restaurant?.menuItems || []} 
+            isKidsMode={kidMode} 
+            restaurant={restaurant}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    container: {
-        flex: 1,
-    },
-    content: {
-        padding: 16,
-        paddingTop: 0,
-        maxWidth: '100%',
-        width: '100%',
-        marginHorizontal: 'auto',
-    },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+    paddingTop: 0,
+    maxWidth: '100%',
+    width: '100%',
+    marginHorizontal: 'auto',
+  },
 });
+

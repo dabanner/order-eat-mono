@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { Restaurant, MenuItem } from './restaurantStore.js';
 
+export interface WaitstaffRequest {
+  type: 'checkout' | 'water' | 'other';
+  status: 'pending' | 'completed';
+  timestamp: string;
+}
+
 interface DetailedNutritionInfo {
     fiber: number;
     servingSize: string;
@@ -43,14 +49,15 @@ export interface ReservationDetails {
 }
 
 export interface Command {
-    id?: string;
-    restaurant: Restaurant;
-    userId: string;
-    reservationDetails: ReservationDetails;
-    menuItems: (MenuItem & { quantity: number })[];
-    totalAmount: number;
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-    type: 'takeaway' | 'dinein';
+  id?: string;
+  restaurant: Restaurant;
+  userId: string;
+  reservationDetails: ReservationDetails;
+  menuItems: (MenuItem & { quantity: number; paid: boolean })[];
+  totalAmount: number;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  type: 'takeaway' | 'dinein';
+  waitstaffRequests: WaitstaffRequest[];
 }
 
 // Mock reservation data
@@ -93,6 +100,7 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 mealTypeId: "m1",
                 preparationTime: 20,
                 quantity: 3,
+                paid: false,
                 sizes: ["10\"", "14\"", "16\""],
                 keyIngredients: [
                     { name: "Pepperoni", icon: "drumstick-bite", isAllergy: false },
@@ -149,6 +157,7 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 mealTypeId: "m1",
                 preparationTime: 20,
                 quantity: 1,
+                paid: true,
                 selectedSize: "14\"",
                 sizes: ["10\"", "14\"", "16\""],
                 keyIngredients: [
@@ -195,6 +204,7 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 }
             }
         ],
+        waitstaffRequests: [],
         reservationDetails: {
             date: "01/05/2025",
             time: "13:30",
@@ -218,6 +228,9 @@ interface CommandStore {
     addCommand: (command: Omit<Command, 'id'>) => string;
     confirmCommand: (commandId: string) => void;
     getCommandById: (commandId: string) => Command | undefined;
+    toggleItemPaidStatus: (itemId: string) => void;
+    addWaitstaffRequest: (type: WaitstaffRequest['type']) => void;
+    completeWaitstaffRequest: (timestamp: string) => void;
 }
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -241,68 +254,31 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
             ),
         })),
 
-    addCommand: (command) => {
-        const id = generateId();
-        const newCommand = { ...command, id };
-
-        set((state) => ({
-            pendingCommands: [...state.pendingCommands, newCommand],
-            currentCommand: newCommand,
-        }));
-
-        return id;
-    },
-
-    confirmCommand: (commandId) =>
-        set((state) => {
-            const commandToConfirm = state.pendingCommands.find(cmd => cmd.id === commandId) ||
-                state.currentCommand;
-
-            if (!commandToConfirm) return state;
-
-            const confirmedCommand = {
-                ...commandToConfirm,
-                status: 'confirmed' as const
-            };
-
-            return {
-                pendingCommands: state.pendingCommands.filter(cmd => cmd.id !== commandId),
-                currentCommand: null,
-                confirmedCommands: [...state.confirmedCommands, confirmedCommand]
-            };
-        }),
-
-    getCommandById(commandId) {
-        console.log('Searching for command:', commandId);
-        set({ currentCommand: MOCK_RESERVATIONS.mock_reservation_1 });
-        return MOCK_RESERVATIONS.mock_reservation_1;
-    },
-
     addMenuItem: (item) =>
-        set((state) => {
-            if (!state.currentCommand) return state;
-            const existingItem = state.currentCommand.menuItems.find((i) => i.id === item.id);
-            let updatedMenuItems;
-            if (existingItem) {
-                updatedMenuItems = state.currentCommand.menuItems.map((i) =>
-                    i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-                );
-            } else {
-                updatedMenuItems = [...state.currentCommand.menuItems, { ...item, quantity: 1 }];
-            }
-            const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const updatedCommand = {
-                ...state.currentCommand,
-                menuItems: updatedMenuItems,
-                totalAmount,
-            };
-            return {
-                currentCommand: updatedCommand,
-                pendingCommands: state.pendingCommands.map((command) =>
-                    command.id === updatedCommand.id ? updatedCommand : command
-                ),
-            };
-        }),
+  set((state) => {
+    if (!state.currentCommand) return state;
+    const existingItem = state.currentCommand.menuItems.find((i) => i.id === item.id);
+    let updatedMenuItems;
+    if (existingItem) {
+      updatedMenuItems = state.currentCommand.menuItems.map((i) =>
+        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+      );
+    } else {
+      updatedMenuItems = [...state.currentCommand.menuItems, { ...item, quantity: 1, paid: false }];
+    }
+    const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const updatedCommand = {
+      ...state.currentCommand,
+      menuItems: updatedMenuItems,
+      totalAmount,
+    };
+    return {
+      currentCommand: updatedCommand,
+      pendingCommands: state.pendingCommands.map((command) =>
+        command.id === updatedCommand.id ? updatedCommand : command
+      ),
+    };
+  }),
 
     removeMenuItem: (itemId) =>
         set((state) => {
@@ -343,4 +319,106 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
         }),
 
     clearCommand: () => set({ currentCommand: null }),
+
+    addCommand: (command) => {
+        const id = generateId();
+        const newCommand = { ...command, id };
+
+        set((state) => ({
+            pendingCommands: [...state.pendingCommands, newCommand],
+            currentCommand: newCommand,
+        }));
+
+        return id;
+    },
+
+    confirmCommand: (commandId) =>
+        set((state) => {
+            const commandToConfirm = state.pendingCommands.find(cmd => cmd.id === commandId) ||
+                state.currentCommand;
+
+            if (!commandToConfirm) return state;
+
+            const confirmedCommand = {
+                ...commandToConfirm,
+                status: 'confirmed' as const
+            };
+
+            return {
+                pendingCommands: state.pendingCommands.filter(cmd => cmd.id !== commandId),
+                currentCommand: null,
+                confirmedCommands: [...state.confirmedCommands, confirmedCommand]
+            };
+        }),
+
+    getCommandById(commandId) {
+        console.log('Searching for command:', commandId);
+          set({ currentCommand: MOCK_RESERVATIONS.mock_reservation_1 });
+          return MOCK_RESERVATIONS.mock_reservation_1;
+    },
+    toggleItemPaidStatus: (itemId: string) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+      const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
+        item.id === itemId ? { ...item, paid: !item.paid } : item
+      );
+      const updatedCommand = {
+        ...state.currentCommand,
+        menuItems: updatedMenuItems,
+      };
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
+
+    addWaitstaffRequest: (type: WaitstaffRequest['type']) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+
+    const newRequest: WaitstaffRequest = {
+      type,
+      status: 'pending' as 'pending',
+      timestamp: new Date().toISOString(),
+    };
+
+      const updatedCommand = {
+        ...state.currentCommand,
+        waitstaffRequests: [
+          ...(state.currentCommand.waitstaffRequests || []),
+          newRequest,
+        ],
+      };
+
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
+
+  completeWaitstaffRequest: (timestamp: string) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+
+    const updatedCommand = {
+      ...state.currentCommand,
+      waitstaffRequests: state.currentCommand.waitstaffRequests?.map((request) =>
+        request.timestamp === timestamp
+          ? { ...request, status: 'completed' as 'completed' }
+          : request
+      ) || [],
+    };
+
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
 }));
+

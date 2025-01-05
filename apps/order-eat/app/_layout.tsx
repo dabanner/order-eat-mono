@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, Platform, Image } from 'react-native';
 import { Slot, useRouter, usePathname } from 'expo-router';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -9,7 +8,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
 import 'react-native-reanimated';
 import { LocationNotificationService } from '@/components/LocationNotificationService';
-import { SideMenu } from '@repo/ui/src/side-menu';
 import TopBar from '@repo/ui/src/topbar';
 
 SplashScreen.preventAutoHideAsync();
@@ -18,7 +16,6 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { pendingCommands, confirmedCommands } = useCommandStore();
@@ -33,22 +30,22 @@ export default function RootLayout() {
     return null;
   }
 
-  console.log('[DEBUG] App component rendering');
-
-  const openSideMenu = () => {
-    setIsSideMenuOpen(true);
-  };
-
   const hasTopBar = !pathname.includes('/login') && !pathname.includes('/signup');
 
-  const isChildRoute = pathname.split('/').length > 2;
   const totalCommands = pendingCommands.length + confirmedCommands.length;
 
   return (
     <ThemeProvider value={DefaultTheme}>
       <LocationNotificationService />
       <SafeAreaView style={styles.container} edges={['top']}>
-        <TopBar isStandard={true} isTablet={false} visible={hasTopBar} onActionButton={() => router.push('/reservation')} onHome={() => router.push('/')} />
+        <TopBar 
+          isStandard={true} 
+          isTablet={false} 
+          visible={hasTopBar} 
+          totalItems={totalCommands}
+          backable={['reservation']}
+          onActionButton={() => router.push('/reservation')} onHome={() => router.push('/')} 
+        />
         <View style={styles.content}>
           <Slot />
         </View>

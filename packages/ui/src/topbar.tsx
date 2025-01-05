@@ -4,50 +4,49 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
 import { SideMenu } from './side-menu';
+import { usePathname, useRouter } from 'expo-router';
 import CustomSwitch from 'react-native-custom-switch-new';
 
 interface TopBarProps {
-    onBack?: () => void;
     onHome?: () => void;
     onActionButton?: () => void;
-    isChildRoute?: boolean;
     isStandard?: boolean;
     isTablet?: boolean;
     isKidsMode?: boolean;
+    totalItems?: number;
     onKidsModeToggle?: (value: boolean) => void;
     visible?: boolean;
+    backable?: string[];
 }
 
 export default function TopBar({
-    onBack,
     onHome,
     onActionButton,
-    isChildRoute,
-    isStandard: isStandard,
+    isStandard,
     isTablet,
     isKidsMode,
+    totalItems,
     onKidsModeToggle,
     visible = true,
+    backable,
 }: TopBarProps) {
+    const router = useRouter();
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-    const { currentCommand } = useCommandStore();
-
+    const pathname = usePathname();
     const openSideMenu = () => {
         setIsSideMenuOpen(true);
     };
-
-    const totalItems = currentCommand ? currentCommand.menuItems.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
     return (
         (visible) &&
         <>
             <SafeAreaView edges={['top']}>
                 <View style={[styles.header]}>
-                    {isChildRoute && onBack ? (
-                        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                    {((pathname.split('/').length > 2 ||backable?.includes(pathname.split('/')[1]))&& Platform.OS!='web') && (
+                        <TouchableOpacity onPress={() => router.back()}  style={styles.backButton}>
                             <MaterialIcons name="arrow-back" size={24} color="#000" />
                         </TouchableOpacity>
-                    ) : null}
+                    )}
                     <TouchableOpacity onPress={onHome} style={styles.logoButton}>
                         <Image
                             source={require('../assets/images/LogoLong.png')}
@@ -61,7 +60,7 @@ export default function TopBar({
                             onPress={onActionButton}
                         >
                         <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
-                        {totalItems > 0 && (
+                        {totalItems!=undefined && totalItems > 0 && (
                             <View style={styles.cartBadge}>
                                 <Text style={styles.cartBadgeText}>{totalItems}</Text>
                             </View>

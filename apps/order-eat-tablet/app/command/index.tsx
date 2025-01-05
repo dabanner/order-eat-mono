@@ -1,86 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Image,
-  ListRenderItem,
+  SafeAreaView,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useRouter } from 'expo-router';
 import { MenuItem } from '@repo/store/src/restaurantStore';
-import { useCommandStore } from '@repo/store/src/commandStore';
-
-type RootStackParamList = {
-  CommandItems: undefined;
-  // Add other screens as needed
-};
-
-type CommandItemsScreenProps = NativeStackScreenProps<RootStackParamList, 'CommandItems'>;
+import { useCommandStore, WaitstaffRequest } from '@repo/store/src/commandStore';
+import { ItemCard } from '@/components/ItemCard';
+import { WaitstaffModal } from '@/components/WaitstaffModal';
 
 type OrderMenuItem = MenuItem & {
   quantity: number;
+  paid: boolean;
 };
 
-interface QuantityControlsProps {
-  itemId: string;
-  quantity: number;
-  onQuantityChange: (itemId: string, currentQuantity: number, increment: number) => void;
-}
-
-interface ItemCardProps {
-  item: OrderMenuItem;
-  onQuantityChange: (itemId: string, currentQuantity: number, increment: number) => void;
-}
-
-const QuantityControls: React.FC<QuantityControlsProps> = ({ itemId, quantity, onQuantityChange }) => (
-  <View style={styles.quantityControls}>
-    <TouchableOpacity
-      style={styles.quantityButton}
-      onPress={() => onQuantityChange(itemId, quantity, -1)}
-    >
-      <Text style={styles.quantityButtonText}>-</Text>
-    </TouchableOpacity>
-    
-    <Text style={styles.quantityText}>{quantity}</Text>
-    
-    <TouchableOpacity
-      style={styles.quantityButton}
-      onPress={() => onQuantityChange(itemId, quantity, 1)}
-    >
-      <Text style={styles.quantityButtonText}>+</Text>
-    </TouchableOpacity>
-  </View>
-);
-
-const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange }) => (
-  <View style={styles.itemContainer}>
-    <Image
-     source={{ uri: item.images[0] }}
-      style={styles.itemImage}
-    />
-    
-    <View style={styles.itemDetails}>
-      <Text style={styles.itemName}>{item.name}</Text>
-      <Text style={styles.itemDescription} numberOfLines={2}>
-        {item.description}
-      </Text>
-      
-      <View style={styles.priceQuantityContainer}>
-        <Text style={styles.itemPrice}>${(item.price * item.quantity).toFixed(2)}</Text>
-        <QuantityControls
-          itemId={item.id}
-          quantity={item.quantity}
-          onQuantityChange={onQuantityChange}
-        />
-      </View>
-    </View>
-  </View>
-);
-
-const CommandItemsScreen: React.FC<CommandItemsScreenProps> = () => {
-  const { currentCommand, updateMenuItemQuantity, removeMenuItem } = useCommandStore();
+export default function CommandItemsScreen() {
+  const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false);
+  const {
+    currentCommand,
+    updateMenuItemQuantity,
+    removeMenuItem,
+    toggleItemPaidStatus,
+    addWaitstaffRequest,
+  } = useCommandStore();
+  const router = useRouter();
 
   const handleQuantityChange = (itemId: string, currentQuantity: number, increment: number): void => {
     const newQuantity = currentQuantity + increment;
@@ -91,8 +38,18 @@ const CommandItemsScreen: React.FC<CommandItemsScreenProps> = () => {
     }
   };
 
-  const renderItem: ListRenderItem<OrderMenuItem> = ({ item }) => (
-    <ItemCard item={item} onQuantityChange={handleQuantityChange} />
+  const handleSubmitOrder = () => {
+    // Handle order submission
+    console.log('Order submitted');
+    router.back();
+  };
+
+  const renderItem = ({ item }: { item: OrderMenuItem }) => (
+    <ItemCard
+      item={item}
+      onQuantityChange={handleQuantityChange}
+      onPaymentStatusChange={() => toggleItemPaidStatus(item.id)}
+    />
   );
 
   if (!currentCommand) {
@@ -103,39 +60,63 @@ const CommandItemsScreen: React.FC<CommandItemsScreenProps> = () => {
     );
   }
 
+  const sortedMenuItems = [...currentCommand.menuItems].sort((a, b) => {
+    if (a.paid === b.paid) return 0;
+    return a.paid ? 1 : -1;
+  });
+
   return (
-    <View style={styles.container}>
-      <FlatList<OrderMenuItem>
-        data={currentCommand.menuItems}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Your Order</Text>
+        <TouchableOpacity
+          style={styles.callWaitstaffButton}
+          onPress={() => setWaitstaffModalVisible(true)}
+        >
+          <Text style={styles.callWaitstaffButtonText}>Call Waitstaff</Text>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={sortedMenuItems}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={() => (
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Order Items</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>All Items</Text>
             <Text style={styles.totalAmount}>
               Total: ${currentCommand.totalAmount.toFixed(2)}
             </Text>
           </View>
         )}
-        ListEmptyComponent={() => (
-          <Text style={styles.emptyText}>No items in the order</Text>
-        )}
       />
-    </View>
+
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.defaultButton]}
+          onPress={handleSubmitOrder}
+        >
+          <Text style={styles.actionButtonText}>Submit Order</Text>
+        </TouchableOpacity>
+      </View>
+
+      <WaitstaffModal
+        visible={isWaitstaffModalVisible}
+        onClose={() => setWaitstaffModalVisible(false)}
+        onAction={addWaitstaffRequest}
+      />
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
@@ -144,80 +125,32 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#333',
+    flex: 1,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
   },
   totalAmount: {
     fontSize: 18,
     color: '#FF9800',
     fontWeight: '600',
   },
-  itemContainer: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#fff',
-    marginVertical: 4,
-    marginHorizontal: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  itemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  itemDetails: {
+  emptyContainer: {
     flex: 1,
-    justifyContent: 'space-between',
-  },
-  itemName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  itemDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  priceQuantityContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  itemPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FF9800',
-  },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quantityButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#FF9800',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  quantityButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  quantityText: {
-    marginHorizontal: 12,
-    fontSize: 16,
-    fontWeight: '600',
   },
   emptyText: {
     textAlign: 'center',
@@ -225,6 +158,39 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 24,
   },
+  footer: {
+    flexDirection: 'row',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  actionButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginHorizontal: 8,
+    borderRadius: 8,
+  },
+  defaultButton: {
+    backgroundColor: '#4CAF50',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  callWaitstaffButton: {
+    backgroundColor: '#FF9800',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  callWaitstaffButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
 
-export default CommandItemsScreen;
