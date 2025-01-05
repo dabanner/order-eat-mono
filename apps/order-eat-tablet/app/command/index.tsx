@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     flex: 1,
-    textAlign: 'center',
   },
   sectionHeader: {
     flexDirection: 'row',
