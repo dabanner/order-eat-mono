@@ -21,7 +21,7 @@ export default function RestaurantScreen() {
                 style={styles.container}
                 showsVerticalScrollIndicator={Platform.OS === 'web'}
             >
-                <TopBar isPhone={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode}/>
+                <TopBar isStandard={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode}/>
                 <View style={styles.content}>
                     <Categories isKidsMode={isKidsMode}/>
                     <MenuGrid menuItems={restaurant?.menuItems || []} isKidsMode={isKidsMode} restaurant={restaurant}/>

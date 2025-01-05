@@ -11,10 +11,11 @@ interface TopBarProps {
     onHome?: () => void;
     onActionButton?: () => void;
     isChildRoute?: boolean;
-    isPhone?: boolean;
+    isStandard?: boolean;
     isTablet?: boolean;
     isKidsMode?: boolean;
     onKidsModeToggle?: (value: boolean) => void;
+    visible?: boolean;
 }
 
 export default function TopBar({
@@ -22,10 +23,11 @@ export default function TopBar({
     onHome,
     onActionButton,
     isChildRoute,
-    isPhone,
+    isStandard: isStandard,
     isTablet,
     isKidsMode,
-    onKidsModeToggle
+    onKidsModeToggle,
+    visible
 }: TopBarProps) {
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
     const { pendingCommands, confirmedCommands } = useCommandStore();
@@ -37,6 +39,7 @@ export default function TopBar({
     const totalCommands = pendingCommands.length + confirmedCommands.length;
 
     return (
+        (visible) &&
         <>
             <SafeAreaView edges={['top']}>
                 <View style={[styles.header]}>
@@ -65,7 +68,7 @@ export default function TopBar({
                         )}
                     </TouchableOpacity>
                     ) : null }
-                    {isPhone ? (
+                    {isStandard ? (
 
                         <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
                             <MaterialIcons name="menu" size={24} color="#000" />

@@ -19,13 +19,6 @@ export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command 
 
     const essentialData = {
       id: command.id,
-      userId: command.userId,
-      restaurantId: command.restaurant.id, // Assuming restaurant has an id
-      reservationTime: command.reservationDetails.time, // Assuming this exists
-      totalAmount: command.totalAmount,
-      status: command.status,
-      type: command.type,
-      itemCount: command.menuItems.length,
     };
     const finalData =  JSON.stringify(essentialData);
 
