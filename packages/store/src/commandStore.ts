@@ -63,146 +63,110 @@ export interface Command {
 // Mock reservation data
 const MOCK_RESERVATIONS: Record<string, Command> = {
     "mock_reservation_1": {
-        id: "mock_reservation_1",
-        userId: "user123",
+        id: "ORDER-3630",
+        userId: "KarimCHARLEUX",
         status: "confirmed",
         type: "dinein",
-        totalAmount: 89.97,
+        totalAmount: 29.80,
         restaurant: {
             id: "1",
-            name: "Pizza De La Mama",
-            type: "Italian",
-            address: "123 avenue Saint-Philippe, 06410 BIOT",
-            description: "Authentic Italian pizzas and pasta made with love and tradition.",
-            shortDescription: "Pizza - Pasta - Tiramisu",
-            rating: 4.7,
+            name: "L'Alivia",
+            type: 'Italian & Mediterranean',
+            address: '123 avenue Saint-Philippe, 06410 BIOT',
+            description: 'Experience authentic Italian and Mediterranean cuisine in a charming setting on the French Riviera.',
+            shortDescription: 'Italian - Mediterranean - Pizza - Pasta',
+            rating: 4.8,
             categoryId: "c1",
             images: [
-                "https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D",
-                "https://cdn.sortiraparis.com/images/80/100789/834071-too-restaurant-too-hotel-paris-photos-menu-entrees.jpg",
-                "https://www.tourisme-rennes.com/voy_content/uploads/2023/09/Hotel-Balthazar-restaurant.jpg"
-            ],
-            latitude: 43.623428,
-            longitude: 7.046175,
-            time: "20 min",
+                require('@repo/ui/assets/images/restaurants/alivia/alivia-exterior.jpeg'),
+                require('@repo/ui/assets/images/restaurants/alivia/alivia-interior.jpeg'),
+                require('@repo/ui/assets/images/restaurants/alivia/alivia-terrace.jpeg'),
+              ],
+            latitude: 43.615632, // Polytech coordinates 43.615632, 7.071891
+            longitude: 7.071891,
+            time: "25 min",
             menuItems: []
         },
         menuItems: [
             {
-                id: "p2",
-                name: "Pepperoni Pizza",
-                description: "Pizza topped with pepperoni and mozzarella",
-                price: 14.99,
+                id: 'al_p1',
+                quantity: 1,
+                name: 'Margherita Royale',
+                description: 'Our signature Margherita Royale showcases the finest Italian ingredients: creamy buffalo mozzarella DOP from Campania, hand-picked San Marzano tomatoes grown in the volcanic soils of Mount Vesuvius, fresh organic basil from our herb garden, and premium extra virgin olive oil from Tuscany. Each pizza is carefully crafted by our master pizzaiolo and baked to perfection in our wood-fired oven at 400°C, creating the perfect balance of flavors and textures with a slightly charred, pillowy crust.',
+                descriptionForKids: 'A yummy pizza with melty cheese, sweet tomato sauce, and green basil leaves that look like little stars! 🌟 Just like in Italy! 🍕',
+                price: 16.90,
                 images: [
-                    "https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D"
+                require('@repo/ui/assets/images/restaurants/alivia/margherita-pizza-1.jpg'),
+                require('@repo/ui/assets/images/restaurants/alivia/margherita-pizza-2.jpeg'),
                 ],
-                foodCategoryId: "f1",
-                mealTypeId: "m1",
+                foodCategoryId: 'f1',
+                mealTypeId: 'm1',
                 preparationTime: 20,
-                quantity: 3,
-                paid: false,
-                sizes: ["10\"", "14\"", "16\""],
+                paid: true,
+                sizes: ['S', 'M', 'L'],
                 keyIngredients: [
-                    { name: "Pepperoni", icon: "drumstick-bite", isAllergy: false },
-                    { name: "Mozzarella", icon: "cheese", isAllergy: true },
-                    { name: "Tomato Sauce", icon: "pepper-hot", isAllergy: false }
+                { name: 'Mozzarella', icon: 'cheese' },
+                { name: 'Tomatoes', icon: 'seedling' },
+                { name: 'Basil', icon: 'leaf' },
+                { name: 'Olive Oil', icon: 'oil-can' }
                 ],
-                allergens: ["dairy", "gluten", "pork"],
+                allergens: ['Milk', 'Gluten'],
                 nutrition: {
-                    carbs: 65,
-                    proteins: 18,
-                    calories: 750,
-                    fats: 12,
-                    fiber: 2,
-                    servingSize: "14\" pizza (300g serving)",
-                    description: "Our classic Pepperoni Pizza is a perfect balance of flavors, featuring our signature tomato sauce, mozzarella cheese, and premium pepperoni slices on our hand-tossed crust.",
-                    details: {
-                        totalFat: {
-                            value: 12,
-                            saturatedFat: 5,
-                            transFat: 0
-                        },
-                        totalCarbohydrates: {
-                            value: 65,
-                            fiber: 2,
-                            sugars: 4
-                        },
-                        protein: {
-                            value: 18,
-                            source: "mozzarella cheese and pepperoni"
-                        },
-                        minerals: {
-                            sodium: 1200,
-                            potassium: 280,
-                            calcium: 20,
-                            iron: 15
-                        },
-                        vitamins: {
-                            vitaminA: 10,
-                            vitaminC: 8,
-                            vitaminD: 4
-                        }
-                    }
+                carbs: 42,
+                proteins: 15,
+                calories: 450,
+                fats: 12,
+                fiber: 2.5,
+                servingSize: '30cm pizza',
+                description: 'Our signature Margherita pizza combines premium ingredients for a classic Italian taste.',
+                details: {
+                    totalFat: { value: 12, saturatedFat: 5, transFat: 0 },
+                    totalCarbohydrates: { value: 42, fiber: 2.5, sugars: 3 },
+                    protein: { value: 15, source: 'buffalo mozzarella' },
+                    minerals: { sodium: 680, potassium: 210, calcium: 25, iron: 8 },
+                    vitamins: { vitaminA: 12, vitaminC: 15, vitaminD: 2 }
+                }
                 }
             },
             {
-                id: "p1",
-                name: "Pizza Calzone European",
-                description: "Pizza folded in half with chicken, mushrooms, and cheese",
-                price: 32,
-                images: [
-                    "https://cdn.tasteatlas.com/Images/Dishes/2bfdf993487d4995b8ed4ce3e99c5703.jpg"
-                ],
-                foodCategoryId: "f1",
-                mealTypeId: "m1",
-                preparationTime: 20,
+                id: 'al_f1',
                 quantity: 1,
-                paid: true,
-                selectedSize: "14\"",
-                sizes: ["10\"", "14\"", "16\""],
-                keyIngredients: [
-                    { name: "Chicken", icon: "drumstick-bite", isAllergy: false },
-                    { name: "Mushrooms", icon: "seedling", isAllergy: false },
-                    { name: "Mozzarella", icon: "cheese", isAllergy: true }
+                name: 'Truffle Parmesan Fries',
+                description: 'Hand-cut fries made from premium Agria potatoes, double-cooked to golden perfection in premium olive oil. Finished with shaved black truffle, aged Parmigiano Reggiano DOP, fresh parsley, and our signature truffle-infused sea salt. Served with a trio of house-made dipping sauces: black truffle aioli, roasted garlic mayonnaise, and spicy tomato coulis. Each portion is carefully arranged in a copper serving vessel lined with herb-scented paper.',
+                descriptionForKids: 'Magic golden fries sprinkled with special cheese dust and fancy mushroom sparkles! They come with three yummy dipping sauces for extra fun! ✨🍟',
+                price: 12.90,
+                images: [
+                  require('@repo/ui/assets/images/restaurants/alivia/truffle-fries-1.jpg'),
                 ],
-                allergens: ["dairy", "gluten"],
+                foodCategoryId: 'f7',
+                mealTypeId: 'm2',
+                preparationTime: 10,
+                sizes: ['Regular', 'Large'],
+                paid: true,
+                keyIngredients: [
+                  { name: 'Potatoes', icon: 'carrot' },
+                  { name: 'Truffle', icon: 'mushroom' },
+                  { name: 'Parmesan', icon: 'cheese' },
+                  { name: 'Herbs', icon: 'leaf' }
+                ],
+                allergens: ['Milk', 'Eggs'],
                 nutrition: {
-                    carbs: 89,
-                    proteins: 12.2,
-                    calories: 850,
-                    fats: 10.4,
-                    fiber: 2.5,
-                    servingSize: "14\" calzone (350g serving)",
-                    description: "This handcrafted Italian calzone delivers a perfect blend of proteins and carbohydrates.",
-                    details: {
-                        totalFat: {
-                            value: 10.4,
-                            saturatedFat: 4.2,
-                            transFat: 0
-                        },
-                        totalCarbohydrates: {
-                            value: 89,
-                            fiber: 2.5,
-                            sugars: 3.2
-                        },
-                        protein: {
-                            value: 12.2,
-                            source: "free-range chicken and fresh mozzarella"
-                        },
-                        minerals: {
-                            sodium: 980,
-                            potassium: 320,
-                            calcium: 15,
-                            iron: 10
-                        },
-                        vitamins: {
-                            vitaminA: 8,
-                            vitaminC: 12,
-                            vitaminD: 6
-                        }
-                    }
+                  carbs: 48,
+                  proteins: 8,
+                  calories: 420,
+                  fats: 22,
+                  fiber: 4,
+                  servingSize: '200g',
+                  description: 'Premium hand-cut fries with truffle and parmesan.',
+                  details: {
+                    totalFat: { value: 22, saturatedFat: 6, transFat: 0 },
+                    totalCarbohydrates: { value: 48, fiber: 4, sugars: 1 },
+                    protein: { value: 8, source: 'cheese and potato' },
+                    minerals: { sodium: 580, potassium: 820, calcium: 180, iron: 2 },
+                    vitamins: { vitaminA: 4, vitaminC: 28, vitaminD: 1 }
+                  }
                 }
-            }
+              },
         ],
         waitstaffRequests: [],
         reservationDetails: {
@@ -421,4 +385,5 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
       };
     }),
 }));
+
 
