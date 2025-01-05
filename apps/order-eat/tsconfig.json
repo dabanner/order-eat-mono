@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "../../packages/ui/src/topbar.tsx", "../../packages/ui/src/side-menu.tsx"  ]
+, "../../packages/ui/src/topbar.tsx", "../../packages/ui/src/side-menu.tsx", "../../packages/ui/src/MenuItemModal.tsx", "../../packages/ui/src/ImageGallery.tsx"  ]
 }

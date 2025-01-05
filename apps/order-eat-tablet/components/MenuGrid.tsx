@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { MenuItem } from '@repo/store/src/restaurantStore';
+import { MenuItem, Restaurant } from '@repo/store/src/restaurantStore';
 import { MenuItem as MenuItemComponent } from '@repo/ui/src/MenuItem';
 import { useFoodCategoryStore } from '@repo/store/src/foodCaregoryStore';
+import { MenuItemModal } from '@repo/ui/src/MenuItemModal';
+import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 
 interface MenuGridProps {
     menuItems: MenuItem[];
     isKidsMode?: boolean;
+    restaurant: Restaurant;
 }
 
-export default function MenuGrid({ menuItems, isKidsMode }: MenuGridProps) {
+export default function MenuGrid({ menuItems, isKidsMode, restaurant }: MenuGridProps) {
+    const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
+
     const groupedItems = menuItems.reduce((acc, item) => {
         if (!acc[item.foodCategoryId]) {
             acc[item.foodCategoryId] = [];
@@ -60,7 +65,7 @@ export default function MenuGrid({ menuItems, isKidsMode }: MenuGridProps) {
                             <MenuItemComponent
                                 key={item.id}
                                 item={item}
-                                onPress={() => {}}
+                                onPress={() => setSelectedMenuItem(item)}
                                 onAddClick={() => {}}
                                 showAddButton={true}
                                 isKidsMode={isKidsMode}
@@ -69,6 +74,22 @@ export default function MenuGrid({ menuItems, isKidsMode }: MenuGridProps) {
                     </View>
                 </View>
             ))}
+
+            {selectedMenuItem && (
+                <MenuItemModal
+                    isVisible={!!selectedMenuItem}
+                    onClose={() => setSelectedMenuItem(null)}
+                    menuItem={selectedMenuItem}
+                    restaurant={restaurant}
+                    onAddToOrder={() => {
+                        // Ajoutez ici la logique pour ajouter au panier
+                        setSelectedMenuItem(null);
+                    }}
+                    quantity={0}
+                    showAddButton={true}
+                    isKidsMode={isKidsMode}
+                />
+            )}
         </View>
     );
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { MenuItem as MenuItemType, Restaurant } from '@repo/store/src/restaurantStore';
 import { FoodCategory } from '@repo/store/src/foodCaregoryStore';
-import { MenuItemModal } from './MenuItemModal';
+import { MenuItemModal } from '@repo/ui/src/MenuItemModal';
 import { MenuItem } from '@repo/ui/src/MenuItem'
 
 interface MenuListProps {

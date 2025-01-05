@@ -24,7 +24,7 @@ export default function RestaurantScreen() {
                 <TopBar isPhone={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode}/>
                 <View style={styles.content}>
                     <Categories isKidsMode={isKidsMode}/>
-                    <MenuGrid menuItems={restaurant?.menuItems || []} isKidsMode={isKidsMode}/>
+                    <MenuGrid menuItems={restaurant?.menuItems || []} isKidsMode={isKidsMode} restaurant={restaurant}/>
                 </View>
             </ScrollView>
         </SafeAreaView>
