@@ -48,17 +48,11 @@ export default function RootLayout() {
     <ThemeProvider value={DefaultTheme}>
       <LocationNotificationService />
       <SafeAreaView style={styles.container} edges={['top']}>
-        <TopBar isStandard={true} isTablet={false} visible={hasTopBar} />
+        <TopBar isStandard={true} isTablet={false} visible={hasTopBar} onActionButton={() => router.push('/reservation')}/>
         <View style={styles.content}>
-            <Slot />
+          <Slot />
         </View>
       </SafeAreaView>
-      {isSideMenuOpen && (
-        <SideMenu
-          visible={isSideMenuOpen}
-          onClose={() => setIsSideMenuOpen(false)}
-        />
-      )}
     </ThemeProvider>
   );
 }
