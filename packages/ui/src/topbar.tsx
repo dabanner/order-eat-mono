@@ -16,6 +16,7 @@ interface TopBarProps {
     totalItems?: number;
     onKidsModeToggle?: (value: boolean) => void;
     visible?: boolean;
+    backable?: string[];
 }
 
 export default function TopBar({
@@ -27,6 +28,7 @@ export default function TopBar({
     totalItems,
     onKidsModeToggle,
     visible = true,
+    backable,
 }: TopBarProps) {
     const router = useRouter();
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
@@ -40,7 +42,7 @@ export default function TopBar({
         <>
             <SafeAreaView edges={['top']}>
                 <View style={[styles.header]}>
-                    {pathname.split('/').length > 2 && Platform.OS!='web' && (
+                    {((pathname.split('/').length > 2 ||backable?.includes(pathname.split('/')[1]))&& Platform.OS!='web') && (
                         <TouchableOpacity onPress={() => router.back()}  style={styles.backButton}>
                             <MaterialIcons name="arrow-back" size={24} color="#000" />
                         </TouchableOpacity>
