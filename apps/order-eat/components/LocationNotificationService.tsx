@@ -146,8 +146,8 @@ export function LocationNotificationService(): null {
                             if (distance <= CONFIG.NOTIFICATION_DISTANCE && !hasNotifiedRef.current[restaurant.id]) {
                                 console.log(`[DEBUG] Within notification distance of ${restaurant.name}!`);
                                 showLocalNotification(
-                                    `${restaurant.name} Nearby!`,
-                                    `You're ${Math.round(distance)}m away. Check out our special menu!`
+                                    `${restaurant.name} is ${Math.round(distance)}m away !`,
+                                    `You're table n°34. Take a seat and enjoy your meal !`
                                 );
                                 hasNotifiedRef.current[restaurant.id] = true;
                             } else if (distance > CONFIG.NOTIFICATION_DISTANCE) {
