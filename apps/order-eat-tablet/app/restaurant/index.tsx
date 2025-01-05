@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, Platform, StyleSheet } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { useCommandStore, Command } from '@repo/store/src/commandStore';
 import TopBar from '@repo/ui/src/topbar';
@@ -12,6 +12,8 @@ export default function RestaurantScreen() {
   const { restaurants } = useRestaurantStore();
   const { currentCommand, setCurrentCommand, addCommand } = useCommandStore();
   const [isKidsMode, setIsKidsMode] = React.useState(false);
+
+  const router = useRouter();
 
   // Find the restaurant with the given id 
   const restaurant = restaurants.find(restaurant => restaurant.id === id) || restaurants[0];
@@ -50,7 +52,7 @@ export default function RestaurantScreen() {
                 style={styles.container}
                 showsVerticalScrollIndicator={Platform.OS === 'web'}
             >
-                <TopBar isPhone={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode}/>
+                <TopBar isPhone={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode} onActionButton={() => router.push('/command')}/>
                 <View style={styles.content}>
                     <Categories isKidsMode={isKidsMode}/>
                     <MenuGrid menuItems={restaurant?.menuItems || []} isKidsMode={isKidsMode} restaurant={restaurant}/>

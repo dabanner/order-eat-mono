@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     fontSize: 18,
-    color: '#2196F3',
+    color: '#FF9800',
     fontWeight: '600',
   },
   itemContainer: {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#FF9800',
     justifyContent: 'center',
     alignItems: 'center',
   },
