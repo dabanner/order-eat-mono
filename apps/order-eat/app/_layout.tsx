@@ -18,7 +18,6 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { pendingCommands, confirmedCommands } = useCommandStore();
@@ -33,22 +32,21 @@ export default function RootLayout() {
     return null;
   }
 
-  console.log('[DEBUG] App component rendering');
-
-  const openSideMenu = () => {
-    setIsSideMenuOpen(true);
-  };
-
   const hasTopBar = !pathname.includes('/login') && !pathname.includes('/signup');
 
-  const isChildRoute = pathname.split('/').length > 2;
   const totalCommands = pendingCommands.length + confirmedCommands.length;
 
   return (
     <ThemeProvider value={DefaultTheme}>
       <LocationNotificationService />
       <SafeAreaView style={styles.container} edges={['top']}>
-        <TopBar isStandard={true} isTablet={false} visible={hasTopBar} onActionButton={() => router.push('/reservation')} onHome={() => router.push('/')} />
+        <TopBar 
+          isStandard={true} 
+          isTablet={false} 
+          visible={hasTopBar} 
+          totalItems={totalCommands}
+          onActionButton={() => router.push('/reservation')} onHome={() => router.push('/')} 
+        />
         <View style={styles.content}>
           <Slot />
         </View>

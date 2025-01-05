@@ -13,6 +13,7 @@ interface TopBarProps {
     isStandard?: boolean;
     isTablet?: boolean;
     isKidsMode?: boolean;
+    totalItems?: number;
     onKidsModeToggle?: (value: boolean) => void;
     visible?: boolean;
 }
@@ -23,18 +24,16 @@ export default function TopBar({
     isStandard,
     isTablet,
     isKidsMode,
+    totalItems,
     onKidsModeToggle,
     visible = true,
 }: TopBarProps) {
     const router = useRouter();
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-    const { currentCommand } = useCommandStore();
     const pathname = usePathname();
     const openSideMenu = () => {
         setIsSideMenuOpen(true);
     };
-
-    const totalItems = currentCommand ? currentCommand.menuItems.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
     return (
         (visible) &&
@@ -59,7 +58,7 @@ export default function TopBar({
                             onPress={onActionButton}
                         >
                         <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
-                        {totalItems > 0 && (
+                        {totalItems!=undefined && totalItems > 0 && (
                             <View style={styles.cartBadge}>
                                 <Text style={styles.cartBadgeText}>{totalItems}</Text>
                             </View>

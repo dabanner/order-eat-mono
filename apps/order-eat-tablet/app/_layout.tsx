@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Slot, useRouter } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import TopBar from '@repo/ui/src/topbar';
+import { useCommandStore } from '@repo/store/src/commandStore';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,6 +36,9 @@ export default function TabletRootLayout() {
   if (!loaded) {
     return null;
   }
+  const { currentCommand } = useCommandStore();
+  const totalItems = currentCommand ? currentCommand.menuItems.reduce((sum, item) => sum + item.quantity, 0) : 0;
+
 
   const kidsModeValue = { isKidsMode, setIsKidsMode };
 
@@ -46,6 +50,7 @@ export default function TabletRootLayout() {
             isStandard={false} 
             isTablet={true} 
             isKidsMode={isKidsMode} 
+            totalItems={totalItems}
             onKidsModeToggle={setIsKidsMode} 
             onActionButton={() => router.push('/restaurant/command')}
           />
