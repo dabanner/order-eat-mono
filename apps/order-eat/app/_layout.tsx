@@ -10,6 +10,7 @@ import { useCommandStore } from '@repo/store/src/commandStore';
 import 'react-native-reanimated';
 import { LocationNotificationService } from '@/components/LocationNotificationService';
 import { SideMenu } from '@repo/ui/src/side-menu';
+import TopBar from '@repo/ui/src/topbar';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -45,41 +46,11 @@ export default function RootLayout() {
     <ThemeProvider value={DefaultTheme}>
         <LocationNotificationService />
       <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={[styles.header]}>
-          {isChildRoute ? (
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <MaterialIcons name="arrow-back" size={24} color="#000" />
-            </TouchableOpacity>
-          ) : null}
-          <TouchableOpacity onPress={() => router.push('/')} style={styles.logoButton}>
-            <Image
-              source={require('../assets/images/LogoLong.png')}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={openSideMenu} style={styles.menuButton}>
-            <MaterialIcons name="menu" size={24} color="#000" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cartButton} onPress={() => router.push('/reservation')}>
-            <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
-            {totalCommands > 0 && (
-              <View style={styles.cartBadge}>
-                <Text style={styles.cartBadgeText}>{totalCommands}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
+        <TopBar isPhone={true} onActionButton={() => router.push('/reservation')}></TopBar>
         <View style={styles.content}>
           <Slot />
         </View>
       </SafeAreaView>
-      {isSideMenuOpen && (
-        <SideMenu
-          visible={isSideMenuOpen}
-          onClose={() => setIsSideMenuOpen(false)}
-        />
-      )}
     </ThemeProvider>
   );
 }
