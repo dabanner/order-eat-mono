@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Platform, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import TopBar from "@repo/ui/src/topbar";
 import Categories from "@repo/ui/src/categories";
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import MenuGrid from '@/components/MenuGrid';
+import { useLocalSearchParams } from 'expo-router';
+
 
 export default function RestaurantScreen() {
+    const { id } = useLocalSearchParams();
     const { restaurants } = useRestaurantStore();
-    const firstRestaurant = restaurants[0];
+    const [isKidsMode, setIsKidsMode] = useState(false);
+
+    // Find the restaurant with the given id 
+    const restaurant = restaurants.find(restaurant => restaurant.id === id) || restaurants[0];
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -15,10 +21,10 @@ export default function RestaurantScreen() {
                 style={styles.container}
                 showsVerticalScrollIndicator={Platform.OS === 'web'}
             >
-                <TopBar isPhone={false} />
+                <TopBar isPhone={false} isTablet={true} isKidsMode={isKidsMode} onKidsModeToggle={setIsKidsMode}/>
                 <View style={styles.content}>
-                <Categories />
-                    <MenuGrid menuItems={firstRestaurant.menuItems} />
+                    <Categories isKidsMode={isKidsMode}/>
+                    <MenuGrid menuItems={restaurant?.menuItems || []} isKidsMode={isKidsMode}/>
                 </View>
             </ScrollView>
         </SafeAreaView>

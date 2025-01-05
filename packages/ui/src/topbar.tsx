@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
 import { SideMenu } from './side-menu';
-
+import CustomSwitch from 'react-native-custom-switch-new';
 
 interface TopBarProps {
     onBack?: () => void;
@@ -12,6 +12,9 @@ interface TopBarProps {
     onActionButton?: () => void;
     isChildRoute?: boolean;
     isPhone?: boolean;
+    isTablet?: boolean;
+    isKidsMode?: boolean;
+    onKidsModeToggle?: (value: boolean) => void;
 }
 
 export default function TopBar({
@@ -19,7 +22,10 @@ export default function TopBar({
     onHome,
     onActionButton,
     isChildRoute,
-    isPhone
+    isPhone,
+    isTablet,
+    isKidsMode,
+    onKidsModeToggle
 }: TopBarProps) {
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
     const { pendingCommands, confirmedCommands } = useCommandStore();
@@ -52,10 +58,27 @@ export default function TopBar({
                             <MaterialIcons name="menu" size={24} color="#000" />
                         </TouchableOpacity>
                     ) : null }
-                    <TouchableOpacity
-                        style={styles.cartButton}
-                        onPress={onActionButton}
-                    >
+                    { isTablet ? (
+                        <View style={styles.rightSection}>
+                            <View style={styles.kidsModeContainer}>
+                            <CustomSwitch 
+                                buttonColor={'#FFFFFF'}
+                                switchBackgroundColor={'#BB4430'}
+                                onSwitchBackgroundColor={'#7EBDC2'}
+                                switchLeftText={"👨‍🦱"}
+                                switchRightText={"👶"}
+                                onSwitch={() => onKidsModeToggle?.(true)}
+                                onSwitchReverse={() => onKidsModeToggle?.(false)}
+                                startOnLeft={false}
+                                />
+                            </View>
+                        </View>
+                    ) : null }
+                    { !isKidsMode ? (
+                        <TouchableOpacity
+                            style={styles.cartButton}
+                            onPress={onActionButton}
+                        >
                         <MaterialCommunityIcons name="shopping-outline" size={24} color="#000" />
                         {totalCommands > 0 && (
                             <View style={styles.cartBadge}>
@@ -63,6 +86,7 @@ export default function TopBar({
                             </View>
                         )}
                     </TouchableOpacity>
+                    ) : null }
                 </View>
             </SafeAreaView>
             {isSideMenuOpen && (
@@ -92,6 +116,21 @@ const styles = StyleSheet.create({
         position: 'absolute',
         left: 5,
         display: Platform.OS === 'web' ? 'flex' : 'none',
+    },
+    rightSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    kidsModeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f8f9fa',
+        padding: 8,
+        borderRadius: 20,
+        gap: 8,
+    },
+    switch: {
+        transform: Platform.OS === 'ios' ? [{ scale: 0.8 }] : [],
     },
     logoImage: {
         width: 160,

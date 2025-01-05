@@ -239,10 +239,11 @@ export default function TabletScannerPage(): JSX.Element {
 
   const handleConfirm = async (): Promise<void> => {
     setIsLoading(true);
+    const reservationData = JSON.parse(scannedData) as ReservationData;
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Reservation confirmed:', JSON.parse(scannedData) as ReservationData);
+      console.log('Reservation confirmed:', reservationData);
        Alert.alert(
       'Success', 
       'Reservation confirmed successfully!',
@@ -250,7 +251,7 @@ export default function TabletScannerPage(): JSX.Element {
         {
           text: 'OK',
           onPress: () => {
-            router.push('/restaurant');
+            router.push(`/restaurant?id=${reservationData.restaurantId}`);
           }
         }
       ]
@@ -261,9 +262,7 @@ export default function TabletScannerPage(): JSX.Element {
     } finally {
       setIsLoading(false);
       closeScanner();
-       router.push({
-      pathname: "/restaurant",
-    });
+       router.push(`/restaurant?id=${reservationData.restaurantId}`);
     }
   };
 
@@ -321,7 +320,7 @@ export default function TabletScannerPage(): JSX.Element {
         {/* Keep the logo section */}
         <View style={styles.logoContainer}>
           <Image
-              source={require('@/assets/images/logo.png')}
+              source={require('@/assets/images/Logo.png')}
               style={styles.logoImage}
               resizeMode="contain"
           />
