@@ -79,7 +79,7 @@ export function MenuItemModal({
                 styles.description,
                 isKidsMode && styles.kidsDescription
               ]}>
-                {menuItem.description}
+                {isKidsMode ? menuItem.descriptionForKids : menuItem.description}
               </Text>
 
               {menuItem.sizes && menuItem.sizes.length > 0 && (
