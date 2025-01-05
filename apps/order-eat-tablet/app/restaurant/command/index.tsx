@@ -14,7 +14,6 @@ import { useCommandStore } from '@repo/store/src/commandStore';
 
 type RootStackParamList = {
   CommandItems: undefined;
-  // Add other screens as needed
 };
 
 type CommandItemsScreenProps = NativeStackScreenProps<RootStackParamList, 'CommandItems'>;

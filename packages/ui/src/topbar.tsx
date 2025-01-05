@@ -4,13 +4,12 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
 import { SideMenu } from './side-menu';
+import { usePathname, useRouter } from 'expo-router';
 import CustomSwitch from 'react-native-custom-switch-new';
 
 interface TopBarProps {
-    onBack?: () => void;
     onHome?: () => void;
     onActionButton?: () => void;
-    isChildRoute?: boolean;
     isStandard?: boolean;
     isTablet?: boolean;
     isKidsMode?: boolean;
@@ -19,19 +18,18 @@ interface TopBarProps {
 }
 
 export default function TopBar({
-    onBack,
     onHome,
     onActionButton,
-    isChildRoute,
-    isStandard: isStandard,
+    isStandard,
     isTablet,
     isKidsMode,
     onKidsModeToggle,
     visible = true,
 }: TopBarProps) {
+    const router = useRouter();
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
     const { currentCommand } = useCommandStore();
-
+    const pathname = usePathname();
     const openSideMenu = () => {
         setIsSideMenuOpen(true);
     };
@@ -43,11 +41,11 @@ export default function TopBar({
         <>
             <SafeAreaView edges={['top']}>
                 <View style={[styles.header]}>
-                    {isChildRoute && onBack ? (
-                        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                    {pathname.split('/').length > 2 && Platform.OS!='web' && (
+                        <TouchableOpacity onPress={() => router.back()}  style={styles.backButton}>
                             <MaterialIcons name="arrow-back" size={24} color="#000" />
                         </TouchableOpacity>
-                    ) : null}
+                    )}
                     <TouchableOpacity onPress={onHome} style={styles.logoButton}>
                         <Image
                             source={require('../assets/images/LogoLong.png')}
