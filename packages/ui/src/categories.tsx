@@ -5,6 +5,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 export default function Categories({isKidsMode}: {isKidsMode?: boolean}) {
   const categories = useFoodCategoryStore((state) => state.categories);
 
+  const getImageKey = (id: string, isKids: boolean) => `${id}-${isKids ? 'kids' : 'normal'}`;
+
   return (
     <>
       <View style={styles.categoriesHeader}>
@@ -53,8 +55,10 @@ export default function Categories({isKidsMode}: {isKidsMode?: boolean}) {
               isKidsMode && styles.kidsCategoryImageContainer
             ]}>
               <Image
+                key={getImageKey(item.id, isKidsMode ?? false)}
                 source={isKidsMode ? item.imageKids : item.image}
                 style={styles.categoryImage}
+                resizeMode="contain"
               />
             </View>
             <Text style={[
