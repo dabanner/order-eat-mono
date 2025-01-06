@@ -26,6 +26,7 @@ export default function Index() {
     });
   };
 
+  //FRONTAND
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView 
