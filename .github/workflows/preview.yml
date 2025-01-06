@@ -1,6 +1,5 @@
 name: preview
 on: pull_request
-
 jobs:
   update:
     name: EAS Update
@@ -10,7 +9,6 @@ jobs:
       pull-requests: write
       issues: write
       statuses: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,25 +28,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Initialize EAS project
-        working-directory: ./apps/order-eat
-        run: |
-          npx eas init --non-interactive
-
-      - name: Create preview
+      - name: Create preview - order-eat
         uses: expo/expo-github-action/preview@v8
         with:
           command: eas update --auto
-          working-directory: ./apps/order-eat
+          working-directory: apps/order-eat
 
-
-      - name: Initialize EAS project (Tablet)
-        working-directory: ./apps/order-eat-tablet
-        run: |
-          npx eas init --non-interactive
-
-      - name: Create preview (Tablet)
+      - name: Create preview - order-eat-tablet
         uses: expo/expo-github-action/preview@v8
         with:
           command: eas update --auto
-          working-directory: ./apps/order-eat-tablet
+          working-directory: apps/order-eat-tablet
