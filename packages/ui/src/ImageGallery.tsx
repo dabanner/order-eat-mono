@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Image, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 
 interface ImageGalleryProps {
-  images: string[];
+  images: number[];
 }
 
 export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
@@ -30,7 +30,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                 style={styles.thumbnail}
               >
                 <Image
-                  source={{ uri: image }}
+                  source={image}
                   style={[
                     styles.thumbnailImage,
                     currentIndex === index && styles.thumbnailActive,
@@ -44,7 +44,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
       <View style={styles.mainImageContainer}>
         {Platform.OS === 'web' ? (
           <Image
-            source={{ uri: images[currentIndex] }}
+            source={images[currentIndex]}
             style={styles.mainImage}
           />
         ) : (
@@ -56,7 +56,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             scrollEventThrottle={16}
           >
             {images.map((image, index) => (
-              <Image key={index} source={{ uri: image }} style={styles.mainImage} />
+              <Image key={index} source={image} style={styles.mainImage} />
             ))}
           </ScrollView>
         )}

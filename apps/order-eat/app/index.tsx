@@ -66,7 +66,7 @@ export default function Index() {
                 onPress={() => handleRestaurantPress(item.id)}
               >
                 <Image
-                  source={{ uri: item.images[0] }}
+                  source={item.images[0]}
                   style={styles.restaurantImage}
                 />
                 <Text style={styles.restaurantName}>{item.name}</Text>

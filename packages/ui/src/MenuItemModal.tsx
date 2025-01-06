@@ -79,7 +79,7 @@ export function MenuItemModal({
                 styles.description,
                 isKidsMode && styles.kidsDescription
               ]}>
-                {menuItem.description}
+                {isKidsMode ? menuItem.descriptionForKids : menuItem.description}
               </Text>
 
               {menuItem.sizes && menuItem.sizes.length > 0 && (
@@ -197,7 +197,7 @@ export function MenuItemModal({
                 )}
               </View>
               )}
-              {!isKidsMode && (
+              {(!isKidsMode && menuItem.allergens.length > 0) && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>ALLERGENS</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.allergensScroll}>
@@ -383,11 +383,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 25,
     backgroundColor: '#F8F9FB',
+    textAlign: 'center',
   },
   kidsSizeButton: {
     width: 60,
     height: 60,
     borderRadius: 30,
+    textAlign: 'center',
     backgroundColor: '#fff',
     borderWidth: 2,
     borderColor: '#ffa26d',

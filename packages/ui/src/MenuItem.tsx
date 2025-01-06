@@ -29,7 +29,7 @@ export function MenuItem({
       onPress={onPress}
     >
       <Image
-        source={{ uri: item.images[0] }}
+        source={item.images[0]}
         style={[
           styles.itemImage,
           isKidsMode && styles.kidsItemImage
