@@ -56,7 +56,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             scrollEventThrottle={16}
           >
             {images.map((image, index) => (
-              <Image key={index} source={{ uri: image }} style={styles.mainImage} />
+              <Image key={index} source={image} style={styles.mainImage} />
             ))}
           </ScrollView>
         )}

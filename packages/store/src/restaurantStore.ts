@@ -938,8 +938,8 @@ const initialRestaurants: Restaurant[] = [
     description: 'Authentic Italian pizzas and pasta made with love and tradition.',
     shortDescription: 'Pizza - Pasta - Tiramisu',
     address: '123 avenue Saint-Philippe, 06410 BIOT',
-    latitude: 43.624047, 
-    longitude: 7.048598,
+    latitude: 42.624047, 
+    longitude: 6.048598,
     menuItems: [
       {
         id: 'p1',

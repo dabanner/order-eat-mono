@@ -197,7 +197,7 @@ export function MenuItemModal({
                 )}
               </View>
               )}
-              {!isKidsMode && (
+              {(!isKidsMode && menuItem.allergens.length > 0) && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>ALLERGENS</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.allergensScroll}>
