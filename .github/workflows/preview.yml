@@ -28,24 +28,27 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install -g eas-cli
+          npm install
 
-      - name: Initialize EAS project
+      # Mobile App
+      - name: Initialize EAS project (Mobile)
         working-directory: ./apps/order-eat
         run: |
-          npx eas init --non-interactive
+          eas init --non-interactive
 
-      - name: Create preview
+      - name: Create preview (Mobile)
         uses: expo/expo-github-action/preview@v8
         with:
           command: eas update --auto
           working-directory: ./apps/order-eat
 
-
+      # Tablet App
       - name: Initialize EAS project (Tablet)
         working-directory: ./apps/order-eat-tablet
         run: |
-          npx eas init --non-interactive
+          eas init --non-interactive
 
       - name: Create preview (Tablet)
         uses: expo/expo-github-action/preview@v8
