@@ -29,11 +29,11 @@ export function MenuItem({
       onPress={onPress}
     >
       <Image
-        source={item.images[0]}
-        style={[
-          styles.itemImage,
-          isKidsMode && styles.kidsItemImage
-        ]}
+          source={{ uri: item.images[0] }}
+          style={[
+            styles.itemImage,
+            isKidsMode && styles.kidsItemImage
+          ]}
       />
       <View style={[
         styles.itemInfo,
