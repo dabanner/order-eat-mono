@@ -42,8 +42,8 @@ export default function TabletRootLayout() {
             isKidsMode={kidMode} 
             totalItems={totalItems}
             onKidsModeToggle={toggleKidMode}
-            backable={['command']}
-            onActionButton={() => router.push('/command')}
+            backable={['/']}
+            onActionButton={() => router.push('/')}
           />
           <Slot />
         </View>
@@ -56,9 +56,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
   },
 });
 
