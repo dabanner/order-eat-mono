@@ -5,19 +5,26 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useCommandStore } from '@repo/store/dist/commandStore';
 import { ItemCard } from '@/components/ItemCard';
 import { WaitstaffModal } from '@/components/WaitstaffModal';
+import { SuccessModal } from '@/components/SuccessModal';
 
 export default function CommandSection() {
   const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false);
+  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
   const {
     currentCommand,
     updateMenuItemQuantity,
     removeMenuItem,
     toggleItemPaidStatus,
+    toggleItemSubmittedStatus,
     addWaitstaffRequest,
+    confirmCommand,
+    addMenuItem,
+    submitUnsubmittedItems,
   } = useCommandStore();
 
   const handleQuantityChange = (itemId: string, currentQuantity: number, increment: number): void => {
@@ -30,8 +37,19 @@ export default function CommandSection() {
   };
 
   const handleSubmitOrder = () => {
-    console.log('Order submitted');
-    // Handle order submission logic here
+    if (!currentCommand) return;
+    
+    if (currentCommand.menuItems.length === 0) {
+      Alert.alert(
+        "Empty Order",
+        "Please add some items to your order before submitting.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    submitUnsubmittedItems();
+    setSuccessModalVisible(true);
   };
 
   const renderItem = ({ item }) => (
@@ -39,8 +57,34 @@ export default function CommandSection() {
       item={item}
       onQuantityChange={handleQuantityChange}
       onPaymentStatusChange={() => toggleItemPaidStatus(item.id)}
+      onSubmitStatusChange={() => toggleItemSubmittedStatus(item.id)}
+      onAddNewItem={() => addMenuItem(item)}
     />
   );
+
+  const groupAndSortItems = (items) => {
+    const groupedItems = items.reduce((acc, item) => {
+      const key = `${item.id}-${item.submitted ? 'submitted' : 'unsubmitted'}-${item.paid ? 'paid' : 'unpaid'}`;
+      if (!acc[key]) {
+        acc[key] = { ...item, groupQuantity: item.quantity };
+      } else {
+        acc[key].groupQuantity += item.quantity;
+      }
+      return acc;
+    }, {});
+
+    return Object.values(groupedItems).sort((a, b) => {
+      if (a.submitted === b.submitted) {
+        if (a.paid === b.paid) return 0;
+        return a.paid ? 1 : -1;
+      }
+      return a.submitted ? 1 : -1;
+    });
+  };
+
+  const hasUnsubmittedItems = () => {
+    return currentCommand?.menuItems.some(item => !item.submitted) ?? false;
+  };
 
   if (!currentCommand) {
     return (
@@ -50,10 +94,7 @@ export default function CommandSection() {
     );
   }
 
-  const sortedMenuItems = [...currentCommand.menuItems].sort((a, b) => {
-    if (a.paid === b.paid) return 0;
-    return a.paid ? 1 : -1;
-  });
+  const groupedAndSortedItems = groupAndSortItems(currentCommand.menuItems);
 
   return (
     <View style={styles.container}>
@@ -67,10 +108,9 @@ export default function CommandSection() {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={sortedMenuItems}
+        data={groupedAndSortedItems}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        keyExtractor={(item, index) => `${item.id}-${item.submitted}-${item.paid}-${index}`}
         ListHeaderComponent={() => (
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>All Items</Text>
@@ -82,18 +122,29 @@ export default function CommandSection() {
       />
 
       <View style={styles.footer}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.defaultButton]}
-          onPress={handleSubmitOrder}
-        >
-          <Text style={styles.actionButtonText}>Submit Order</Text>
-        </TouchableOpacity>
+        {hasUnsubmittedItems() ? (
+          <TouchableOpacity
+            style={[styles.actionButton, styles.defaultButton]}
+            onPress={handleSubmitOrder}
+          >
+            <Text style={styles.actionButtonText}>Submit Order</Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.preparingText}>
+            Please be patient, we are preparing your order...
+          </Text>
+        )}
       </View>
 
       <WaitstaffModal
         visible={isWaitstaffModalVisible}
         onClose={() => setWaitstaffModalVisible(false)}
         onAction={addWaitstaffRequest}
+      />
+
+      <SuccessModal
+        visible={isSuccessModalVisible}
+        onClose={() => setSuccessModalVisible(false)}
       />
     </View>
   );
@@ -178,6 +229,12 @@ const styles = StyleSheet.create({
   callWaitstaffButtonText: {
     color: '#fff',
     fontSize: 12,
+    fontWeight: '600',
+  },
+  preparingText: {
+    textAlign: 'center',
+    color: '#4CAF50',
+    fontSize: 16,
     fontWeight: '600',
   },
 });

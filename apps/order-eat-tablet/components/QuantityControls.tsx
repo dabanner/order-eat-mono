@@ -6,29 +6,35 @@ interface QuantityControlsProps {
   quantity: number;
   onQuantityChange: (itemId: string, currentQuantity: number, increment: number) => void;
   isPaid: boolean;
+  isSubmitted: boolean;
 }
 
-export const QuantityControls: React.FC<QuantityControlsProps> = ({ itemId, quantity, onQuantityChange, isPaid }) => (
-  <View style={[styles.quantityControls, isPaid && styles.paidQuantityControls]}>
-    {!isPaid && (
+export const QuantityControls: React.FC<QuantityControlsProps> = ({ 
+  itemId, 
+  quantity, 
+  onQuantityChange, 
+  isPaid,
+  isSubmitted,
+}) => {
+  return (
+    <View style={styles.quantityControls}>
       <TouchableOpacity
-        style={styles.quantityButton}
+        style={[styles.quantityButton, (isPaid || isSubmitted) && styles.disabledButton]}
         onPress={() => onQuantityChange(itemId, quantity, -1)}
+        disabled={isPaid || isSubmitted}
       >
         <Text style={styles.quantityButtonText}>-</Text>
       </TouchableOpacity>
-    )}
-    <Text style={[styles.quantityText, isPaid && styles.paidQuantityText]}>{quantity}</Text>
-    {!isPaid && (
+      <Text style={styles.quantityText}>{quantity}</Text>
       <TouchableOpacity
         style={styles.quantityButton}
         onPress={() => onQuantityChange(itemId, quantity, 1)}
       >
         <Text style={styles.quantityButtonText}>+</Text>
       </TouchableOpacity>
-    )}
-  </View>
-);
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   quantityControls: {
@@ -38,10 +44,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 4,
     paddingVertical: 2,
-  },
-  paidQuantityControls: {
-    backgroundColor: 'transparent',
-    justifyContent: 'flex-end',
   },
   quantityButton: {
     width: 28,
@@ -59,13 +61,15 @@ const styles = StyleSheet.create({
     shadowRadius: 1.41,
     elevation: 2,
   },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
   quantityButtonText: {
     color: '#fff',
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: '600',
     lineHeight: 28,
     textAlign: 'center',
-    marginBottom: 6,
   },
   quantityText: {
     marginHorizontal: 12,
@@ -74,9 +78,6 @@ const styles = StyleSheet.create({
     color: '#333',
     minWidth: 24,
     textAlign: 'center',
-  },
-  paidQuantityText: {
-    color: '#4CAF50',
   },
 });
 

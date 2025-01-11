@@ -53,7 +53,7 @@ export interface Command {
   restaurant: Restaurant;
   userId: string;
   reservationDetails: ReservationDetails;
-  menuItems: (MenuItem & { quantity: number; paid: boolean })[];
+  menuItems: (MenuItem & { quantity: number; paid: boolean; submitted: boolean })[];
   totalAmount: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   type: 'takeaway' | 'dinein';
@@ -82,7 +82,7 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 require('@repo/ui/assets/images/restaurants/alivia/alivia-interior.jpeg'),
                 require('@repo/ui/assets/images/restaurants/alivia/alivia-terrace.jpeg'),
               ],
-            latitude: 43.615632, // Polytech coordinates 43.615632, 7.071891
+            latitude: 43.615632,
             longitude: 7.071891,
             time: "25 min",
             menuItems: []
@@ -103,6 +103,7 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 mealTypeId: 'm1',
                 preparationTime: 20,
                 paid: true,
+                submitted: true,
                 sizes: ['S', 'M', 'L'],
                 keyIngredients: [
                 { name: 'Mozzarella', icon: 'cheese' },
@@ -143,6 +144,7 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
                 preparationTime: 10,
                 sizes: ['Regular', 'Large'],
                 paid: true,
+                submitted: true,
                 keyIngredients: [
                   { name: 'Potatoes', icon: 'carrot' },
                   { name: 'Truffle', icon: 'mushroom' },
@@ -195,6 +197,8 @@ interface CommandStore {
     toggleItemPaidStatus: (itemId: string) => void;
     addWaitstaffRequest: (type: WaitstaffRequest['type']) => void;
     completeWaitstaffRequest: (timestamp: string) => void;
+    toggleItemSubmittedStatus: (itemId: string) => void;
+    submitUnsubmittedItems: () => void;
 }
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -218,31 +222,29 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
             ),
         })),
 
-    addMenuItem: (item) =>
-  set((state) => {
-    if (!state.currentCommand) return state;
-    const existingItem = state.currentCommand.menuItems.find((i) => i.id === item.id);
-    let updatedMenuItems;
-    if (existingItem) {
-      updatedMenuItems = state.currentCommand.menuItems.map((i) =>
-        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-      );
-    } else {
-      updatedMenuItems = [...state.currentCommand.menuItems, { ...item, quantity: 1, paid: false }];
-    }
-    const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const updatedCommand = {
-      ...state.currentCommand,
-      menuItems: updatedMenuItems,
-      totalAmount,
-    };
-    return {
-      currentCommand: updatedCommand,
-      pendingCommands: state.pendingCommands.map((command) =>
-        command.id === updatedCommand.id ? updatedCommand : command
-      ),
-    };
-  }),
+    addMenuItem: (item: MenuItem) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+      
+      // Create a new entry for the item
+      const newItem = { ...item, quantity: 1, paid: false, submitted: false };
+      
+      const updatedMenuItems = [...state.currentCommand.menuItems, newItem];
+      const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      
+      const updatedCommand = {
+        ...state.currentCommand,
+        menuItems: updatedMenuItems,
+        totalAmount,
+      };
+      
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
 
     removeMenuItem: (itemId) =>
         set((state) => {
@@ -384,6 +386,40 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
         ),
       };
     }),
-}));
+    toggleItemSubmittedStatus: (itemId: string) =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+      const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
+        item.id === itemId && !item.paid ? { ...item, submitted: !item.submitted } : item
+      );
+      const updatedCommand = {
+        ...state.currentCommand,
+        menuItems: updatedMenuItems,
+      };
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
 
+    submitUnsubmittedItems: () =>
+    set((state) => {
+      if (!state.currentCommand) return state;
+      const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
+        !item.submitted ? { ...item, submitted: true } : item
+      );
+      const updatedCommand = {
+        ...state.currentCommand,
+        menuItems: updatedMenuItems,
+      };
+      return {
+        currentCommand: updatedCommand,
+        pendingCommands: state.pendingCommands.map((command) =>
+          command.id === updatedCommand.id ? updatedCommand : command
+        ),
+      };
+    }),
+}));
 
