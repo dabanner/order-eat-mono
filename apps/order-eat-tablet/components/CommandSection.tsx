@@ -10,7 +10,7 @@ import {
 import { useCommandStore } from '@repo/store/src/commandStore';
 import { ItemCard } from '@/components/ItemCard';
 import { WaitstaffModal } from '@/components/WaitstaffModal';
-import { SuccessModal } from '@/components/SuccessModal';
+import { GenericModal } from './GenericModal';
 
 export default function CommandSection() {
   const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false);
@@ -52,7 +52,7 @@ export default function CommandSection() {
     setSuccessModalVisible(true);
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <ItemCard
       item={item}
       onQuantityChange={handleQuantityChange}
@@ -62,7 +62,7 @@ export default function CommandSection() {
     />
   );
 
-  const groupAndSortItems = (items) => {
+  const groupAndSortItems = (items: any[]) => {
     const groupedItems = items.reduce((acc, item) => {
       const key = `${item.id}-${item.submitted ? 'submitted' : 'unsubmitted'}-${item.paid ? 'paid' : 'unpaid'}`;
       if (!acc[key]) {
@@ -110,7 +110,7 @@ export default function CommandSection() {
       <FlatList
         data={groupedAndSortedItems}
         renderItem={renderItem}
-        keyExtractor={(item, index) => `${item.id}-${item.submitted}-${item.paid}-${index}`}
+        keyExtractor={(item: any, index) => `${item.id}-${item.submitted}-${item.paid}-${index}`}
         ListHeaderComponent={() => (
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>All Items</Text>
@@ -142,9 +142,14 @@ export default function CommandSection() {
         onAction={addWaitstaffRequest}
       />
 
-      <SuccessModal
+      <GenericModal
         visible={isSuccessModalVisible}
         onClose={() => setSuccessModalVisible(false)}
+        image="https://cdn.prod.website-files.com/6364b6fd26e298b11fb9391f/6364b6fd26e298312bb93c5a_63158fe13a6379546cdc4dcb_DrawKit0026_Cooking_%2526_Food_Banner.png"
+        title="Your order has been received!"
+        description="The chef will start prepping your order shortly! We'll serve you when the dishes are ready! Meanwhile feel free to add more to the shopping bag if you like!"
+        buttonText="Gotcha!"
+        autoCloseTime={4}
       />
     </View>
   );
