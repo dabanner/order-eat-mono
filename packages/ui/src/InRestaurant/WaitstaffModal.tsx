@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { WaitstaffRequest } from '@repo/store/src/commandStore';
-import { GenericModal } from '@/components/GenericModal';
+import { GenericModal } from './GenericModal';
 
 interface WaitstaffModalProps {
   visible: boolean;

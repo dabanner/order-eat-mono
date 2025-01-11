@@ -8,9 +8,9 @@ import {
   Alert,
 } from 'react-native';
 import { useCommandStore } from '@repo/store/src/commandStore';
-import { ItemCard } from '@/components/ItemCard';
-import { WaitstaffModal } from '@/components/WaitstaffModal';
-import { GenericModal } from './GenericModal';
+import { ItemCard } from './ItemCard';
+import { WaitstaffModal } from './WaitstaffModal';
+import { GenericModal } from '@repo/ui/src/InRestaurant/GenericModal';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function CommandSection() {

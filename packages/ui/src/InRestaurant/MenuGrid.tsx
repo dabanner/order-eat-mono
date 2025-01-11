@@ -4,7 +4,6 @@ import { MenuItem, Restaurant } from '@repo/store/src/restaurantStore';
 import { MenuItem as MenuItemComponent } from '@repo/ui/src/MenuItem';
 import { useFoodCategoryStore } from '@repo/store/src/foodCaregoryStore';
 import { MenuItemModal } from '@repo/ui/src/MenuItemModal';
-import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { useCommandStore } from '@repo/store/src/commandStore';
 
 interface MenuGridProps {

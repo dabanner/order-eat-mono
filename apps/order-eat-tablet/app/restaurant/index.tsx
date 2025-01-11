@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import TabletMenu from '@/components/TabletMenu';
+import TabletMenu from '@repo/ui/src/InRestaurant/TabletMenu';
 import * as ScreenOrientation from "expo-screen-orientation";
 import { Platform } from 'react-native';
 

@@ -7,7 +7,7 @@ import { Slot, useRouter } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import TopBar from '@repo/ui/src/topbar';
 import { useCommandStore } from '@repo/store/src/commandStore';
-import { KidTheme, useThemeStore } from '@/components/theme';
+import { KidTheme, useThemeStore } from '@repo/ui/src/InRestaurant/theme';
 
 SplashScreen.preventAutoHideAsync();
 

@@ -3,9 +3,9 @@ import { View, Text, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { useCommandStore, Command } from '@repo/store/src/commandStore';
 import Categories from '@repo/ui/src/categories';
-import MenuGrid from '@/components/MenuGrid';
-import { useThemeStore } from '@/components/theme';
-import CommandSection from '@/components/CommandSection';
+import MenuGrid from './MenuGrid';
+import { useThemeStore } from './theme';
+import CommandSection from './CommandSection';
 
 interface TabletMenuProps {
   restaurantId: string;
