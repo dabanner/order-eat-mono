@@ -315,7 +315,7 @@ export const useCommandStore = create<CommandStore>((set, get) => ({
                 currentCommand: null,
                 confirmedCommands: [...state.confirmedCommands, confirmedCommand]
             };
-        }),
+      }),
 
     getCommandById(commandId) {
         console.log('Searching for command:', commandId);

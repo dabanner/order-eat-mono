@@ -42,8 +42,6 @@ export default function TabletRootLayout() {
             isKidsMode={kidMode} 
             totalItems={totalItems}
             onKidsModeToggle={toggleKidMode}
-            backable={['/']}
-            onActionButton={() => router.push('/')}
           />
           <Slot />
         </View>

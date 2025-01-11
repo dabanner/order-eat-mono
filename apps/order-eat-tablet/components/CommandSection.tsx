@@ -13,8 +13,8 @@ import { WaitstaffModal } from '@/components/WaitstaffModal';
 import { SuccessModal } from '@/components/SuccessModal';
 
 export default function CommandSection() {
-  const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false);
-  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
+  const [isWaitstaffModalVisible, setIsWaitstaffModalVisible] = useState(false);
+  const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
   const {
     currentCommand,
     updateMenuItemQuantity,
@@ -49,7 +49,7 @@ export default function CommandSection() {
     }
 
     submitUnsubmittedItems();
-    setSuccessModalVisible(true);
+    setIsSuccessModalVisible(true);
   };
 
   const renderItem = ({ item }) => (
@@ -102,7 +102,7 @@ export default function CommandSection() {
         <Text style={styles.headerTitle}>Your Order</Text>
         <TouchableOpacity
           style={styles.callWaitstaffButton}
-          onPress={() => setWaitstaffModalVisible(true)}
+          onPress={() => setIsWaitstaffModalVisible(true)}
         >
           <Text style={styles.callWaitstaffButtonText}>Call Waitstaff</Text>
         </TouchableOpacity>
@@ -138,13 +138,13 @@ export default function CommandSection() {
 
       <WaitstaffModal
         visible={isWaitstaffModalVisible}
-        onClose={() => setWaitstaffModalVisible(false)}
+        onClose={() => setIsWaitstaffModalVisible(false)}
         onAction={addWaitstaffRequest}
       />
 
       <SuccessModal
         visible={isSuccessModalVisible}
-        onClose={() => setSuccessModalVisible(false)}
+        onClose={() => setIsSuccessModalVisible(false)}
       />
     </View>
   );

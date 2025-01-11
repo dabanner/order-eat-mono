@@ -60,9 +60,9 @@ export default function TabletMenu({ restaurantId }: TabletMenuProps) {
             />
           </ScrollView>
         </View>
-        <View style={styles.commandSection}>
+        {!kidMode&&<View style={styles.commandSection}>
           <CommandSection />
-        </View>
+        </View>}
       </View>
     </SafeAreaView>
   );
