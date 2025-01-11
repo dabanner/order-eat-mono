@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Dimensions, Modal, Alert, ScrollView } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
-import { ReservationData, CustomAlertProps, NativeScannerProps, ManualEntryProps, ScannerHook } from './types';
+import { ReservationData, CustomAlertProps, NativeScannerProps, ManualEntryProps, ScannerHook, StylesType } from './types';
 import { useRouter } from 'expo-router';
 import { useCommandStore } from '@repo/store/src/commandStore';
 

@@ -7,14 +7,14 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useCommandStore } from '@repo/store/dist/commandStore';
+import { useCommandStore } from '@repo/store/src/commandStore';
 import { ItemCard } from '@/components/ItemCard';
 import { WaitstaffModal } from '@/components/WaitstaffModal';
 import { SuccessModal } from '@/components/SuccessModal';
 
 export default function CommandSection() {
-  const [isWaitstaffModalVisible, setIsWaitstaffModalVisible] = useState(false);
-  const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
+  const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false);
+  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
   const {
     currentCommand,
     updateMenuItemQuantity,
@@ -49,7 +49,7 @@ export default function CommandSection() {
     }
 
     submitUnsubmittedItems();
-    setIsSuccessModalVisible(true);
+    setSuccessModalVisible(true);
   };
 
   const renderItem = ({ item }) => (
@@ -102,7 +102,7 @@ export default function CommandSection() {
         <Text style={styles.headerTitle}>Your Order</Text>
         <TouchableOpacity
           style={styles.callWaitstaffButton}
-          onPress={() => setIsWaitstaffModalVisible(true)}
+          onPress={() => setWaitstaffModalVisible(true)}
         >
           <Text style={styles.callWaitstaffButtonText}>Call Waitstaff</Text>
         </TouchableOpacity>
@@ -138,13 +138,13 @@ export default function CommandSection() {
 
       <WaitstaffModal
         visible={isWaitstaffModalVisible}
-        onClose={() => setIsWaitstaffModalVisible(false)}
+        onClose={() => setWaitstaffModalVisible(false)}
         onAction={addWaitstaffRequest}
       />
 
       <SuccessModal
         visible={isSuccessModalVisible}
-        onClose={() => setIsSuccessModalVisible(false)}
+        onClose={() => setSuccessModalVisible(false)}
       />
     </View>
   );
@@ -238,3 +238,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+

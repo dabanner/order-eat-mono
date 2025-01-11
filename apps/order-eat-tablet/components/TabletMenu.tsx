@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
-import { useRestaurantStore } from '@repo/store/dist/restaurantStore';
-import { useCommandStore, Command } from '@repo/store/dist/commandStore';
+import { useRestaurantStore } from '@repo/store/src/restaurantStore';
+import { useCommandStore, Command } from '@repo/store/src/commandStore';
 import Categories from '@repo/ui/src/categories';
 import MenuGrid from '@/components/MenuGrid';
 import { useThemeStore } from '@/components/theme';
@@ -88,3 +88,4 @@ const styles = StyleSheet.create({
     maxWidth: 400, 
   },
 });
+
