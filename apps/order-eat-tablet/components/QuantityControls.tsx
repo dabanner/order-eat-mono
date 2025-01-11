@@ -66,10 +66,11 @@ const styles = StyleSheet.create({
   },
   quantityButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 28,
     fontWeight: '600',
     lineHeight: 28,
     textAlign: 'center',
+    marginBottom: 6,
   },
   quantityText: {
     marginHorizontal: 12,

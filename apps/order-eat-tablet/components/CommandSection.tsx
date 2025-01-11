@@ -11,6 +11,7 @@ import { useCommandStore } from '@repo/store/src/commandStore';
 import { ItemCard } from '@/components/ItemCard';
 import { WaitstaffModal } from '@/components/WaitstaffModal';
 import { GenericModal } from './GenericModal';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function CommandSection() {
   const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false);
@@ -86,53 +87,94 @@ export default function CommandSection() {
     return currentCommand?.menuItems.some(item => !item.submitted) ?? false;
   };
 
-  if (!currentCommand) {
+  const calculateOrderSummary = () => {
+    if (!currentCommand) return { totalAmount: 0, paidAmount: 0, remainingAmount: 0 };
+
+    const total = currentCommand.totalAmount;
+    const paid = currentCommand.menuItems.reduce((sum, item) => sum + (item.paid ? item.price * item.quantity : 0), 0);
+    return {
+      totalAmount: total,
+      paidAmount: paid,
+      remainingAmount: total - paid
+    };
+  };
+
+  if (!currentCommand || currentCommand.menuItems.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No active command</Text>
+        <View style={styles.emptyIconContainer}>
+          <MaterialIcons name="restaurant-menu" size={64} color="#4CAF50" />
+        </View>
+        <Text style={styles.emptyTitle}>Let's start your feast!</Text>
+        <Text style={styles.emptyText}>
+          Explore our menu and add some delicious dishes to your order.
+        </Text>
+        <TouchableOpacity style={styles.emptyButton}>
+          <Text style={styles.emptyButtonText}>Browse Menu</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   const groupedAndSortedItems = groupAndSortItems(currentCommand.menuItems);
+  const { totalAmount, paidAmount, remainingAmount } = calculateOrderSummary();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Order</Text>
+        <View style={styles.headerTitleContainer}>
+          <MaterialIcons name="receipt" size={28} color="#4CAF50" />
+          <Text style={styles.headerTitle}>Your Order</Text>
+        </View>
         <TouchableOpacity
           style={styles.callWaitstaffButton}
           onPress={() => setWaitstaffModalVisible(true)}
         >
+          <MaterialIcons name="room-service" size={20} color="#fff" />
           <Text style={styles.callWaitstaffButtonText}>Call Waitstaff</Text>
         </TouchableOpacity>
+      </View>
+      <View style={styles.orderSummary}>
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryLabel}>Total:</Text>
+          <Text style={styles.summaryValue}>${totalAmount.toFixed(2)}</Text>
+        </View>
+        {paidAmount > 0 && (
+          <>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Paid:</Text>
+              <Text style={styles.summaryValue}>${paidAmount.toFixed(2)}</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Remaining:</Text>
+              <Text style={[styles.summaryValue, styles.remainingValue]}>${remainingAmount.toFixed(2)}</Text>
+            </View>
+          </>
+        )}
       </View>
       <FlatList
         data={groupedAndSortedItems}
         renderItem={renderItem}
         keyExtractor={(item: any, index) => `${item.id}-${item.submitted}-${item.paid}-${index}`}
-        ListHeaderComponent={() => (
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>All Items</Text>
-            <Text style={styles.totalAmount}>
-              Total: ${currentCommand.totalAmount.toFixed(2)}
-            </Text>
-          </View>
-        )}
+        contentContainerStyle={styles.listContent}
       />
 
       <View style={styles.footer}>
         {hasUnsubmittedItems() ? (
           <TouchableOpacity
-            style={[styles.actionButton, styles.defaultButton]}
+            style={styles.submitButton}
             onPress={handleSubmitOrder}
           >
-            <Text style={styles.actionButtonText}>Submit Order</Text>
+            <MaterialIcons name="send" size={24} color="#fff" />
+            <Text style={styles.submitButtonText}>Submit Order</Text>
           </TouchableOpacity>
         ) : (
-          <Text style={styles.preparingText}>
-            Please be patient, we are preparing your order...
-          </Text>
+          <View style={styles.preparingContainer}>
+            <MaterialIcons name="restaurant" size={24} color="#4CAF50" />
+            <Text style={styles.preparingText}>
+              Your order is being prepared...
+            </Text>
+          </View>
         )}
       </View>
 
@@ -146,9 +188,9 @@ export default function CommandSection() {
         visible={isSuccessModalVisible}
         onClose={() => setSuccessModalVisible(false)}
         image="https://cdn.prod.website-files.com/6364b6fd26e298b11fb9391f/6364b6fd26e298312bb93c5a_63158fe13a6379546cdc4dcb_DrawKit0026_Cooking_%2526_Food_Banner.png"
-        title="Your order has been received!"
-        description="The chef will start prepping your order shortly! We'll serve you when the dishes are ready! Meanwhile feel free to add more to the shopping bag if you like!"
-        buttonText="Gotcha!"
+        title="Order Received!"
+        description="Our chefs are firing up the kitchen! We'll serve you when everything's ready. Feel free to add more items if you'd like!"
+        buttonText="Got it!"
         autoCloseTime={4}
       />
     </View>
@@ -158,88 +200,136 @@ export default function CommandSection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f9f9',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
+    padding: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    elevation: 2,
+  },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    flex: 1,
+    marginLeft: 8,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#fff',
+  orderSummary: {
+    backgroundColor: '#f0f8ff',
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+  summaryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
-  totalAmount: {
+  summaryLabel: {
     fontSize: 16,
-    color: '#FF9800',
+    color: '#555',
     fontWeight: '600',
+  },
+  summaryValue: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  remainingValue: {
+    color: '#FF9800',
+  },
+  listContent: {
+    paddingBottom: 16,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 24,
+  },
+  emptyIconContainer: {
+    backgroundColor: '#E8F5E9',
+    borderRadius: 50,
+    padding: 16,
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   emptyText: {
-    textAlign: 'center',
-    fontSize: 16,
+    fontSize: 18,
     color: '#666',
-    marginTop: 24,
+    marginBottom: 24,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  emptyButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  emptyButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
   },
   footer: {
-    padding: 12,
+    padding: 16,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
   },
-  actionButton: {
+  submitButton: {
+    backgroundColor: '#4CAF50',
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 8,
   },
-  defaultButton: {
-    backgroundColor: '#4CAF50',
-  },
-  actionButtonText: {
+  submitButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
+    marginLeft: 8,
   },
   callWaitstaffButton: {
     backgroundColor: '#FF9800',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   callWaitstaffButtonText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '600',
+    marginLeft: 4,
+  },
+  preparingContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   preparingText: {
-    textAlign: 'center',
+    marginLeft: 8,
     color: '#4CAF50',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
   },
 });
