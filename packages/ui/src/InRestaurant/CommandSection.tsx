@@ -109,9 +109,6 @@ export default function CommandSection() {
         <Text style={styles.emptyText}>
           Explore our menu and add some delicious dishes to your order.
         </Text>
-        <TouchableOpacity style={styles.emptyButton}>
-          <Text style={styles.emptyButtonText}>Browse Menu</Text>
-        </TouchableOpacity>
       </View>
     );
   }
@@ -275,17 +272,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'center',
     lineHeight: 24,
-  },
-  emptyButton: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  emptyButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
   },
   footer: {
     padding: 16,
