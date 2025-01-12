@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Platform, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import TabletMenu from '@repo/ui/src/InRestaurant/TabletMenu';
 import { useCommandStore } from '@repo/store/src/commandStore';
 import { useRestaurantStore } from '@repo/store/src/restaurantStore';
@@ -79,98 +79,69 @@ export default function Index() {
     setCurrentCommand(section.command);
   };
 
+  const renderSection = (section: TableSection) => (
+    <View key={section.id} style={styles.section}>
+      <View 
+        style={[
+          styles.sectionContent,
+          section.orientation === 'down' && styles.sectionContentRotated
+        ]}
+        onTouchStart={() => handleSectionFocus(section)}
+      >
+        <View style={styles.menuSection}>
+          <View style={styles.categoriesContainer}>
+            <Categories isKidsMode={section.kidMode} />
+          </View>
+          <ScrollView 
+            style={styles.menuGridContainer}
+            contentContainerStyle={styles.menuGridContent}
+          >
+            <MenuGrid 
+              menuItems={restaurant?.menuItems || []} 
+              isKidsMode={section.kidMode}
+              restaurant={restaurant}
+            />
+          </ScrollView>
+        </View>
+        {!section.kidMode && (
+          <View style={styles.commandSection}>
+            <CommandSection />
+          </View>
+        )}
+        <View style={[
+          styles.kidsModeToggle,
+          section.orientation === 'down' && styles.kidsModeToggleRotated
+        ]}>
+          <View style={styles.sectionIdentifier}>
+            <Text style={styles.sectionText}>Section {section.id}</Text>
+          </View>
+          <CustomSwitch 
+            buttonColor={'#FFFFFF'}
+            switchBackgroundColor={'#BB4430'}
+            onSwitchBackgroundColor={'#7EBDC2'}
+            switchLeftText={"‍👶"}
+            switchRightText={"👨"}
+            onSwitch={() => handleKidModeToggle(section.id, true)}
+            onSwitchReverse={() => handleKidModeToggle(section.id, false)}
+            startOnLeft={!section.kidMode}
+          />
+        </View>
+      </View>
+    </View>
+  );
+
   return (
     <GestureHandlerRootView style={styles.gestureRoot}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           {/* Top Row (Upside Down) */}
-          <View style={styles.row}>
-            {tableSections.slice(0, 2).map((section) => (
-              <View key={section.id} style={styles.section}>
-                <View 
-                  style={[styles.sectionContent, styles.sectionContentRotated]}
-                  onTouchStart={() => handleSectionFocus(section)}
-                >
-                  <View style={styles.menuSection}>
-                    <View style={styles.categoriesContainer}>
-                      <Categories isKidsMode={section.kidMode} />
-                    </View>
-                    <View style={styles.menuGridContainer}>
-                      <MenuGrid 
-                        menuItems={restaurant?.menuItems || []} 
-                        isKidsMode={section.kidMode}
-                        restaurant={restaurant}
-                      />
-                    </View>
-                  </View>
-                  {!section.kidMode && (
-                    <View style={styles.commandSection}>
-                      <CommandSection />
-                    </View>
-                  )}
-                  <View style={[styles.kidsModeToggle, styles.kidsModeToggleRotated]}>
-                    <View style={styles.sectionIdentifier}>
-                      <Text style={styles.sectionText}>Section {section.id}</Text>
-                    </View>
-                    <CustomSwitch 
-                      buttonColor={'#FFFFFF'}
-                      switchBackgroundColor={'#BB4430'}
-                      onSwitchBackgroundColor={'#7EBDC2'}
-                      switchLeftText={"‍👶"}
-                      switchRightText={"👨"}
-                      onSwitch={() => handleKidModeToggle(section.id, true)}
-                      onSwitchReverse={() => handleKidModeToggle(section.id, false)}
-                      startOnLeft={!section.kidMode}
-                    />
-                  </View>
-                </View>
-              </View>
-            ))}
+          <View style={styles.rowTop}>
+            {tableSections.slice(0, 2).map(renderSection)}
           </View>
 
           {/* Bottom Row (Normal Orientation) */}
-          <View style={styles.row}>
-            {tableSections.slice(2, 4).map((section) => (
-              <View key={section.id} style={styles.section}>
-                <View 
-                  style={styles.sectionContent}
-                  onTouchStart={() => handleSectionFocus(section)}
-                >
-                  <View style={styles.menuSection}>
-                    <View style={styles.categoriesContainer}>
-                      <Categories isKidsMode={section.kidMode} />
-                    </View>
-                    <View style={styles.menuGridContainer}>
-                      <MenuGrid 
-                        menuItems={restaurant?.menuItems || []} 
-                        isKidsMode={section.kidMode}
-                        restaurant={restaurant}
-                      />
-                    </View>
-                  </View>
-                  {!section.kidMode && (
-                    <View style={styles.commandSection}>
-                      <CommandSection />
-                    </View>
-                  )}
-                  <View style={styles.kidsModeToggle}>
-                    <View style={styles.sectionIdentifier}>
-                      <Text style={styles.sectionText}>Section {section.id}</Text>
-                    </View>
-                    <CustomSwitch 
-                      buttonColor={'#FFFFFF'}
-                      switchBackgroundColor={'#BB4430'}
-                      onSwitchBackgroundColor={'#7EBDC2'}
-                      switchLeftText={"‍👶"}
-                      switchRightText={"👨"}
-                      onSwitch={() => handleKidModeToggle(section.id, true)}
-                      onSwitchReverse={() => handleKidModeToggle(section.id, false)}
-                      startOnLeft={!section.kidMode}
-                    />
-                  </View>
-                </View>
-              </View>
-            ))}
+          <View style={styles.rowBot}>
+            {tableSections.slice(2, 4).map(renderSection)}
           </View>
         </View>
       </SafeAreaView>
@@ -184,25 +155,40 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FF8C00'
   },
   container: {
     flex: 1,
     flexDirection: 'column',
+    padding: 16, 
   },
-  row: {
+  rowTop: {
     flex: 1,
     flexDirection: 'row',
+    gap: 28,
+    marginBottom: 28,
+  },
+  rowBot: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 28,
+    marginTop: 28,
   },
   section: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderWidth: 3,
+    borderColor: '#FF8C00',
+    borderRadius: 12, 
     overflow: 'hidden',
+    backgroundColor: '#fff',
+    elevation: 2,
+    marginLeft: 28,
+    marginRight: 28,
   },
   sectionContent: {
     flex: 1,
     flexDirection: 'row',
+    
   },
   sectionContentRotated: {
     transform: [{ rotate: '180deg' }],
@@ -219,7 +205,9 @@ const styles = StyleSheet.create({
   },
   menuGridContainer: {
     flex: 1,
-    paddingHorizontal: 16,
+  },
+  menuGridContent: {
+    padding: 16,
   },
   commandSection: {
     width: '30%',
