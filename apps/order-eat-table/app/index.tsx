@@ -11,11 +11,11 @@ import MenuGrid from '@repo/ui/src/InRestaurant/MenuGrid';
 import { useThemeStore } from '@repo/ui/src/InRestaurant/theme';
 import CustomSwitch from 'react-native-custom-switch-new';
 
-
 interface TableSection {
   id: number;
   command: any;
   kidMode: boolean;
+  orientation: 'up' | 'down';
 }
 
 export default function Index() {
@@ -23,15 +23,13 @@ export default function Index() {
   const restaurant = restaurants[0];
   const { setCurrentCommand, addCommand } = useCommandStore();
   
-  // State for each table section
   const [tableSections, setTableSections] = useState<TableSection[]>([
-    { id: 1, command: null, kidMode: false },
-    { id: 2, command: null, kidMode: false },
-    { id: 3, command: null, kidMode: false },
-    { id: 4, command: null, kidMode: false },
+    { id: 1, command: null, kidMode: false, orientation: 'down' },
+    { id: 2, command: null, kidMode: false, orientation: 'down' },
+    { id: 3, command: null, kidMode: false, orientation: 'up' },
+    { id: 4, command: null, kidMode: false, orientation: 'up' },
   ]);
 
-  // Initialize commands for each section
   React.useEffect(() => {
     if (restaurant) {
       tableSections.forEach((section) => {
@@ -67,7 +65,6 @@ export default function Index() {
     }
   }, [restaurant, addCommand]);
 
-  // Handle kid mode toggle for each section
   const handleKidModeToggle = (sectionId: number, value: boolean) => {
     setTableSections(prev =>
       prev.map(section =>
@@ -78,7 +75,6 @@ export default function Index() {
     );
   };
 
-  // Set current command when interacting with a section
   const handleSectionFocus = (section: TableSection) => {
     setCurrentCommand(section.command);
   };
@@ -87,89 +83,91 @@ export default function Index() {
     <GestureHandlerRootView style={styles.gestureRoot}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
-          {/* Top Row */}
+          {/* Top Row (Upside Down) */}
           <View style={styles.row}>
             {tableSections.slice(0, 2).map((section) => (
-              <View
-                key={section.id}
-                style={styles.section}
-                onTouchStart={() => handleSectionFocus(section)}
-              >
-                <View style={styles.menuSection}>
-                  <View style={styles.categoriesContainer}>
-                    <Categories isKidsMode={section.kidMode} />
+              <View key={section.id} style={styles.section}>
+                <View 
+                  style={[styles.sectionContent, styles.sectionContentRotated]}
+                  onTouchStart={() => handleSectionFocus(section)}
+                >
+                  <View style={styles.menuSection}>
+                    <View style={styles.categoriesContainer}>
+                      <Categories isKidsMode={section.kidMode} />
+                    </View>
+                    <View style={styles.menuGridContainer}>
+                      <MenuGrid 
+                        menuItems={restaurant?.menuItems || []} 
+                        isKidsMode={section.kidMode}
+                        restaurant={restaurant}
+                      />
+                    </View>
                   </View>
-                  <View style={styles.menuGridContainer}>
-                    <MenuGrid 
-                      menuItems={restaurant?.menuItems || []} 
-                      isKidsMode={section.kidMode}
-                      restaurant={restaurant}
+                  {!section.kidMode && (
+                    <View style={styles.commandSection}>
+                      <CommandSection />
+                    </View>
+                  )}
+                  <View style={[styles.kidsModeToggle, styles.kidsModeToggleRotated]}>
+                    <View style={styles.sectionIdentifier}>
+                      <Text style={styles.sectionText}>Section {section.id}</Text>
+                    </View>
+                    <CustomSwitch 
+                      buttonColor={'#FFFFFF'}
+                      switchBackgroundColor={'#BB4430'}
+                      onSwitchBackgroundColor={'#7EBDC2'}
+                      switchLeftText={"‍👶"}
+                      switchRightText={"👨"}
+                      onSwitch={() => handleKidModeToggle(section.id, true)}
+                      onSwitchReverse={() => handleKidModeToggle(section.id, false)}
+                      startOnLeft={!section.kidMode}
                     />
                   </View>
-                </View>
-                {!section.kidMode && (
-                  <View style={styles.commandSection}>
-                    <CommandSection />
-                  </View>
-                )}
-                <View style={styles.kidsModeToggle}>
-                  <View style={styles.sectionIdentifier}>
-                    <Text style={styles.sectionText}>Section {section.id}</Text>
-                  </View>
-                  <CustomSwitch 
-                    buttonColor={'#FFFFFF'}
-                    switchBackgroundColor={'#BB4430'}
-                    onSwitchBackgroundColor={'#7EBDC2'}
-                    switchLeftText={"‍👶"}
-                    switchRightText={"👨"}
-                    onSwitch={() => handleKidModeToggle(section.id, true)}
-                    onSwitchReverse={() => handleKidModeToggle(section.id, false)}
-                    startOnLeft={!section.kidMode}
-                  />
                 </View>
               </View>
             ))}
           </View>
 
-          {/* Bottom Row */}
+          {/* Bottom Row (Normal Orientation) */}
           <View style={styles.row}>
             {tableSections.slice(2, 4).map((section) => (
-              <View
-                key={section.id}
-                style={styles.section}
-                onTouchStart={() => handleSectionFocus(section)}
-              >
-                <View style={styles.menuSection}>
-                  <View style={styles.categoriesContainer}>
-                    <Categories isKidsMode={section.kidMode} />
+              <View key={section.id} style={styles.section}>
+                <View 
+                  style={styles.sectionContent}
+                  onTouchStart={() => handleSectionFocus(section)}
+                >
+                  <View style={styles.menuSection}>
+                    <View style={styles.categoriesContainer}>
+                      <Categories isKidsMode={section.kidMode} />
+                    </View>
+                    <View style={styles.menuGridContainer}>
+                      <MenuGrid 
+                        menuItems={restaurant?.menuItems || []} 
+                        isKidsMode={section.kidMode}
+                        restaurant={restaurant}
+                      />
+                    </View>
                   </View>
-                  <View style={styles.menuGridContainer}>
-                    <MenuGrid 
-                      menuItems={restaurant?.menuItems || []} 
-                      isKidsMode={section.kidMode}
-                      restaurant={restaurant}
+                  {!section.kidMode && (
+                    <View style={styles.commandSection}>
+                      <CommandSection />
+                    </View>
+                  )}
+                  <View style={styles.kidsModeToggle}>
+                    <View style={styles.sectionIdentifier}>
+                      <Text style={styles.sectionText}>Section {section.id}</Text>
+                    </View>
+                    <CustomSwitch 
+                      buttonColor={'#FFFFFF'}
+                      switchBackgroundColor={'#BB4430'}
+                      onSwitchBackgroundColor={'#7EBDC2'}
+                      switchLeftText={"‍👶"}
+                      switchRightText={"👨"}
+                      onSwitch={() => handleKidModeToggle(section.id, true)}
+                      onSwitchReverse={() => handleKidModeToggle(section.id, false)}
+                      startOnLeft={!section.kidMode}
                     />
                   </View>
-                </View>
-                {!section.kidMode && (
-                  <View style={styles.commandSection}>
-                    <CommandSection />
-                  </View>
-                )}
-                <View style={styles.kidsModeToggle}>
-                  <View style={styles.sectionIdentifier}>
-                    <Text style={styles.sectionText}>Section {section.id}</Text>
-                  </View>
-                  <CustomSwitch 
-                    buttonColor={'#FFFFFF'}
-                    switchBackgroundColor={'#BB4430'}
-                    onSwitchBackgroundColor={'#7EBDC2'}
-                    switchLeftText={"‍👶"}
-                    switchRightText={"👨"}
-                    onSwitch={() => handleKidModeToggle(section.id, true)}
-                    onSwitchReverse={() => handleKidModeToggle(section.id, false)}
-                    startOnLeft={!section.kidMode}
-                  />
                 </View>
               </View>
             ))}
@@ -200,7 +198,14 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: '#e0e0e0',
-    position: 'relative',
+    overflow: 'hidden',
+  },
+  sectionContent: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  sectionContentRotated: {
+    transform: [{ rotate: '180deg' }],
   },
   menuSection: {
     flex: 1,
@@ -218,10 +223,6 @@ const styles = StyleSheet.create({
   },
   commandSection: {
     width: '30%',
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
     borderLeftWidth: 1,
     borderLeftColor: '#e0e0e0',
     backgroundColor: '#fff',
@@ -244,6 +245,9 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     zIndex: 10,
+  },
+  kidsModeToggleRotated: {
+    transform: [{ rotate: '180deg' }],
   },
   sectionIdentifier: {
     marginRight: 8,
