@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "../../packages/ui/src/InRestaurant/GenericModal.tsx", "../../packages/ui/src/InRestaurant/ItemCard.tsx", "../../packages/ui/src/InRestaurant/MenuGrid.tsx", "../../packages/ui/src/InRestaurant/QuantityControls.tsx", "../../packages/ui/src/InRestaurant/TabletMenu.tsx", "../../packages/ui/src/InRestaurant/WaitstaffModal.tsx"  ]
 }

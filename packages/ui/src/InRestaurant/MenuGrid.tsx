@@ -4,7 +4,6 @@ import { MenuItem, Restaurant } from '@repo/store/src/restaurantStore';
 import { MenuItem as MenuItemComponent } from '@repo/ui/src/MenuItem';
 import { useFoodCategoryStore } from '@repo/store/src/foodCaregoryStore';
 import { MenuItemModal } from '@repo/ui/src/MenuItemModal';
-import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 import { useCommandStore } from '@repo/store/src/commandStore';
 
 interface MenuGridProps {
@@ -41,7 +40,9 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant }: MenuGrid
     };
 
     const getItemQuantity = (itemId: string) => {
-        return currentCommand?.menuItems.find(item => item.id === itemId)?.quantity || 0;
+        return currentCommand?.menuItems
+            .filter(item => item.id === itemId && !item.submitted)
+            .reduce((total, item) => total + item.quantity, 0) || 0;
     };
 
     return (

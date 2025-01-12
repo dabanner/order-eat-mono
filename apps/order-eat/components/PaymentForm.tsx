@@ -14,7 +14,6 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ command, updateReserva
   const [name, setName] = useState('');
 
   const handlePayment = () => {
-    // In a real app, you would process the payment here
     updateReservationDetails({ status: 'confirmed' });
   };
 

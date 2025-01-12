@@ -1,5 +1,5 @@
 {
-  "name": "order-eat-tablet",
+  "name": "order-eat-table",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -11,8 +11,8 @@
     "test": "jest --watchAll",
     "lint": "expo lint",
     "check-types": "tsc --noEmit",
-    "dev": "npx expo start --port 8082",
-    "tunnel": "npx expo start --tunnel --port 8082"
+    "dev": "npx expo start --port 8083",
+    "tunnel": "npx expo start --tunnel --port 8083"
   },
   "jest": {
     "preset": "jest-expo"
@@ -42,8 +42,7 @@
     "react-native-screens": "~4.1.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
-    "expo-camera": "~16.0.9",
-    "expo-screen-orientation": "~8.0.3"
+    "expo-camera": "~16.0.9"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
