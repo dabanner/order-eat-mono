@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { MenuItem as MenuItemType, Restaurant } from '@repo/store/src/restaurantStore';
 import { FoodCategory } from '@repo/store/src/foodCaregoryStore';
 import { MenuItemModal } from '@repo/ui/src/MenuItemModal';
 import { MenuItem } from '@repo/ui/src/MenuItem'
+import {isLoading} from "expo-font";
+import MenuListSkeleton from "@repo/ui/src/MenuListSkeleton";
 
 interface MenuListProps {
   menuItems: MenuItemType[];
@@ -27,6 +29,23 @@ export function MenuList({
   showAddButton = false 
 }: MenuListProps) {
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItemType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log('Loading timeout completed, setting isLoading to false');
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return <MenuListSkeleton />;
+  }
+
 
   return (
     <View style={styles.container}>
