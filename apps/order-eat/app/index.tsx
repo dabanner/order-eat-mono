@@ -98,14 +98,14 @@ export default function Index() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'ios' ? -35 : 0,
   },
   container: {
     flex: 1,
   },
   content: {
-    padding: 16,
     paddingTop: 0,
+    padding: 16,
     maxWidth: '100%',
     width: '100%',
     marginHorizontal: 'auto',

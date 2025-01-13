@@ -102,20 +102,16 @@ export default function TopBar({
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
     header: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignItems: 'center',
         paddingHorizontal: 16,
-        height: Platform.OS === 'web' ? 64 : 56,
+        marginVertical: Platform.OS === 'ios' ? -50 : 0,
+        height: Platform.OS === 'web' ? 64 : 55,
     },
     logoButton: {
         padding: 8,
-        position: 'absolute',
         left: 5,
         display: Platform.OS === 'web' ? 'flex' : 'none',
     },

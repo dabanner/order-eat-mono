@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import {View, StyleSheet, ScrollView, Platform} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCommandStore } from '@repo/store/src/commandStore';
@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'ios' ? -35 : 0,
   },
   content: {
     flex: 1,
