@@ -115,6 +115,158 @@ export const registerImage = (imageUrl: string): number => {
 export const getImageUrl = (imageId: number): string | undefined => {
   return imageRegistry[imageId];
 };
+const descriptions = [
+  {
+    shortName: "foie gras",
+    description: "A luxurious French delicacy made from specially prepared duck or goose liver, with a rich, buttery texture and complex flavor",
+    descriptionForKids: ""
+  },
+  {
+    shortName: "soft-boiled egg",
+    description: "An egg cooked until the white is set but the yolk remains creamy and runny",
+    descriptionForKids: "A yummy egg that's a little runny inside, perfect for dipping toast soldiers"
+  },
+  {
+    shortName: "goat cheese",
+    description: "A tangy, creamy cheese made from goat's milk with a distinctive flavor",
+    descriptionForKids: "A special white cheese that's soft and creamy"
+  },
+  {
+    shortName: "salmon",
+    description: "Fresh, tender pink fish that can be grilled, smoked, or served raw, rich in healthy omega-3 oils",
+    descriptionForKids: "Tasty pink fish that's good for you and makes you strong"
+  },
+  {
+    shortName: "crab maki",
+    description: "Japanese sushi roll filled with crab meat, rice, and vegetables, wrapped in seaweed",
+    descriptionForKids: "Fun rice rolls with yummy crab inside"
+  },
+  {
+    shortName: "burrata",
+    description: "A fresh Italian cheese made from mozzarella and cream, with a soft, creamy center",
+    descriptionForKids: "Super creamy white cheese that's like a special treat"
+  },
+  {
+    shortName: "pizza",
+    description: "Italian flatbread topped with tomato sauce, cheese, and various toppings, baked until crispy",
+    descriptionForKids: "Delicious round bread with melty cheese and toppings"
+  },
+  {
+    shortName: "lasagna",
+    description: "Layered Italian pasta dish with meat sauce, cheese, and bechamel",
+    descriptionForKids: "Yummy layers of pasta, sauce, and cheese stacked together"
+  },
+  {
+    shortName: "beef burger",
+    description: "Ground beef patty served on a bun with various toppings and condiments",
+    descriptionForKids: "Tasty meat patty on a soft bun with your favorite toppings"
+  },
+  {
+    shortName: "beef chuck",
+    description: "Tender, slow-cooked beef from the shoulder area, full of rich flavor",
+    descriptionForKids: "Soft, juicy beef that melts in your mouth"
+  },
+  {
+    shortName: "half cooked tuna",
+    description: "Seared tuna steak, cooked on the outside while remaining rare in the center",
+    descriptionForKids: ""
+  },
+  {
+    shortName: "brownie",
+    description: "Rich, dense chocolate cake square with a fudgy texture",
+    descriptionForKids: "Chocolate cake square that's super chocolatey and delicious"
+  },
+  {
+    shortName: "chocolate",
+    description: "Sweet treat made from cocoa beans, available in dark, milk, or white varieties",
+    descriptionForKids: "Sweet, creamy treat that makes you happy"
+  },
+  {
+    shortName: "lemon",
+    description: "Bright citrus fruit with tart, refreshing flavor",
+    descriptionForKids: "Yellow fruit that's a little sour but fun to taste"
+  },
+  {
+    shortName: "rasp and peaches",
+    description: "Fresh combination of sweet peaches and tart raspberries",
+    descriptionForKids: "Sweet peachy fruit with little red berries"
+  },
+  {
+    shortName: "strawberries",
+    description: "Sweet, bright red berries with a juicy texture",
+    descriptionForKids: "Sweet red berries that are super yummy"
+  },
+  {
+    shortName: "seasonal fruit",
+    description: "Fresh fruits that are currently in season, ensuring peak flavor",
+    descriptionForKids: "Fresh, tasty fruits picked when they're perfectly ready"
+  },
+  {
+    shortName: "tiramisu",
+    description: "Italian dessert made with coffee-soaked ladyfingers and mascarpone cream",
+    descriptionForKids: "Creamy Italian dessert with soft cookies inside"
+  },
+  {
+    shortName: "coke",
+    description: "Carbonated cola beverage with a classic sweet taste",
+    descriptionForKids: "Bubbly sweet drink for special occasions"
+  },
+  {
+    shortName: "ice tea",
+    description: "Chilled tea served over ice, often flavored with lemon or fruit",
+    descriptionForKids: "Cold, refreshing tea that's perfect when it's hot outside"
+  },
+  {
+    shortName: "bottled water",
+    description: "Pure, still water served in a bottle",
+    descriptionForKids: "Fresh, clean water in a bottle"
+  },
+  {
+    shortName: "sparkling water",
+    description: "Carbonated water with refreshing bubbles",
+    descriptionForKids: "Water with fun bubbles that tickle your nose"
+  },
+  {
+    shortName: "spritz",
+    description: "Italian cocktail made with prosecco, bitter liqueur, and soda water",
+    descriptionForKids: ""
+  },
+  {
+    shortName: "margarita",
+    description: "Cocktail made with tequila, lime juice, and triple sec, often served with salt",
+    descriptionForKids: ""
+  },
+  {
+    shortName: "tequila",
+    description: "Mexican spirit made from the blue agave plant",
+    descriptionForKids: ""
+  },
+  {
+    shortName: "mojito",
+    description: "Cuban cocktail made with rum, mint, lime, sugar, and soda water",
+    descriptionForKids: ""
+  },
+  {
+    shortName: "martini",
+    description: "Classic cocktail made with gin or vodka and vermouth",
+    descriptionForKids: ""
+  },
+  {
+    shortName: "lemonade",
+    description: "Refreshing drink made from lemon juice, water, and sugar",
+    descriptionForKids: "Sweet and sour drink made from lemons"
+  },
+  {
+    shortName: "apple juice",
+    description: "Sweet beverage made from pressed apples",
+    descriptionForKids: "Sweet drink made from fresh apples"
+  },
+  {
+    shortName: "café",
+    description: "Hot brewed coffee made from roasted coffee beans",
+    descriptionForKids: ""
+  }
+]
 
 export const useRestaurantStore = create<RestaurantStore>((set) => ({
   restaurants: [sampleRestaurant],
@@ -132,8 +284,8 @@ export const useRestaurantStore = create<RestaurantStore>((set) => ({
       const mappedMenuItems = response.data.map((backendItem: any) => ({
         id: backendItem._id,  // ✅ Map from backend
         name: backendItem.fullName, // ✅ Map from backend
-        description: "Default description", // Keep your default values
-        descriptionForKids: "Default kids description",
+        description: descriptions.find((desc)=> desc.shortName === backendItem.shortName)?.description, // Keep your default values
+        descriptionForKids: descriptions.find((desc)=> desc.shortName === backendItem.shortName)?.descriptionForKids, // Keep your default values
         price: backendItem.price, // ✅ Map from backend
         images: backendItem.image ? [backendItem.image] : [], // ✅ Map from backend (as array)
         foodCategoryId: "f1", // Default value

@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TabletScannerPage from '@/components/TabletScannerPage';
+import { useRestaurantStore } from '@repo/store/src/restaurantStore';
 
 export default function Index() {
+  useEffect(() => {
+    const init = async () => {
+      await useRestaurantStore.getState().fetchMenuItems();
+    };
+  });
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView 
