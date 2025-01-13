@@ -9,7 +9,9 @@ export default function Index() {
     const init = async () => {
       await useRestaurantStore.getState().fetchMenuItems();
     };
+    init();
   });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView 

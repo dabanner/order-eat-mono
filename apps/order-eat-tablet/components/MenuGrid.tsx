@@ -17,7 +17,9 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant }: MenuGrid
     const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
     const { addMenuItem, currentCommand } = useCommandStore();
 
-    const groupedItems = menuItems.reduce((acc, item) => {
+    const newItems = isKidsMode ? menuItems.filter((menuItem)=> menuItem.descriptionForKids.length > 0) : menuItems
+
+    const groupedItems = newItems.reduce((acc, item) => {
         if (!acc[item.foodCategoryId]) {
             acc[item.foodCategoryId] = [];
         }

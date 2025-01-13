@@ -76,7 +76,6 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
             description: 'Experience authentic Italian and Mediterranean cuisine in a charming setting on the French Riviera.',
             shortDescription: 'Italian - Mediterranean - Pizza - Pasta',
             rating: 4.8,
-            categoryId: "c1",
             images: [
                 require('@repo/ui/assets/images/restaurants/alivia/alivia-exterior.jpeg'),
                 require('@repo/ui/assets/images/restaurants/alivia/alivia-interior.jpeg'),
