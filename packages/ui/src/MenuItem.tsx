@@ -29,11 +29,11 @@ export function MenuItem({
       onPress={onPress}
     >
       <Image
-        source={item.images[0]}
-        style={[
-          styles.itemImage,
-          isKidsMode && styles.kidsItemImage
-        ]}
+          source={{ uri: item.images[0] }}
+          style={[
+            styles.itemImage,
+            isKidsMode && styles.kidsItemImage
+          ]}
       />
       <View style={[
         styles.itemInfo,
@@ -49,7 +49,7 @@ export function MenuItem({
           styles.itemDescription,
           isKidsMode && styles.kidsItemDescription
         ]} numberOfLines={2}>
-          {item.description}
+          {isKidsMode ? item.descriptionForKids : item.description}
         </Text>
         <View style={styles.priceContainer}>
           <Text style={[

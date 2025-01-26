@@ -17,16 +17,15 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant, mode }: Me
   const [openModals, setOpenModals] = useState<Record<string, boolean>>({})
   const { addMenuItem, currentCommand } = useCommandStore()
 
-  const groupedItems = menuItems.reduce(
-    (acc, item) => {
-      if (!acc[item.foodCategoryId]) {
-        acc[item.foodCategoryId] = []
-      }
-      acc[item.foodCategoryId].push(item)
-      return acc
-    },
-    {} as Record<string, MenuItem[]>,
-  )
+    const newItems = isKidsMode ? menuItems.filter((menuItem)=> menuItem.descriptionForKids.length > 0) : menuItems
+
+    const groupedItems = newItems.reduce((acc, item) => {
+        if (!acc[item.foodCategoryId]) {
+            acc[item.foodCategoryId] = [];
+        }
+        acc[item.foodCategoryId].push(item);
+        return acc;
+    }, {} as Record<string, MenuItem[]>);
 
   const getCategoryName = (categoryId: string) => {
     const category = useFoodCategoryStore.getState().getFoodCategoryById(categoryId)
