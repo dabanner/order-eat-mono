@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "../../packages/ui/src/InRestaurant/SectionCommand.tsx", "../../packages/ui/src/InRestaurant/Multitouch.tsx"  ]
 }

@@ -180,245 +180,231 @@ const MOCK_RESERVATIONS: Record<string, Command> = {
     }
 };
 
+
 interface CommandStore {
-    currentCommand: Command | null;
-    pendingCommands: Command[];
-    confirmedCommands: Command[];
-    setCurrentCommand: (command: Command | null) => void;
-    updateReservationDetails: (commandId: string, details: Partial<ReservationDetails>) => void;
-    addMenuItem: (item: MenuItem) => void;
-    removeMenuItem: (itemId: string) => void;
-    updateMenuItemQuantity: (itemId: string, quantity: number) => void;
-    clearCommand: () => void;
-    addCommand: (command: Omit<Command, 'id'>) => string;
-    confirmCommand: (commandId: string) => void;
-    getCommandById: (commandId: string) => Command | undefined;
-    toggleItemPaidStatus: (itemId: string) => void;
-    addWaitstaffRequest: (type: WaitstaffRequest['type']) => void;
-    completeWaitstaffRequest: (timestamp: string) => void;
-    toggleItemSubmittedStatus: (itemId: string) => void;
-    submitUnsubmittedItems: () => void;
+  commands: Record<string, Command>
+  addCommand: (sectionId: string, command: Omit<Command, "id">) => string
+  updateCommand: (sectionId: string, commandId: string, updates: Partial<Command>) => void
+  removeCommand: (sectionId: string, commandId: string) => void
+  getCommandBySection: (sectionId: string) => Command | undefined
+  addMenuItem: (sectionId: string, item: MenuItem) => void
+  removeMenuItem: (sectionId: string, itemId: string) => void
+  updateMenuItemQuantity: (sectionId: string, itemId: string, quantity: number) => void
+  toggleItemPaidStatus: (sectionId: string, itemId: string) => void
+  toggleItemSubmittedStatus: (sectionId: string, itemId: string) => void
+  submitUnsubmittedItems: (sectionId: string) => void
+  addWaitstaffRequest: (sectionId: string, type: WaitstaffRequest["type"]) => void
+  completeWaitstaffRequest: (sectionId: string, timestamp: string) => void
 }
 
-const generateId = () => Math.random().toString(36).substr(2, 9);
+const generateId = () => Math.random().toString(36).substr(2, 9)
 
 export const useCommandStore = create<CommandStore>((set, get) => ({
-    currentCommand: null,
-    pendingCommands: [],
-    confirmedCommands: [],
+  commands: {},
 
-    setCurrentCommand: (command) => set({ currentCommand: command }),
+  addCommand: (sectionId, command) => {
+    const id = generateId()
+    const newCommand = { ...command, id }
+    set((state) => ({
+      commands: {
+        ...state.commands,
+        [sectionId]: newCommand,
+      },
+    }))
+    return id
+  },
 
-    updateReservationDetails: (commandId, details) =>
-        set((state) => ({
-            pendingCommands: state.pendingCommands.map((command) =>
-                command.id === commandId
-                    ? {
-                        ...command,
-                        reservationDetails: { ...command.reservationDetails, ...details },
-                    }
-                    : command
-            ),
-        })),
+  updateCommand: (sectionId, commandId, updates) => {
+    set((state) => ({
+      commands: {
+        ...state.commands,
+        [sectionId]: {
+          ...state.commands[sectionId],
+          ...updates,
+        },
+      },
+    }))
+  },
 
-    addMenuItem: (item: MenuItem) =>
+  removeCommand: (sectionId, commandId) => {
     set((state) => {
-      if (!state.currentCommand) return state;
-      
-      // Create a new entry for the item
-      const newItem = { ...item, quantity: 1, paid: false, submitted: false };
-      
-      const updatedMenuItems = [...state.currentCommand.menuItems, newItem];
-      const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      
-      const updatedCommand = {
-        ...state.currentCommand,
-        menuItems: updatedMenuItems,
-        totalAmount,
-      };
-      
-      return {
-        currentCommand: updatedCommand,
-        pendingCommands: state.pendingCommands.map((command) =>
-          command.id === updatedCommand.id ? updatedCommand : command
-        ),
-      };
-    }),
+      const { [sectionId]: _, ...rest } = state.commands
+      return { commands: rest }
+    })
+  },
 
-    removeMenuItem: (itemId) =>
-        set((state) => {
-            if (!state.currentCommand) return state;
-            const updatedMenuItems = state.currentCommand.menuItems.filter((item) => item.id !== itemId);
-            const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const updatedCommand = {
-                ...state.currentCommand,
-                menuItems: updatedMenuItems,
-                totalAmount,
-            };
-            return {
-                currentCommand: updatedCommand,
-                pendingCommands: state.pendingCommands.map((command) =>
-                    command.id === updatedCommand.id ? updatedCommand : command
-                ),
-            };
-        }),
+  getCommandBySection: (sectionId) => {
+    return get().commands[sectionId]
+  },
 
-    updateMenuItemQuantity: (itemId, quantity) =>
-        set((state) => {
-            if (!state.currentCommand) return state;
-            const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
-                item.id === itemId ? { ...item, quantity } : item
-            );
-            const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const updatedCommand = {
-                ...state.currentCommand,
-                menuItems: updatedMenuItems,
-                totalAmount,
-            };
-            return {
-                currentCommand: updatedCommand,
-                pendingCommands: state.pendingCommands.map((command) =>
-                    command.id === updatedCommand.id ? updatedCommand : command
-                ),
-            };
-        }),
-
-    clearCommand: () => set({ currentCommand: null }),
-
-    addCommand: (command) => {
-        const id = generateId();
-        const newCommand = { ...command, id };
-
-        set((state) => ({
-            pendingCommands: [...state.pendingCommands, newCommand],
-            currentCommand: newCommand,
-        }));
-
-        return id;
-    },
-
-    confirmCommand: (commandId) =>
-        set((state) => {
-            const commandToConfirm = state.pendingCommands.find(cmd => cmd.id === commandId) ||
-                state.currentCommand;
-
-            if (!commandToConfirm) return state;
-
-            const confirmedCommand = {
-                ...commandToConfirm,
-                status: 'confirmed' as const
-            };
-
-            return {
-                pendingCommands: state.pendingCommands.filter(cmd => cmd.id !== commandId),
-                currentCommand: null,
-                confirmedCommands: [...state.confirmedCommands, confirmedCommand]
-            };
-      }),
-
-    getCommandById(commandId) {
-        console.log('Searching for command:', commandId);
-          set({ currentCommand: MOCK_RESERVATIONS.mock_reservation_1 });
-          return MOCK_RESERVATIONS.mock_reservation_1;
-    },
-    toggleItemPaidStatus: (itemId: string) =>
+  addMenuItem: (sectionId, item) => {
     set((state) => {
-      if (!state.currentCommand) return state;
-      const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
-        item.id === itemId ? { ...item, paid: !item.paid } : item
-      );
-      const updatedCommand = {
-        ...state.currentCommand,
-        menuItems: updatedMenuItems,
-      };
-      return {
-        currentCommand: updatedCommand,
-        pendingCommands: state.pendingCommands.map((command) =>
-          command.id === updatedCommand.id ? updatedCommand : command
-        ),
-      };
-    }),
+      const command = state.commands[sectionId]
+      if (!command) return state
 
-    addWaitstaffRequest: (type: WaitstaffRequest['type']) =>
-    set((state) => {
-      if (!state.currentCommand) return state;
-
-    const newRequest: WaitstaffRequest = {
-      type,
-      status: 'pending' as 'pending',
-      timestamp: new Date().toISOString(),
-    };
-
-      const updatedCommand = {
-        ...state.currentCommand,
-        waitstaffRequests: [
-          ...(state.currentCommand.waitstaffRequests || []),
-          newRequest,
-        ],
-      };
+      const newItem = { ...item, quantity: 1, paid: false, submitted: false }
+      const updatedMenuItems = [...command.menuItems, newItem]
+      const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
       return {
-        currentCommand: updatedCommand,
-        pendingCommands: state.pendingCommands.map((command) =>
-          command.id === updatedCommand.id ? updatedCommand : command
-        ),
-      };
-    }),
+        commands: {
+          ...state.commands,
+          [sectionId]: {
+            ...command,
+            menuItems: updatedMenuItems,
+            totalAmount,
+          },
+        },
+      }
+    })
+  },
 
-  completeWaitstaffRequest: (timestamp: string) =>
+  removeMenuItem: (sectionId, itemId) => {
     set((state) => {
-      if (!state.currentCommand) return state;
+      const command = state.commands[sectionId]
+      if (!command) return state
 
-    const updatedCommand = {
-      ...state.currentCommand,
-      waitstaffRequests: state.currentCommand.waitstaffRequests?.map((request) =>
-        request.timestamp === timestamp
-          ? { ...request, status: 'completed' as 'completed' }
-          : request
-      ) || [],
-    };
+      const updatedMenuItems = command.menuItems.filter((item) => item.id !== itemId)
+      const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
       return {
-        currentCommand: updatedCommand,
-        pendingCommands: state.pendingCommands.map((command) =>
-          command.id === updatedCommand.id ? updatedCommand : command
-        ),
-      };
-    }),
-    toggleItemSubmittedStatus: (itemId: string) =>
-    set((state) => {
-      if (!state.currentCommand) return state;
-      const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
-        item.id === itemId && !item.paid ? { ...item, submitted: !item.submitted } : item
-      );
-      const updatedCommand = {
-        ...state.currentCommand,
-        menuItems: updatedMenuItems,
-      };
-      return {
-        currentCommand: updatedCommand,
-        pendingCommands: state.pendingCommands.map((command) =>
-          command.id === updatedCommand.id ? updatedCommand : command
-        ),
-      };
-    }),
+        commands: {
+          ...state.commands,
+          [sectionId]: {
+            ...command,
+            menuItems: updatedMenuItems,
+            totalAmount,
+          },
+        },
+      }
+    })
+  },
 
-    submitUnsubmittedItems: () =>
+  updateMenuItemQuantity: (sectionId, itemId, quantity) => {
     set((state) => {
-      if (!state.currentCommand) return state;
-      const updatedMenuItems = state.currentCommand.menuItems.map((item) =>
-        !item.submitted ? { ...item, submitted: true } : item
-      );
-      const updatedCommand = {
-        ...state.currentCommand,
-        menuItems: updatedMenuItems,
-      };
+      const command = state.commands[sectionId]
+      if (!command) return state
+
+      const updatedMenuItems = command.menuItems.map((item) => (item.id === itemId ? { ...item, quantity } : item))
+      const totalAmount = updatedMenuItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
       return {
-        currentCommand: updatedCommand,
-        pendingCommands: state.pendingCommands.map((command) =>
-          command.id === updatedCommand.id ? updatedCommand : command
-        ),
-      };
-    }),
-}));
+        commands: {
+          ...state.commands,
+          [sectionId]: {
+            ...command,
+            menuItems: updatedMenuItems,
+            totalAmount,
+          },
+        },
+      }
+    })
+  },
+
+  toggleItemPaidStatus: (sectionId, itemId) => {
+    set((state) => {
+      const command = state.commands[sectionId]
+      if (!command) return state
+
+      const updatedMenuItems = command.menuItems.map((item) =>
+        item.id === itemId ? { ...item, paid: !item.paid } : item,
+      )
+
+      return {
+        commands: {
+          ...state.commands,
+          [sectionId]: {
+            ...command,
+            menuItems: updatedMenuItems,
+          },
+        },
+      }
+    })
+  },
+
+  toggleItemSubmittedStatus: (sectionId, itemId) => {
+    set((state) => {
+      const command = state.commands[sectionId]
+      if (!command) return state
+
+      const updatedMenuItems = command.menuItems.map((item) =>
+        item.id === itemId && !item.paid ? { ...item, submitted: !item.submitted } : item,
+      )
+
+      return {
+        commands: {
+          ...state.commands,
+          [sectionId]: {
+            ...command,
+            menuItems: updatedMenuItems,
+          },
+        },
+      }
+    })
+  },
+
+  submitUnsubmittedItems: (sectionId) => {
+    set((state) => {
+      const command = state.commands[sectionId]
+      if (!command) return state
+
+      const updatedMenuItems = command.menuItems.map((item) => (!item.submitted ? { ...item, submitted: true } : item))
+
+      return {
+        commands: {
+          ...state.commands,
+          [sectionId]: {
+            ...command,
+            menuItems: updatedMenuItems,
+          },
+        },
+      }
+    })
+  },
+
+  addWaitstaffRequest: (sectionId, type) => {
+    set((state) => {
+      const command = state.commands[sectionId]
+      if (!command) return state
+
+      const newRequest: WaitstaffRequest = {
+        type,
+        status: "pending",
+        timestamp: new Date().toISOString(),
+      }
+
+      return {
+        commands: {
+          ...state.commands,
+          [sectionId]: {
+            ...command,
+            waitstaffRequests: [...(command.waitstaffRequests || []), newRequest],
+          },
+        },
+      }
+    })
+  },
+
+  completeWaitstaffRequest: (sectionId, timestamp) => {
+    set((state) => {
+      const command = state.commands[sectionId]
+      if (!command) return state
+
+      const updatedWaitstaffRequests =
+        command.waitstaffRequests?.map((request) =>
+          request.timestamp === timestamp ? { ...request, status: "completed" } : request,
+        ) || []
+
+      return {
+        commands: {
+          ...state.commands,
+          [sectionId]: {
+            ...command,
+            waitstaffRequests: updatedWaitstaffRequests,
+          },
+        },
+      }
+    })
+  },
+}))
 

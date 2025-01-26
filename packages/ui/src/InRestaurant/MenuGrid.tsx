@@ -11,21 +11,23 @@ interface MenuGridProps {
   isKidsMode?: boolean
   restaurant: Restaurant
   mode: "left-top" | "left-bottom" | "right-top" | "right-bottom"
+  sectionId: string
 }
 
-export default function MenuGrid({ menuItems, isKidsMode, restaurant, mode }: MenuGridProps) {
+export default function MenuGrid({ menuItems, isKidsMode, restaurant, mode, sectionId }: MenuGridProps) {
   const [openModals, setOpenModals] = useState<Record<string, boolean>>({})
-  const { addMenuItem, currentCommand } = useCommandStore()
+  const { addMenuItem, commands } = useCommandStore()
 
-    const newItems = isKidsMode ? menuItems.filter((menuItem)=> menuItem.descriptionForKids.length > 0) : menuItems
-
-    const groupedItems = newItems.reduce((acc, item) => {
-        if (!acc[item.foodCategoryId]) {
-            acc[item.foodCategoryId] = [];
-        }
-        acc[item.foodCategoryId].push(item);
-        return acc;
-    }, {} as Record<string, MenuItem[]>);
+  const groupedItems = menuItems.reduce(
+    (acc, item) => {
+      if (!acc[item.foodCategoryId]) {
+        acc[item.foodCategoryId] = []
+      }
+      acc[item.foodCategoryId].push(item)
+      return acc
+    },
+    {} as Record<string, MenuItem[]>,
+  )
 
   const getCategoryName = (categoryId: string) => {
     const category = useFoodCategoryStore.getState().getFoodCategoryById(categoryId)
@@ -38,16 +40,16 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant, mode }: Me
   }
 
   const handleAddMenuItem = (item: MenuItem) => {
-    console.log("[CURRENT COMMAND]", currentCommand)
-    addMenuItem(item)
+    console.log("[CURRENT COMMAND]", commands[sectionId])
+    addMenuItem(sectionId, item)
   }
 
   const getItemQuantity = (itemId: string) => {
-    return (
-      currentCommand?.menuItems
-        .filter((item) => item.id === itemId && !item.submitted)
-        .reduce((total, item) => total + item.quantity, 0) || 0
-    )
+    const command = commands[sectionId]
+    if (!command) return 0
+    return command.menuItems
+      .filter((item) => item.id === itemId && !item.submitted)
+      .reduce((total, item) => total + item.quantity, 0)
   }
 
   const toggleModal = (itemId: string) => {

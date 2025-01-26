@@ -2,17 +2,15 @@ import React, { useState, useCallback, useRef } from "react"
 import { View, StyleSheet, Platform, Text } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler"
-import { useCommandStore } from "@repo/store/src/commandStore"
 import { useRestaurantStore } from "@repo/store/src/restaurantStore"
-import CommandSection from "@repo/ui/src/InRestaurant/CommandSection"
 import Categories from "@repo/ui/src/categories"
 import MenuGrid from "@repo/ui/src/InRestaurant/MenuGrid"
 import CustomSwitch from "react-native-custom-switch-new"
-import { MultiTouch } from "@/components/Multitouch"
+import { MultiTouch } from "@repo/ui/src/InRestaurant/Multitouch"
+import { SectionCommand } from "@repo/ui/src/InRestaurant/SectionCommand"
 
 interface TableSection {
   id: number
-  command: any
   kidMode: boolean
   orientation: "up" | "down"
   position: "left-top" | "left-bottom" | "right-top" | "right-bottom"
@@ -21,72 +19,30 @@ interface TableSection {
 export default function Index() {
   const { restaurants } = useRestaurantStore()
   const restaurant = restaurants[0]
-  const { setCurrentCommand, addCommand } = useCommandStore()
- const isInit = useRef(false);
+  const isInit = useRef(false)
   const [tableSections, setTableSections] = useState<TableSection[]>([
-    { id: 1, command: null, kidMode: true, orientation: "down", position: "left-top" },
-    { id: 2, command: null, kidMode: true, orientation: "down", position: "right-top" },
-    { id: 3, command: null, kidMode: true, orientation: "up", position: "left-bottom" },
-    { id: 4, command: null, kidMode: true, orientation: "up", position: "right-bottom" },
+    { id: 1, kidMode: true, orientation: "down", position: "left-top" },
+    { id: 2, kidMode: true, orientation: "down", position: "right-top" },
+    { id: 3, kidMode: true, orientation: "up", position: "left-bottom" },
+    { id: 4, kidMode: true, orientation: "up", position: "right-bottom" },
   ])
 
-
-  React.useEffect(() => {  
+  React.useEffect(() => {
     if (!isInit.current) {
-      console.log('fetching menu items')
-      isInit.current = true;
+      console.log("fetching menu items")
+      isInit.current = true
       const init = async () => {
-        await useRestaurantStore.getState().fetchMenuItems();
-      };
-      init();
+        await useRestaurantStore.getState().fetchMenuItems()
+      }
+      init()
     }
-    if (restaurant) {
-      console.log('menuItems fetched')
-      console.log(restaurant.menuItems)
-      tableSections.forEach((section) => {
-        if (!section.command) {
-          const newCommand = {
-            id: `section-${section.id}`,
-            restaurant,
-            userId: `user-section-${section.id}`,
-            reservationDetails: {
-              date: new Date().toISOString(),
-              time: new Date().toTimeString(),
-              numberOfPersons: 1,
-              type: "dinein",
-              wantToPreOrder: true,
-            },
-            menuItems: [],
-            totalAmount: 0,
-            status: "pending",
-            type: "dinein",
-            waitstaffRequests: [],
-          }
-
-          const newCommandId = addCommand(newCommand)
-          setTableSections((prev) =>
-            prev.map((s) => (s.id === section.id ? { ...s, command: { ...newCommand, id: newCommandId } } : s)),
-          )
-        }
-      })
-    }
-  }, [restaurant, addCommand, tableSections])
+  }, [])
 
   const handleKidModeToggle = useCallback((sectionId: number, value: boolean) => {
     setTableSections((prev) =>
       prev.map((section) => (section.id === sectionId ? { ...section, kidMode: value } : section)),
     )
   }, [])
-
-  const handleTouchStart = useCallback(
-    (sectionId: number) => {
-      const section = tableSections.find((s) => s.id === sectionId)
-      if (section) {
-        setCurrentCommand(section.command)
-      }
-    },
-    [tableSections, setCurrentCommand],
-  )
 
   const renderSection = useCallback(
     (section: TableSection) => (
@@ -97,23 +53,20 @@ export default function Index() {
               <Categories isKidsMode={section.kidMode} />
             </View>
             <View style={styles.menuGridWrapper}>
-              <MultiTouch
-                style={styles.menuGridContainer}
-                sectionId={section.id}
-                onTouchStart={() => handleTouchStart(section.id)}
-              >
+              <MultiTouch style={styles.menuGridContainer} sectionId={section.id}>
                 <MenuGrid
                   menuItems={restaurant?.menuItems || []}
                   isKidsMode={section.kidMode}
                   restaurant={restaurant}
                   mode={section.position}
+                  sectionId={section.id.toString()}
                 />
               </MultiTouch>
             </View>
           </View>
           {!section.kidMode && (
             <View style={styles.commandSection}>
-              <CommandSection />
+              <SectionCommand sectionId={section.id.toString()} />
             </View>
           )}
           <View style={[styles.kidsModeToggle, section.orientation === "down" && styles.kidsModeToggleRotated]}>
@@ -134,7 +87,7 @@ export default function Index() {
         </View>
       </View>
     ),
-    [restaurant, handleKidModeToggle, handleTouchStart],
+    [restaurant, handleKidModeToggle],
   )
 
   return (
@@ -251,5 +204,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 })
-
 
