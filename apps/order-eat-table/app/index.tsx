@@ -15,7 +15,6 @@ interface TableSection {
   command: any
   kidMode: boolean
   orientation: "up" | "down"
-  isActive: boolean
 }
 
 export default function Index() {
@@ -24,10 +23,10 @@ export default function Index() {
   const { setCurrentCommand, addCommand } = useCommandStore()
 
   const [tableSections, setTableSections] = useState<TableSection[]>([
-    { id: 1, command: null, kidMode: false, orientation: "down", isActive: false },
-    { id: 2, command: null, kidMode: false, orientation: "down", isActive: false },
-    { id: 3, command: null, kidMode: false, orientation: "up", isActive: false },
-    { id: 4, command: null, kidMode: false, orientation: "up", isActive: false },
+    { id: 1, command: null, kidMode: true, orientation: "down" },
+    { id: 2, command: null, kidMode: true, orientation: "down" },
+    { id: 3, command: null, kidMode: true, orientation: "up" },
+    { id: 4, command: null, kidMode: true, orientation: "up" },
   ])
 
   React.useEffect(() => {
@@ -69,12 +68,6 @@ export default function Index() {
 
   const handleTouchStart = useCallback(
     (sectionId: number) => {
-      setTableSections((prev) =>
-        prev.map((section) => ({
-          ...section,
-          isActive: section.id === sectionId,
-        })),
-      )
       const section = tableSections.find((s) => s.id === sectionId)
       if (section) {
         setCurrentCommand(section.command)
@@ -83,18 +76,9 @@ export default function Index() {
     [tableSections, setCurrentCommand],
   )
 
-  const handleTouchEnd = useCallback((sectionId: number) => {
-    setTableSections((prev) =>
-      prev.map((section) => ({
-        ...section,
-        isActive: false,
-      })),
-    )
-  }, [])
-
   const renderSection = useCallback(
     (section: TableSection) => (
-      <View key={section.id} style={[styles.section, section.isActive && styles.activeSection]}>
+      <View key={section.id} style={styles.section}>
         <View style={[styles.sectionContent, section.orientation === "down" && styles.sectionContentRotated]}>
           <View style={styles.menuSection}>
             <View style={styles.categoriesContainer}>
@@ -179,32 +163,13 @@ const styles = StyleSheet.create({
   },
   section: {
     flex: 1,
-    borderWidth: 3,
-    borderColor: "#FF8C00",
+    borderWidth: 10,
+    borderColor: "#543003",
     borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#fff",
     elevation: 2,
-    marginLeft: 28,
-    marginRight: 28,
-  },
-  activeSection: {
-    borderColor: "#4CAF50",
-    borderWidth: 4,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#4CAF50",
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 6,
-      },
-      web: {
-        boxShadow: "0 0 12px rgba(76, 175, 80, 0.3)",
-      },
-    }),
+    margin:40
   },
   sectionContent: {
     flex: 1,
