@@ -32,9 +32,11 @@ export function MenuItemModal({
 
   const getModalPositionStyle = () => {
     const baseStyles = {
-      width: "42%",
-      height: "42%",
-      position: "absolute" as const,
+      width: "65%",
+      height: "19%",
+      position: "fixed" as const,
+      maxHeight: "calc(50vh - 90px)",
+      overflowY: "auto" as const,
       ...Platform.select({
         ios: {
           shadowColor: "#000",
@@ -46,7 +48,7 @@ export function MenuItemModal({
           elevation: 16,
         },
         web: {
-          boxShadow: "0 18px 50px rgba(0, 0, 0, 0.2)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
         },
       }),
     }
@@ -58,32 +60,32 @@ export function MenuItemModal({
           top: 0,
           left: 0,
           marginLeft: 150,
-          marginTop: 95,
-        }
-      case "left-bottom":
-        return {
-          ...baseStyles,
-          bottom: 0,
-          left: 0,
-          marginLeft: 150,
-          marginBottom: 95,
+          marginTop: 140,
         }
       case "right-top":
         return {
           ...baseStyles,
           top: 0,
           right: 0,
-          marginRight: 150,
-          marginTop: 95,
+          marginRight: 140,
+          marginTop: 5,
         }
       case "right-bottom":
         return {
           ...baseStyles,
           bottom: 0,
           right: 0,
-          marginRight: 150,
-          marginBottom: 95,
+          marginRight: 0,
+          marginBottom: 0,
         }
+        case "left-bottom":
+          return {
+            ...baseStyles,
+            bottom: 0,
+            left: 0,
+            marginLeft: 0,
+            marginBottom: 0,
+          }
       default:
         return {
           width: Platform.OS === "web" ? "80%" : "100%",
@@ -93,164 +95,168 @@ export function MenuItemModal({
     }
   }
 
-  return (
-    <Modal visible={isVisible} animationType="none" transparent={true} onRequestClose={onClose}>
-      <View style={[styles.modalOverlay, mode === "full" ? styles.fullModeOverlay : styles.sectionModeOverlay]}>
-        <View style={[styles.modalContent, getModalPositionStyle(), isKidsMode && styles.kidsModalContent]}>
-          <TouchableOpacity style={[styles.closeButton, isKidsMode && styles.kidsCloseButton]} onPress={onClose}>
-            <MaterialIcons name={"close"} size={28} color={isKidsMode ? "#ff7622" : "#000"} />
-          </TouchableOpacity>
+  if (!isVisible) return null
 
-          <ScrollView style={styles.scrollContent}>
-            <View style={styles.header}>
-              <View style={[styles.gallerySection, isKidsMode && styles.kidsGallerySection]}>
-                <ImageGallery images={menuItem.images || []} />
+  return (
+    <View style={[styles.modalOverlay, mode === "full" ? styles.fullModeOverlay : styles.sectionModeOverlay]}>
+      <View style={[styles.modalContent, getModalPositionStyle(), isKidsMode && styles.kidsModalContent]}>
+        <TouchableOpacity style={[styles.closeButton, isKidsMode && styles.kidsCloseButton]} onPress={onClose}>
+          <MaterialIcons name={"close"} size={28} color={isKidsMode ? "#ff7622" : "#000"} />
+        </TouchableOpacity>
+
+        <ScrollView style={styles.scrollContent}>
+          <View style={styles.header}>
+            <View style={[styles.gallerySection, isKidsMode && styles.kidsGallerySection]}>
+              <ImageGallery images={menuItem.images || []} />
+            </View>
+          </View>
+
+          <View style={[styles.detailsContainer, isKidsMode && styles.kidsDetailsContainer]}>
+            <Text style={[styles.name, isKidsMode && styles.kidsName]}>
+              {isKidsMode ? `${menuItem.name} 🌟` : menuItem.name}
+            </Text>
+
+            <Text style={[styles.description, isKidsMode && styles.kidsDescription]}>
+              {isKidsMode ? menuItem.descriptionForKids : menuItem.description}
+            </Text>
+
+            {menuItem.sizes && menuItem.sizes.length > 0 && (
+              <View style={[styles.sizeSection, isKidsMode && styles.kidsSizeSection]}>
+                <Text style={[styles.sectionTitle, isKidsMode && styles.kidsSectionTitle]}>
+                  {isKidsMode ? "Choose Your Size! 📏" : "SIZE:"}
+                </Text>
+                <View style={styles.sizes}>
+                  {menuItem.sizes.map((size) => (
+                    <TouchableOpacity
+                      key={size}
+                      style={[
+                        styles.sizeButton,
+                        size === selectedSize && styles.selectedSize,
+                        isKidsMode && styles.kidsSizeButton,
+                        size === selectedSize && isKidsMode && styles.kidsSelectedSize,
+                      ]}
+                      onPress={() => setSelectedSize(size)}
+                    >
+                      <Text
+                        style={[
+                          styles.sizeText,
+                          size === selectedSize && styles.selectedSizeText,
+                          isKidsMode && styles.kidsSizeText,
+                          size === selectedSize && isKidsMode && styles.kidsSelectedSizeText,
+                        ]}
+                      >
+                        {size}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
+            )}
+
+            <View style={[styles.section, isKidsMode && styles.kidsSection]}>
+              <Text style={[styles.sectionTitle, isKidsMode && styles.kidsSectionTitle]}>
+                {isKidsMode ? "Special Ingredients! ✨" : "KEY INGREDIENTS"}
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
+                <View style={styles.ingredients}>
+                  {menuItem.keyIngredients.map((ingredient, index) => (
+                    <View key={index} style={[styles.ingredient, isKidsMode && styles.kidsIngredient]}>
+                      <View style={[styles.ingredientIcon, isKidsMode && styles.kidsIngredientIcon]}>
+                        <FontAwesome6 name={ingredient.icon} size={24} color={isKidsMode ? "#ff7622" : "#FF8C00"} />
+                      </View>
+                      <Text style={[styles.ingredientText, isKidsMode && styles.kidsIngredientText]}>
+                        {ingredient.name}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
             </View>
 
-            <View style={[styles.detailsContainer, isKidsMode && styles.kidsDetailsContainer]}>
-              <Text style={[styles.name, isKidsMode && styles.kidsName]}>
-                {isKidsMode ? `${menuItem.name} 🌟` : menuItem.name}
-              </Text>
-
-              <Text style={[styles.description, isKidsMode && styles.kidsDescription]}>
-                {isKidsMode ? menuItem.descriptionForKids : menuItem.description}
-              </Text>
-
-              {menuItem.sizes && menuItem.sizes.length > 0 && (
-                <View style={[styles.sizeSection, isKidsMode && styles.kidsSizeSection]}>
-                  <Text style={[styles.sectionTitle, isKidsMode && styles.kidsSectionTitle]}>
-                    {isKidsMode ? "Choose Your Size! 📏" : "SIZE:"}
-                  </Text>
-                  <View style={styles.sizes}>
-                    {menuItem.sizes.map((size) => (
-                      <TouchableOpacity
-                        key={size}
-                        style={[
-                          styles.sizeButton,
-                          size === selectedSize && styles.selectedSize,
-                          isKidsMode && styles.kidsSizeButton,
-                          size === selectedSize && isKidsMode && styles.kidsSelectedSize,
-                        ]}
-                        onPress={() => setSelectedSize(size)}
-                      >
-                        <Text
-                          style={[
-                            styles.sizeText,
-                            size === selectedSize && styles.selectedSizeText,
-                            isKidsMode && styles.kidsSizeText,
-                            size === selectedSize && isKidsMode && styles.kidsSelectedSizeText,
-                          ]}
-                        >
-                          {size}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
+            {!isKidsMode && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>NUTRITION</Text>
+                {Platform.OS === "web" ? (
+                  <WebNutritionDisplay nutrition={menuItem.nutrition} image={menuItem.images[0]} />
+                ) : (
+                  <View style={styles.nutritionGrid}>
+                    <View style={styles.nutritionItem}>
+                      <View style={styles.nutritionIcon}>
+                        <FontAwesome6 name="wheat-awn" size={24} color="#666" />
+                      </View>
+                      <Text style={styles.nutritionValue}>{menuItem.nutrition.carbs}g carbs</Text>
+                    </View>
+                    <View style={styles.nutritionItem}>
+                      <View style={styles.nutritionIcon}>
+                        <FontAwesome6 name="egg" size={24} color="#666" />
+                      </View>
+                      <Text style={styles.nutritionValue}>{menuItem.nutrition.proteins}g proteins</Text>
+                    </View>
+                    <View style={styles.nutritionItem}>
+                      <View style={styles.nutritionIcon}>
+                        <FontAwesome6 name="fire" size={24} color="#666" />
+                      </View>
+                      <Text style={styles.nutritionValue}>{menuItem.nutrition.calories} Kcal</Text>
+                    </View>
+                    <View style={styles.nutritionItem}>
+                      <View style={styles.nutritionIcon}>
+                        <FontAwesome6 name="cheese" size={24} color="#666" />
+                      </View>
+                      <Text style={styles.nutritionValue}>{menuItem.nutrition.fats}g fats</Text>
+                    </View>
                   </View>
-                </View>
-              )}
+                )}
+              </View>
+            )}
 
-              <View style={[styles.section, isKidsMode && styles.kidsSection]}>
-                <Text style={[styles.sectionTitle, isKidsMode && styles.kidsSectionTitle]}>
-                  {isKidsMode ? "Special Ingredients! ✨" : "KEY INGREDIENTS"}
-                </Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
-                  <View style={styles.ingredients}>
-                    {menuItem.keyIngredients.map((ingredient, index) => (
-                      <View key={index} style={[styles.ingredient, isKidsMode && styles.kidsIngredient]}>
-                        <View style={[styles.ingredientIcon, isKidsMode && styles.kidsIngredientIcon]}>
-                          <FontAwesome6 name={ingredient.icon} size={24} color={isKidsMode ? "#ff7622" : "#FF8C00"} />
-                        </View>
-                        <Text style={[styles.ingredientText, isKidsMode && styles.kidsIngredientText]}>
-                          {ingredient.name}
-                        </Text>
+            {!isKidsMode && menuItem.allergens.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>ALLERGENS</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.allergensScroll}>
+                  <View style={styles.allergens}>
+                    {menuItem.allergens.map((allergen, index) => (
+                      <View key={index} style={styles.allergen}>
+                        <Text style={styles.allergenText}>{allergen}</Text>
                       </View>
                     ))}
                   </View>
                 </ScrollView>
               </View>
-
-              {!isKidsMode && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>NUTRITION</Text>
-                  {Platform.OS === "web" ? (
-                    <WebNutritionDisplay nutrition={menuItem.nutrition} image={menuItem.images[0]} />
-                  ) : (
-                    <View style={styles.nutritionGrid}>
-                      <View style={styles.nutritionItem}>
-                        <View style={styles.nutritionIcon}>
-                          <FontAwesome6 name="wheat-awn" size={24} color="#666" />
-                        </View>
-                        <Text style={styles.nutritionValue}>{menuItem.nutrition.carbs}g carbs</Text>
-                      </View>
-                      <View style={styles.nutritionItem}>
-                        <View style={styles.nutritionIcon}>
-                          <FontAwesome6 name="egg" size={24} color="#666" />
-                        </View>
-                        <Text style={styles.nutritionValue}>{menuItem.nutrition.proteins}g proteins</Text>
-                      </View>
-                      <View style={styles.nutritionItem}>
-                        <View style={styles.nutritionIcon}>
-                          <FontAwesome6 name="fire" size={24} color="#666" />
-                        </View>
-                        <Text style={styles.nutritionValue}>{menuItem.nutrition.calories} Kcal</Text>
-                      </View>
-                      <View style={styles.nutritionItem}>
-                        <View style={styles.nutritionIcon}>
-                          <FontAwesome6 name="cheese" size={24} color="#666" />
-                        </View>
-                        <Text style={styles.nutritionValue}>{menuItem.nutrition.fats}g fats</Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
-              )}
-
-              {!isKidsMode && menuItem.allergens.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>ALLERGENS</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.allergensScroll}>
-                    <View style={styles.allergens}>
-                      {menuItem.allergens.map((allergen, index) => (
-                        <View key={index} style={styles.allergen}>
-                          <Text style={styles.allergenText}>{allergen}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </ScrollView>
-                </View>
-              )}
-            </View>
-          </ScrollView>
-
-          <View style={[styles.footer, isKidsMode && styles.kidsFooter]}>
-            <View style={styles.priceContainer}>
-              <Text style={[styles.price, isKidsMode && styles.kidsPrice]}>${menuItem.price}</Text>
-              {quantity > 0 && showAddButton && (
-                <View style={[styles.quantityBadge, isKidsMode && styles.kidsQuantityBadge]}>
-                  <Text style={[styles.quantityText, isKidsMode && styles.kidsQuantityText]}>{quantity}x</Text>
-                </View>
-              )}
-            </View>
-            {showAddButton && (
-              <TouchableOpacity style={[styles.addButton, isKidsMode && styles.kidsAddButton]} onPress={onAddToOrder}>
-                <Text style={[styles.addButtonText, isKidsMode && styles.kidsAddButtonText]}>
-                  {isKidsMode ? "Add to My Plate! 🍽️" : "Add to Order"}
-                </Text>
-              </TouchableOpacity>
             )}
           </View>
+        </ScrollView>
+
+        <View style={[styles.footer, isKidsMode && styles.kidsFooter]}>
+          <View style={styles.priceContainer}>
+            <Text style={[styles.price, isKidsMode && styles.kidsPrice]}>${menuItem.price}</Text>
+            {quantity > 0 && showAddButton && (
+              <View style={[styles.quantityBadge, isKidsMode && styles.kidsQuantityBadge]}>
+                <Text style={[styles.quantityText, isKidsMode && styles.kidsQuantityText]}>{quantity}x</Text>
+              </View>
+            )}
+          </View>
+          {showAddButton && (
+            <TouchableOpacity style={[styles.addButton, isKidsMode && styles.kidsAddButton]} onPress={onAddToOrder}>
+              <Text style={[styles.addButtonText, isKidsMode && styles.kidsAddButtonText]}>
+                {isKidsMode ? "Add to My Plate! 🍽️" : "Add to Order"}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
-    </Modal>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    flex: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 1000,
   },
   fullModeOverlay: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -262,9 +268,8 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#fff",
     borderRadius: 20,
-    position: "absolute",
     padding: Platform.OS === "web" ? 24 : 16,
-    overflow: "hidden", 
+    overflow: "hidden",
   },
   kidsModalContent: {
     backgroundColor: "#fff9f6",
@@ -291,7 +296,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flex: 1,
-    marginTop: 40,
+    paddingTop: 60,
+    paddingBottom: 20,
   },
   header: {
     width: "100%",

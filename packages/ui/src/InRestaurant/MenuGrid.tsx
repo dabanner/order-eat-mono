@@ -14,7 +14,7 @@ interface MenuGridProps {
 }
 
 export default function MenuGrid({ menuItems, isKidsMode, restaurant, mode }: MenuGridProps) {
-  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null)
+  const [openModals, setOpenModals] = useState<Record<string, boolean>>({})
   const { addMenuItem, currentCommand } = useCommandStore()
 
   const groupedItems = menuItems.reduce(
@@ -51,6 +51,13 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant, mode }: Me
     )
   }
 
+  const toggleModal = (itemId: string) => {
+    setOpenModals((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }))
+  }
+
   return (
     <View style={[styles.container, isKidsMode && styles.kidsContainer]}>
       {Object.entries(groupedItems).map(([categoryId, items]) => (
@@ -67,7 +74,7 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant, mode }: Me
               <MenuItemComponent
                 key={item.id}
                 item={item}
-                onPress={() => setSelectedMenuItem(item)}
+                onPress={() => toggleModal(item.id)}
                 onAddClick={() => handleAddMenuItem(item)}
                 showAddButton={true}
                 isKidsMode={isKidsMode}
@@ -78,22 +85,27 @@ export default function MenuGrid({ menuItems, isKidsMode, restaurant, mode }: Me
         </View>
       ))}
 
-      {selectedMenuItem && (
-        <MenuItemModal
-          isVisible={!!selectedMenuItem}
-          onClose={() => setSelectedMenuItem(null)}
-          menuItem={selectedMenuItem}
-          restaurant={restaurant}
-          onAddToOrder={() => {
-            handleAddMenuItem(selectedMenuItem)
-            setSelectedMenuItem(null)
-          }}
-          quantity={getItemQuantity(selectedMenuItem.id)}
-          showAddButton={true}
-          isKidsMode={isKidsMode}
-          mode={mode}
-        />
-      )}
+      {Object.entries(openModals).map(([itemId, isOpen]) => {
+        const item = menuItems.find((menuItem) => menuItem.id === itemId)
+        if (!item) return null
+        return (
+          <MenuItemModal
+            key={itemId}
+            isVisible={isOpen}
+            onClose={() => toggleModal(itemId)}
+            menuItem={item}
+            restaurant={restaurant}
+            onAddToOrder={() => {
+              handleAddMenuItem(item)
+              toggleModal(itemId)
+            }}
+            quantity={getItemQuantity(itemId)}
+            showAddButton={true}
+            isKidsMode={isKidsMode}
+            mode={mode}
+          />
+        )
+      })}
     </View>
   )
 }
