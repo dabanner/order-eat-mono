@@ -7,9 +7,10 @@ import CommandSection from "@repo/ui/src/InRestaurant/CommandSection"
 
 interface SectionCommandProps {
   sectionId: string
+  mode: "left-top" | "left-bottom" | "right-top" | "right-bottom"
 }
 
-export const SectionCommand: React.FC<SectionCommandProps> = ({ sectionId }) => {
+export const SectionCommand: React.FC<SectionCommandProps> = ({ sectionId, mode }) => {
   const { restaurants } = useRestaurantStore()
   const { addCommand, getCommandBySection } = useCommandStore()
   const restaurant = restaurants[0] // Assuming we're using the first restaurant
@@ -45,7 +46,7 @@ export const SectionCommand: React.FC<SectionCommandProps> = ({ sectionId }) => 
 
   return (
     <View style={styles.container}>
-      <CommandSection sectionId={sectionId} />
+      <CommandSection sectionId={sectionId} mode={mode} />
     </View>
   )
 }

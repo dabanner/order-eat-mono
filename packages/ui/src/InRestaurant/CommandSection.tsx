@@ -3,14 +3,15 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from "react
 import { useCommandStore } from "@repo/store/src/commandStore"
 import { ItemCard } from "./ItemCard"
 import { WaitstaffModal } from "./WaitstaffModal"
-import { GenericModal } from "@repo/ui/src/InRestaurant/GenericModal"
+import { GenericModal } from "./GenericModal"
 import { MaterialIcons } from "@expo/vector-icons"
 
 interface CommandSectionProps {
   sectionId: string
+  mode: "left-top" | "left-bottom" | "right-top" | "right-bottom"
 }
 
-export default function CommandSection({ sectionId }: CommandSectionProps) {
+export default function CommandSection({ sectionId, mode }: CommandSectionProps) {
   const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false)
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false)
   const {
@@ -181,6 +182,7 @@ export default function CommandSection({ sectionId }: CommandSectionProps) {
         description="Our chefs are firing up the kitchen! We'll serve you when everything's ready. Feel free to add more items if you'd like!"
         buttonText="Got it!"
         autoCloseTime={4}
+        mode={mode}
       />
     </View>
   )

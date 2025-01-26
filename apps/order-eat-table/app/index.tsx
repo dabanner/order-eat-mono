@@ -66,7 +66,7 @@ export default function Index() {
           </View>
           {!section.kidMode && (
             <View style={styles.commandSection}>
-              <SectionCommand sectionId={section.id.toString()} />
+              <SectionCommand sectionId={section.id.toString()} mode={section.position} />
             </View>
           )}
           <View style={[styles.kidsModeToggle, section.orientation === "down" && styles.kidsModeToggleRotated]}>
