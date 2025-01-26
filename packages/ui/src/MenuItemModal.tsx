@@ -14,7 +14,7 @@ interface MenuItemModalProps {
   quantity: number
   showAddButton?: boolean
   isKidsMode?: boolean
-  mode: "left-top" | "left-bottom" | "right-top" | "right-bottom"
+  mode: "left-top" | "left-bottom" | "right-top" | "right-bottom" | "full"
 }
 
 export function MenuItemModal({
@@ -32,9 +32,23 @@ export function MenuItemModal({
 
   const getModalPositionStyle = () => {
     const baseStyles = {
-      width: "50%",
-      height: "50%",
+      width: "42%",
+      height: "42%",
       position: "absolute" as const,
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.25,
+          shadowRadius: 24,
+        },
+        android: {
+          elevation: 16,
+        },
+        web: {
+          boxShadow: "0 18px 50px rgba(0, 0, 0, 0.2)",
+        },
+      }),
     }
 
     switch (mode) {
@@ -43,24 +57,32 @@ export function MenuItemModal({
           ...baseStyles,
           top: 0,
           left: 0,
+          marginLeft: 150,
+          marginTop: 95,
         }
       case "left-bottom":
         return {
           ...baseStyles,
           bottom: 0,
           left: 0,
+          marginLeft: 150,
+          marginBottom: 95,
         }
       case "right-top":
         return {
           ...baseStyles,
           top: 0,
           right: 0,
+          marginRight: 150,
+          marginTop: 95,
         }
       case "right-bottom":
         return {
           ...baseStyles,
           bottom: 0,
           right: 0,
+          marginRight: 150,
+          marginBottom: 95,
         }
       default:
         return {
@@ -73,7 +95,7 @@ export function MenuItemModal({
 
   return (
     <Modal visible={isVisible} animationType="none" transparent={true} onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
+      <View style={[styles.modalOverlay, mode === "full" ? styles.fullModeOverlay : styles.sectionModeOverlay]}>
         <View style={[styles.modalContent, getModalPositionStyle(), isKidsMode && styles.kidsModalContent]}>
           <TouchableOpacity style={[styles.closeButton, isKidsMode && styles.kidsCloseButton]} onPress={onClose}>
             <MaterialIcons name={"close"} size={28} color={isKidsMode ? "#ff7622" : "#000"} />
@@ -227,15 +249,22 @@ export function MenuItemModal({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  fullModeOverlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  sectionModeOverlay: {
+    backgroundColor: "transparent",
+    pointerEvents: "box-none",
   },
   modalContent: {
     backgroundColor: "#fff",
     borderRadius: 20,
     position: "absolute",
     padding: Platform.OS === "web" ? 24 : 16,
+    overflow: "hidden", 
   },
   kidsModalContent: {
     backgroundColor: "#fff9f6",
