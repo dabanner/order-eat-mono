@@ -59,33 +59,34 @@ export function MenuItemModal({
           ...baseStyles,
           top: 0,
           left: 0,
-          marginLeft: 150,
-          marginTop: 140,
+          marginLeft: 350,
+          marginTop: 55,
         }
       case "right-top":
         return {
           ...baseStyles,
           top: 0,
           right: 0,
-          marginRight: 140,
-          marginTop: 5,
+          marginRight: 350,
+          marginTop: 55,
         }
       case "right-bottom":
         return {
           ...baseStyles,
           bottom: 0,
           right: 0,
-          marginRight: 0,
-          marginBottom: 0,
+          marginRight: -350,
+          marginBottom: -55,
         }
-        case "left-bottom":
-          return {
-            ...baseStyles,
-            bottom: 0,
-            left: 0,
-            marginLeft: 0,
-            marginBottom: 0,
-          }
+      case "left-bottom":
+        return {
+          ...baseStyles,
+          bottom: 0,
+          left: 0,
+          marginLeft: -350,
+          marginBottom: 350,
+          height: '100%',
+        }
       default:
         return {
           width: Platform.OS === "web" ? "80%" : "100%",

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, useRef } from "react"
 import { View, StyleSheet, Platform, Text } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler"
@@ -22,7 +22,7 @@ export default function Index() {
   const { restaurants } = useRestaurantStore()
   const restaurant = restaurants[0]
   const { setCurrentCommand, addCommand } = useCommandStore()
-
+ const isInit = useRef(false);
   const [tableSections, setTableSections] = useState<TableSection[]>([
     { id: 1, command: null, kidMode: true, orientation: "down", position: "left-top" },
     { id: 2, command: null, kidMode: true, orientation: "down", position: "right-top" },
@@ -32,13 +32,17 @@ export default function Index() {
 
 
   React.useEffect(() => {  
-    console.log("Initializing app...");
-
-    const init = async () => {
-      await useRestaurantStore.getState().fetchMenuItems();
-    };
-    init();
+    if (!isInit.current) {
+      console.log('fetching menu items')
+      isInit.current = true;
+      const init = async () => {
+        await useRestaurantStore.getState().fetchMenuItems();
+      };
+      init();
+    }
     if (restaurant) {
+      console.log('menuItems fetched')
+      console.log(restaurant.menuItems)
       tableSections.forEach((section) => {
         if (!section.command) {
           const newCommand = {
@@ -248,7 +252,4 @@ const styles = StyleSheet.create({
   },
 })
 
-function useEffect(arg0: () => void, arg1: never[]) {
-  throw new Error("Function not implemented.")
-}
 
