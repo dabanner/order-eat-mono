@@ -1,17 +1,28 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MenuItem } from '@repo/store/src/restaurantStore';
 import { QuantityControls } from './QuantityControls';
 
 interface ItemCardProps {
-  item: MenuItem & { quantity: number; paid: boolean };
+  item: MenuItem & { quantity: number; paid: boolean; submitted: boolean; groupQuantity: number };
   onQuantityChange: (itemId: string, currentQuantity: number, increment: number) => void;
   onPaymentStatusChange: () => void;
+  onSubmitStatusChange: () => void;
+  onAddNewItem: () => void;
 }
 
-export const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange, onPaymentStatusChange }) => (
-  <View style={[styles.itemContainer, item.paid && styles.paidItemContainer]}>
+export const ItemCard: React.FC<ItemCardProps> = ({ 
+  item, 
+  onQuantityChange,
+  onPaymentStatusChange,
+  onSubmitStatusChange,
+  onAddNewItem
+}) => (
+  <View style={[
+    styles.itemContainer, 
+    item.submitted && styles.submittedItemContainer,
+    item.paid && styles.paidItemContainer
+  ]}>
     <Image
       source={item.images[0]}
       style={styles.itemImage}
@@ -22,24 +33,26 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onQuantityChange, onPa
         {item.description}
       </Text>
       <View style={styles.priceQuantityContainer}>
-        <Text style={styles.itemPrice}>${(item.price * item.quantity).toFixed(2)}</Text>
+        <View>
+          <Text style={styles.itemPrice}>${(item.price * item.groupQuantity).toFixed(2)}</Text>
+          <Text style={[
+            styles.itemStatus,
+            item.paid ? styles.paidStatus : (item.submitted ? styles.submittedStatus : styles.unpaidStatus)
+          ]}>
+            {item.paid ? 'Paid' : (item.submitted ? 'Submitted' : 'Unpaid')}
+          </Text>
+        </View>
         <View style={styles.quantityActionContainer}>
-          <QuantityControls
-            itemId={item.id}
-            quantity={item.quantity}
-            onQuantityChange={onQuantityChange}
-            isPaid={item.paid}
-          />
-          <TouchableOpacity
-            style={[styles.paymentStatusButton, item.paid && styles.paidButton]}
-            onPress={onPaymentStatusChange}
-          >
-            <MaterialIcons 
-              name={item.paid ? "check-circle" : "radio-button-unchecked"} 
-              size={24} 
-              color={item.paid ? "#4CAF50" : "#FF9800"} 
+          <Text style={styles.quantityText}>x{item.groupQuantity}</Text>
+          {!item.submitted && !item.paid && (
+            <QuantityControls
+              itemId={item.id}
+              quantity={item.quantity}
+              onQuantityChange={onQuantityChange}
+              isPaid={item.paid}
+              isSubmitted={item.submitted}
             />
-          </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -62,6 +75,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  submittedItemContainer: {
+    backgroundColor: '#fff9c4',
+    borderColor: '#FFC107',
+    borderWidth: 1,
   },
   paidItemContainer: {
     backgroundColor: '#f9f9f9',
@@ -92,23 +110,33 @@ const styles = StyleSheet.create({
   priceQuantityContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   itemPrice: {
     fontSize: 16,
     fontWeight: '600',
     color: '#FF9800',
   },
+  itemStatus: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  paidStatus: {
+    color: '#4CAF50',
+  },
+  submittedStatus: {
+    color: '#FFC107',
+  },
+  unpaidStatus: {
+    color: '#FF9800',
+  },
   quantityActionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  paymentStatusButton: {
-    padding: 4,
-    marginLeft: 8,
-  },
-  paidButton: {
-    opacity: 0.7,
+  quantityText: {
+    fontSize: 16,
+    marginRight: 8,
   },
 });
 

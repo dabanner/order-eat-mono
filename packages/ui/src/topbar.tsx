@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCommandStore } from '@repo/store/src/commandStore';
 import { SideMenu } from './side-menu';
 import { usePathname, useRouter } from 'expo-router';
 import CustomSwitch from 'react-native-custom-switch-new';
@@ -54,7 +53,7 @@ export default function TopBar({
                             resizeMode="contain"
                         />
                     </TouchableOpacity>
-                    { !isKidsMode ? (
+                    { !isKidsMode && onActionButton ? (
                         <TouchableOpacity
                             style={styles.cartButton}
                             onPress={onActionButton}
