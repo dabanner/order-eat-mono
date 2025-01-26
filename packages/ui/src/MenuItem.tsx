@@ -97,7 +97,7 @@ export function MenuItem({
 
 const styles = StyleSheet.create({
   menuItem: {
-    width: '48%',
+    width: '32%',
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',

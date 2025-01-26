@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
   sectionContent: {
     flex: 1,
     flexDirection: "row",
+    margin: 18,
   },
   sectionContentRotated: {
     transform: [{ rotate: "180deg" }],
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   commandSection: {
-    width: "30%",
+    width: "20%",
     borderLeftWidth: 1,
     borderLeftColor: "#e0e0e0",
     backgroundColor: "#fff",
