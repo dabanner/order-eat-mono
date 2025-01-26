@@ -30,7 +30,14 @@ export default function Index() {
     { id: 4, command: null, kidMode: true, orientation: "up", position: "right-bottom" },
   ])
 
-  React.useEffect(() => {
+
+  React.useEffect(() => {  
+    console.log("Initializing app...");
+
+    const init = async () => {
+      await useRestaurantStore.getState().fetchMenuItems();
+    };
+    init();
     if (restaurant) {
       tableSections.forEach((section) => {
         if (!section.command) {
@@ -240,4 +247,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 })
+
+function useEffect(arg0: () => void, arg1: never[]) {
+  throw new Error("Function not implemented.")
+}
 
