@@ -15,7 +15,7 @@ interface GenericModalProps {
 }
 
 const MODAL_WIDTH = 400
-const MODAL_HEIGHT = 500
+const MODAL_HEIGHT = 650
 
 export function GenericModal({
   visible,

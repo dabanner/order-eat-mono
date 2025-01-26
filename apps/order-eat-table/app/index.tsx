@@ -7,7 +7,7 @@ import Categories from "@repo/ui/src/categories"
 import MenuGrid from "@repo/ui/src/InRestaurant/MenuGrid"
 import CustomSwitch from "react-native-custom-switch-new"
 import { MultiTouch } from "@repo/ui/src/InRestaurant/Multitouch"
-import { SectionCommand } from "@repo/ui/src/InRestaurant/SectionCommand"
+import { TableSectionCommand } from "@repo/ui/src/InRestaurant/TableSectionCommand"
 
 interface TableSection {
   id: number
@@ -66,7 +66,7 @@ export default function Index() {
           </View>
           {!section.kidMode && (
             <View style={styles.commandSection}>
-              <SectionCommand sectionId={section.id.toString()} mode={section.position} />
+              <TableSectionCommand sectionId={section.id.toString()} mode={section.position} />
             </View>
           )}
           <View style={[styles.kidsModeToggle, section.orientation === "down" && styles.kidsModeToggleRotated]}>

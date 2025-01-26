@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react"
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from "react-native"
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ScrollView } from "react-native"
 import { useCommandStore } from "@repo/store/src/commandStore"
 import { ItemCard } from "./ItemCard"
-import { WaitstaffModal } from "./WaitstaffModal"
 import { GenericModal } from "./GenericModal"
 import { MaterialIcons } from "@expo/vector-icons"
 
@@ -12,7 +11,6 @@ interface CommandSectionProps {
 }
 
 export default function CommandSection({ sectionId, mode }: CommandSectionProps) {
-  const [isWaitstaffModalVisible, setWaitstaffModalVisible] = useState(false)
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false)
   const {
     getCommandBySection,
@@ -20,7 +18,6 @@ export default function CommandSection({ sectionId, mode }: CommandSectionProps)
     removeMenuItem,
     toggleItemPaidStatus,
     toggleItemSubmittedStatus,
-    addWaitstaffRequest,
     addMenuItem,
     submitUnsubmittedItems,
   } = useCommandStore()
@@ -56,18 +53,6 @@ export default function CommandSection({ sectionId, mode }: CommandSectionProps)
     setSuccessModalVisible(true)
   }
 
-  const renderItem = ({ item }: { item: any }) => (
-    <ItemCard
-      item={item}
-      onQuantityChange={(itemId, currentQuantity, increment) =>
-        handleQuantityChange(itemId, currentQuantity, increment)
-      }
-      onPaymentStatusChange={() => toggleItemPaidStatus(sectionId, item.id)}
-      onSubmitStatusChange={() => toggleItemSubmittedStatus(sectionId, item.id)}
-      onAddNewItem={() => addMenuItem(sectionId, item)}
-    />
-  )
-
   const groupAndSortItems = (items: any[]) => {
     const groupedItems = items.reduce((acc, item) => {
       const key = `${item.id}-${item.submitted ? "submitted" : "unsubmitted"}-${item.paid ? "paid" : "unpaid"}`
@@ -102,6 +87,9 @@ export default function CommandSection({ sectionId, mode }: CommandSectionProps)
     }
   }
 
+  const groupedAndSortedItems = groupAndSortItems(command.menuItems)
+  const { totalAmount, paidAmount, remainingAmount } = calculateOrderSummary()
+
   if (command.menuItems.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -114,21 +102,8 @@ export default function CommandSection({ sectionId, mode }: CommandSectionProps)
     )
   }
 
-  const groupedAndSortedItems = groupAndSortItems(command.menuItems)
-  const { totalAmount, paidAmount, remainingAmount } = calculateOrderSummary()
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerTitleContainer}>
-          <MaterialIcons name="receipt" size={28} color="#4CAF50" />
-          <Text style={styles.headerTitle}>Your Order</Text>
-        </View>
-        <TouchableOpacity style={styles.callWaitstaffButton} onPress={() => setWaitstaffModalVisible(true)}>
-          <MaterialIcons name="room-service" size={20} color="#fff" />
-          <Text style={styles.callWaitstaffButtonText}>Call Waitstaff</Text>
-        </TouchableOpacity>
-      </View>
       <View style={styles.orderSummary}>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>Total:</Text>
@@ -147,12 +122,21 @@ export default function CommandSection({ sectionId, mode }: CommandSectionProps)
           </>
         )}
       </View>
-      <FlatList
-        data={groupedAndSortedItems}
-        renderItem={renderItem}
-        keyExtractor={(item: any, index) => `${item.id}-${item.submitted}-${item.paid}-${index}`}
-        contentContainerStyle={styles.listContent}
-      />
+
+      <ScrollView style={styles.itemList}>
+        {groupedAndSortedItems.map((item: any, index: number) => (
+          <ItemCard
+            key={`${item.id}-${item.submitted}-${item.paid}-${index}`}
+            item={item}
+            onQuantityChange={(itemId, currentQuantity, increment) =>
+              handleQuantityChange(itemId, currentQuantity, increment)
+            }
+            onPaymentStatusChange={() => toggleItemPaidStatus(sectionId, item.id)}
+            onSubmitStatusChange={() => toggleItemSubmittedStatus(sectionId, item.id)}
+            onAddNewItem={() => addMenuItem(sectionId, item)}
+          />
+        ))}
+      </ScrollView>
 
       <View style={styles.footer}>
         {hasUnsubmittedItems() ? (
@@ -167,12 +151,6 @@ export default function CommandSection({ sectionId, mode }: CommandSectionProps)
           </View>
         )}
       </View>
-
-      <WaitstaffModal
-        visible={isWaitstaffModalVisible}
-        onClose={() => setWaitstaffModalVisible(false)}
-        onAction={(type) => addWaitstaffRequest(sectionId, type)}
-      />
 
       <GenericModal
         visible={isSuccessModalVisible}
@@ -192,26 +170,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f9f9f9",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    elevation: 2,
-  },
-  headerTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    marginLeft: 8,
   },
   orderSummary: {
     backgroundColor: "#f0f8ff",
@@ -237,8 +195,39 @@ const styles = StyleSheet.create({
   remainingValue: {
     color: "#FF9800",
   },
-  listContent: {
-    paddingBottom: 16,
+  itemList: {
+    flex: 1,
+  },
+  footer: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+  },
+  submitButton: {
+    backgroundColor: "#4CAF50",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  preparingContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  preparingText: {
+    marginLeft: 8,
+    color: "#4CAF50",
+    fontSize: 18,
+    fontWeight: "600",
   },
   emptyContainer: {
     flex: 1,
@@ -266,51 +255,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: "center",
     lineHeight: 24,
-  },
-  footer: {
-    padding: 16,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
-  },
-  submitButton: {
-    backgroundColor: "#4CAF50",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  submitButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-    marginLeft: 8,
-  },
-  callWaitstaffButton: {
-    backgroundColor: "#FF9800",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  callWaitstaffButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-    marginLeft: 4,
-  },
-  preparingContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  preparingText: {
-    marginLeft: 8,
-    color: "#4CAF50",
-    fontSize: 18,
-    fontWeight: "600",
   },
 })
 
