@@ -13,10 +13,16 @@ export default function Index() {
   const { user, setUser } = useUserStore();
   const router = useRouter();
 
+
   useEffect(() => {
-    if (!user) {
-      setUser();
-    }
+    console.log("Initializing app...");
+    const init = async () => {
+      if (!user) {
+        setUser();
+      }
+      await useRestaurantStore.getState().fetchMenuItems();
+    };
+    init();
   }, [user, setUser]);
 
   const handleRestaurantPress = (restaurantId: string) => {
@@ -25,6 +31,9 @@ export default function Index() {
       params: { id: restaurantId }
     });
   };
+
+
+  console.log("/////////////// restaurants : ",restaurants);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -89,14 +98,14 @@ export default function Index() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'ios' ? -35 : 0,
   },
   container: {
     flex: 1,
   },
   content: {
-    padding: 16,
     paddingTop: 0,
+    padding: 16,
     maxWidth: '100%',
     width: '100%',
     marginHorizontal: 'auto',

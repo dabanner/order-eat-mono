@@ -57,14 +57,15 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
   header: {
+    backgroundColor: '#43439f',
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 16,
-    height: Platform.OS === 'web' ? 64 : 56,
+    height: Platform.OS === 'web' ? 64 : 16,
   },
   logoButton: {
     padding: 8,
