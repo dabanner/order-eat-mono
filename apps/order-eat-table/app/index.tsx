@@ -15,6 +15,7 @@ interface TableSection {
   command: any
   kidMode: boolean
   orientation: "up" | "down"
+  position: "left-top" | "left-bottom" | "right-top" | "right-bottom"
 }
 
 export default function Index() {
@@ -23,10 +24,10 @@ export default function Index() {
   const { setCurrentCommand, addCommand } = useCommandStore()
 
   const [tableSections, setTableSections] = useState<TableSection[]>([
-    { id: 1, command: null, kidMode: true, orientation: "down" },
-    { id: 2, command: null, kidMode: true, orientation: "down" },
-    { id: 3, command: null, kidMode: true, orientation: "up" },
-    { id: 4, command: null, kidMode: true, orientation: "up" },
+    { id: 1, command: null, kidMode: true, orientation: "down", position: "left-top" },
+    { id: 2, command: null, kidMode: true, orientation: "down", position: "right-top" },
+    { id: 3, command: null, kidMode: true, orientation: "up", position: "left-bottom" },
+    { id: 4, command: null, kidMode: true, orientation: "up", position: "right-bottom" },
   ])
 
   React.useEffect(() => {
@@ -94,6 +95,7 @@ export default function Index() {
                   menuItems={restaurant?.menuItems || []}
                   isKidsMode={section.kidMode}
                   restaurant={restaurant}
+                  mode={section.position}
                 />
               </MultiTouch>
             </View>
@@ -169,7 +171,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#fff",
     elevation: 2,
-    margin:40
+    margin: 40,
   },
   sectionContent: {
     flex: 1,
