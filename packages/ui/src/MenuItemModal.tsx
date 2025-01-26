@@ -41,14 +41,14 @@ export function MenuItemModal({
         ios: {
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.25,
+          shadowOpacity: 1,
           shadowRadius: 24,
         },
         android: {
           elevation: 16,
         },
         web: {
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+          boxShadow: "0 8px 60px rgba(0, 0, 0, 0.75)",
         },
       }),
     }
@@ -75,17 +75,16 @@ export function MenuItemModal({
           ...baseStyles,
           bottom: 0,
           right: 0,
-          marginRight: -350,
-          marginBottom: -55,
+          marginRight: 240,
+          marginBottom: 3600,
         }
       case "left-bottom":
         return {
           ...baseStyles,
           bottom: 0,
           left: 0,
-          marginLeft: -350,
-          marginBottom: 350,
-          height: '100%',
+          marginLeft: 240,
+          marginBottom: 3600,
         }
       default:
         return {
