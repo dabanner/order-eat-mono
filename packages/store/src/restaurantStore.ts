@@ -288,7 +288,7 @@ export const useRestaurantStore = create<RestaurantStore>((set) => ({
         descriptionForKids: descriptions.find((desc)=> desc.shortName === backendItem.shortName)?.descriptionForKids, // Keep your default values
         price: backendItem.price, // ✅ Map from backend
         images: backendItem.image ? [backendItem.image] : [], // ✅ Map from backend (as array)
-        foodCategoryId: "f1", // Default value
+        foodCategoryId: backendItem.category, // Default value
         mealTypeId: "m1", // Default value
         preparationTime: 15, // Default value
         sizes: [],
