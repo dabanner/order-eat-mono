@@ -8,12 +8,14 @@ import MenuGrid from "@repo/ui/src/InRestaurant/MenuGrid"
 import CustomSwitch from "react-native-custom-switch-new"
 import { MultiTouch } from "@repo/ui/src/InRestaurant/Multitouch"
 import { TableSectionCommand } from "@repo/ui/src/InRestaurant/TableSectionCommand"
+import { WelcomeScreen } from "@repo/ui/src/InRestaurant/WelcomeScreen"
 
 interface TableSection {
   id: number
   kidMode: boolean
   orientation: "up" | "down"
   position: "left-top" | "left-bottom" | "right-top" | "right-bottom"
+  userName?: string
 }
 
 export default function Index() {
@@ -44,50 +46,68 @@ export default function Index() {
     )
   }, [])
 
+  const handleNameSubmit = useCallback((sectionId: number, name: string) => {
+    setTableSections((prev) =>
+      prev.map((section) => (section.id === sectionId ? { ...section, userName: name } : section)),
+    )
+  }, [])
+
   const renderSection = useCallback(
-    (section: TableSection) => (
-      <View key={section.id} style={styles.section}>
-        <View style={[styles.sectionContent, section.orientation === "down" && styles.sectionContentRotated]}>
-          <View style={styles.menuSection}>
-            <View style={styles.categoriesContainer}>
-              <Categories isKidsMode={section.kidMode} />
-            </View>
-            <View style={styles.menuGridWrapper}>
-              <MultiTouch style={styles.menuGridContainer} sectionId={section.id}>
-                <MenuGrid
-                  menuItems={restaurant?.menuItems || []}
-                  isKidsMode={section.kidMode}
-                  restaurant={restaurant}
-                  mode={section.position}
-                  sectionId={section.id.toString()}
-                />
-              </MultiTouch>
+    (section: TableSection) => {
+      if (!section.userName) {
+        return (
+          <View key={section.id} style={styles.section}>
+            <View style={[styles.sectionContent, section.orientation === "down" && styles.sectionContentRotated]}>
+              <WelcomeScreen onSubmit={(name) => handleNameSubmit(section.id, name)} />
             </View>
           </View>
-          {!section.kidMode && (
-            <View style={styles.commandSection}>
-              <TableSectionCommand sectionId={section.id.toString()} mode={section.position} />
+        )
+      }
+
+      return (
+        <View key={section.id} style={styles.section}>
+          <View style={[styles.sectionContent, section.orientation === "down" && styles.sectionContentRotated]}>
+            <View style={styles.menuSection}>
+              <View style={styles.categoriesContainer}>
+                <Categories isKidsMode={section.kidMode} />
+              </View>
+              <View style={styles.menuGridWrapper}>
+                <MultiTouch style={styles.menuGridContainer} sectionId={section.id}>
+                  <MenuGrid
+                    menuItems={restaurant?.menuItems || []}
+                    isKidsMode={section.kidMode}
+                    restaurant={restaurant}
+                    mode={section.position}
+                    sectionId={section.id.toString()}
+                  />
+                </MultiTouch>
+              </View>
             </View>
-          )}
-          <View style={[styles.kidsModeToggle, section.orientation === "down" && styles.kidsModeToggleRotated]}>
-            <View style={styles.sectionIdentifier}>
-              <Text style={styles.sectionText}>Section {section.id}</Text>
+            {!section.kidMode && (
+              <View style={styles.commandSection}>
+                <TableSectionCommand sectionId={section.id.toString()} mode={section.position} userName={section.userName} />
+              </View>
+            )}
+            <View style={[styles.kidsModeToggle, section.orientation === "down" && styles.kidsModeToggleRotated]}>
+              <View style={styles.sectionIdentifier}>
+                <Text style={styles.sectionText}>Section {section.id}</Text>
+              </View>
+              <CustomSwitch
+                buttonColor={"#FFFFFF"}
+                switchBackgroundColor={"#BB4430"}
+                onSwitchBackgroundColor={"#7EBDC2"}
+                switchLeftText={"‍👶"}
+                switchRightText={"👨"}
+                onSwitch={() => handleKidModeToggle(section.id, true)}
+                onSwitchReverse={() => handleKidModeToggle(section.id, false)}
+                startOnLeft={!section.kidMode}
+              />
             </View>
-            <CustomSwitch
-              buttonColor={"#FFFFFF"}
-              switchBackgroundColor={"#BB4430"}
-              onSwitchBackgroundColor={"#7EBDC2"}
-              switchLeftText={"‍👶"}
-              switchRightText={"👨"}
-              onSwitch={() => handleKidModeToggle(section.id, true)}
-              onSwitchReverse={() => handleKidModeToggle(section.id, false)}
-              startOnLeft={!section.kidMode}
-            />
           </View>
         </View>
-      </View>
-    ),
-    [restaurant, handleKidModeToggle],
+      )
+    },
+    [restaurant, handleKidModeToggle, handleNameSubmit], // Added handleNameSubmit to dependencies
   )
 
   return (
