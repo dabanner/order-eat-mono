@@ -44,6 +44,7 @@ export interface DetailedNutritionInfo extends NutritionInfo {
 export interface MenuItem {
   id: string; //✅
   name: string;//✅
+  shortName: string;
   description: string;
   descriptionForKids: string;
   price: number; //✅
@@ -284,11 +285,12 @@ export const useRestaurantStore = create<RestaurantStore>((set) => ({
       const mappedMenuItems = response.data.map((backendItem: any) => ({
         id: backendItem._id,  // ✅ Map from backend
         name: backendItem.fullName, // ✅ Map from backend
+        shortName: backendItem.shortName,
         description: descriptions.find((desc)=> desc.shortName === backendItem.shortName)?.description, // Keep your default values
         descriptionForKids: descriptions.find((desc)=> desc.shortName === backendItem.shortName)?.descriptionForKids, // Keep your default values
         price: backendItem.price, // ✅ Map from backend
         images: backendItem.image ? [backendItem.image] : [], // ✅ Map from backend (as array)
-        foodCategoryId: "f1", // Default value
+        foodCategoryId: backendItem.category, // Default value
         mealTypeId: "m1", // Default value
         preparationTime: 15, // Default value
         sizes: [],

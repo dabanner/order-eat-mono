@@ -120,7 +120,6 @@ export default function ReservationPage() {
     } 
     else {
       command.status = 'confirmed';
-      addCommand(command);
       router.replace(`/reservation`);
     }
   };
