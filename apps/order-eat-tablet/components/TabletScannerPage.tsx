@@ -3,7 +3,8 @@ import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Dimensions,
 import { Camera, CameraView } from 'expo-camera';
 import { ReservationData, CustomAlertProps, NativeScannerProps, ManualEntryProps, ScannerHook, StylesType } from './types';
 import { useRouter } from 'expo-router';
-import { useCommandStore } from '@repo/store/src/commandStore';
+import { Command, useCommandStore } from '@repo/store/src/commandStore';
+import { MenuItem, useRestaurantStore } from '@repo/store/src/restaurantStore';
 
 const { width, height } = Dimensions.get('window');
 
@@ -241,52 +242,120 @@ export default function TabletScannerPage(): JSX.Element {
   const router = useRouter();
 
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }): Promise<void> => {
-    if (scanned) return;
+  if (scanned) return;
 
-    try {
-      const parsedData = JSON.parse(data);
-      console.log('Scanned QR data:', parsedData);
+  try {
+    console.log('Scanned QR data:', data);
+    const parsedData = JSON.parse(data);
+    console.log('Parsed QR data:', parsedData);
 
-      // First validate the essential data from QR code
-      const requiredFields = ['id', 'userId', 'restaurantId', 'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
-
-      if (!requiredFields.every(field => field in parsedData)) {
-        throw new Error('Missing required reservation fields');
-      }
-
-      // Get full details from the mock API
-      const fullReservation = await useCommandStore.getState().getCommandById(parsedData.id);
-
-      if (fullReservation) {
-        console.log('Found full reservation:', fullReservation);
-        setScannedData(JSON.stringify(fullReservation));
-      } else {
-        console.log('Using essential data from QR:', parsedData);
-        setScannedData(data);
-      }
-
-      setScanned(true);
-      setShowAlert(true);
-
-    } catch (error) {
-      console.error('Error processing QR code:', error);
-      setScanned(true);
-      Alert.alert(
-          'Invalid QR Code',
-          'This QR code is not a valid reservation code.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setScanned(false);
-                closeScanner();
-              },
-            },
-          ],
-          { cancelable: false }
-      );
+    // Validate required fields
+    const requiredFields = ['id', 'tableOrderId', 'userId', 'restaurantId', 
+      'reservationTime', 'status', 'type', 'itemCount', 'totalAmount'];
+    
+    if (!requiredFields.every(field => field in parsedData)) {
+      throw new Error('Missing required reservation fields');
     }
-  };
+
+    // Fetch table order data
+    const tableOrderResponse = await fetch(
+      `https://adaptation.chhilif.com/dining/tableOrders/${parsedData.tableOrderId}`
+    );
+    
+    if (!tableOrderResponse.ok) {
+      throw new Error(`HTTP error! status: ${tableOrderResponse.status}`);
+    }
+
+    const tableOrderData = await tableOrderResponse.json();
+    console.log('Table order data:', tableOrderData);
+
+    // Get restaurant store data
+    const restaurantStore = useRestaurantStore.getState();
+    const restaurant = restaurantStore.restaurants.find(r => r.id === parsedData.restaurantId);
+    
+    if (!restaurant) {
+      throw new Error('Restaurant not found in store');
+    }
+
+    // Create a map to count item quantities from lines
+    const itemCountMap = tableOrderData.lines.reduce((acc: Record<string, number>, line: any) => {
+      const itemId = line.item._id;
+      acc[itemId] = (acc[itemId] || 0) + line.howMany;
+      return acc;
+    }, {});
+
+    // Map to menu items with quantities
+    const menuItemsWithQuantity = Object.entries(itemCountMap)
+      .map(([itemId, quantity]) => {
+        // Find matching menu item by ID or shortName
+        const lineItem = tableOrderData.lines.find((line: any) => line.item._id === itemId)?.item;
+        const menuItem = restaurant.menuItems.find(
+          mi => mi.id === itemId || mi.shortName === lineItem?.shortName
+        );
+
+        if (!menuItem) {
+          console.warn(`MenuItem not found for line item ID: ${itemId}`);
+          return null;
+        }
+
+        return {
+          ...menuItem,
+          quantity,
+          paid: false,
+          submitted: false,
+        };
+      })
+      .filter(Boolean) as (MenuItem & { quantity: number; paid: boolean; submitted: boolean })[];
+
+    // Construct full command data
+    const fullReservation: Command = {
+      id: parsedData.id,
+      userId: parsedData.userId,
+      restaurant: {
+        ...restaurant,
+        address: restaurant.address || '',
+        latitude: restaurant.latitude || 0,
+        longitude: restaurant.longitude || 0,
+      },
+      reservationDetails: {
+        time: parsedData.reservationTime,
+        date: new Date().toISOString().split('T')[0],
+        numberOfPersons: tableOrderData.customersCount || 4,
+        type: 'dinein',
+        wantToPreOrder: true,
+      },
+      menuItems: menuItemsWithQuantity,
+      totalAmount: parsedData.totalAmount,
+      status: parsedData.status,
+      type: parsedData.type,
+      waitstaffRequests: [],
+    };
+
+    // Update command store
+    useCommandStore.getState().setCurrentCommand(fullReservation);
+    
+    console.log('Full reservation data:', fullReservation);
+    setScannedData(JSON.stringify(fullReservation));
+    setScanned(true);
+    setShowAlert(true);
+
+  } catch (error) {
+    console.error('Error processing QR code:', error);
+    setScanned(true);
+    Alert.alert(
+      'Invalid QR Code',
+      'Failed to process reservation. Please check the QR code and try again.',
+      [{
+        text: 'OK',
+        onPress: () => {
+          setScanned(false);
+          closeScanner();
+        }
+      }],
+      { cancelable: false }
+    );
+  }
+};
 
   const handleConfirm = async (): Promise<void> => {
     setIsLoading(true);

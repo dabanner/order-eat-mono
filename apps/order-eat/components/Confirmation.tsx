@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, Platform, Dimensions } from 'react-native';
-import { Restaurant } from '@repo/store/src/restaurantStore';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Platform, Dimensions, ActivityIndicator, Alert } from 'react-native';
+import { MenuItem, Restaurant } from '@repo/store/src/restaurantStore';
 import { Command } from '@repo/store/src/commandStore';
 import { RestaurantHeader } from './RestaurantHeader';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -11,24 +11,155 @@ interface ConfirmationProps {
   command: Command;
 }
 
+
+interface TableOrderResponse {
+  _id: string;
+  tableNumber: number;
+  customersCount: number;
+  opened: string;
+  lines: Array<{
+    item: {
+      _id: string;
+      shortName: string;
+    };
+    howMany: number;
+    sentForPreparation: boolean;
+  }>;
+  preparations: any[]; // Simplified for brevity
+  billed: string;
+}
+
+type MenuItemWithQuantity = MenuItem & {
+  quantity: number;
+};
+
+interface Table {
+  _id: string;
+  number: number;
+  taken: boolean;
+  tableOrderId: string;
+}
+
+export async function createOrder(
+  menuItems: MenuItemWithQuantity[],
+): Promise<string> {
+  try {
+    // Step 1: Get all tables
+    const apiUrl = 'https://adaptation.chhilif.com/dining';
+    const tablesResponse = await fetch(`${apiUrl}/tables`);
+    const tables: Table[] = await tablesResponse.json();
+
+    // Step 2: Find first available table
+    const availableTable = tables.find(table => !table.taken);
+    if (!availableTable) {
+      throw new Error('No available tables found');
+    }
+
+    // Step 3: Create table order
+    const orderResponse = await fetch(`${apiUrl}/tableOrders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        tableNumber: availableTable.number,
+        customersCount: 1,
+      }),
+    });
+
+    if (!orderResponse.ok) {
+      throw new Error('Failed to create table order');
+    }
+
+    const tableOrder: TableOrderResponse = await orderResponse.json();
+    const tableOrderId = tableOrder._id;
+
+    // Step 4: Add menu items to the order
+    for (const menuItem of menuItems) {
+      if (menuItem.quantity > 0) { // Only send items with quantity > 0
+        await fetch(`${apiUrl}/tableOrders/${tableOrderId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            menuItemId: menuItem.id,
+            menuItemShortName: menuItem.shortName,
+            howMany: menuItem.quantity,
+          }),
+        });
+      }
+    }
+
+    return tableOrderId;
+  } catch (error) {
+    console.error('Order creation failed:', error);
+    throw error;
+  }
+}
+
 export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command }) => {
-  console.log('Reservation Command:', command);
+  const [tableOrderId, setTableOrderId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const qrCodeSize = Math.min(Dimensions.get('window').width * 0.3, 250);
 
+  useEffect(() => {
+    const createOrderAndSetId = async () => {
+      try {
+        const api_url = process.env.EXPO_PUBLIC_API_URL; // Make sure this is set in your environment
+        const orderId = await createOrder(
+          command.menuItems,
+        );
+        
+        setTableOrderId(orderId);
+      } catch (error) {
+        console.error('Order creation failed:', error);
+        setError('Failed to create order. Please try again.');
+        Alert.alert(
+          'Order Error',
+          'Could not finalize the order. Please contact staff.',
+          [{ text: 'OK' }]
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    createOrderAndSetId();
+  }, []);
 
   const essentialData = {
-    id: command.id,
+    id: tableOrderId,
+    tableOrderId: tableOrderId,
     userId: command.userId,
-    restaurantId: command.restaurant.id, // Assuming restaurant has an id
-    reservationTime: command.reservationDetails.time, // Assuming this exists
+    restaurantId: command.restaurant.id,
+    reservationTime: command.reservationDetails.time,
     totalAmount: command.totalAmount,
     status: command.status,
     type: command.type,
     itemCount: command.menuItems.length,
   };
+
   const finalData = JSON.stringify(essentialData);
-  console.log('Generated QR data:', finalData);
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Creating your order...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -43,13 +174,14 @@ export const Confirmation: React.FC<ConfirmationProps> = ({ restaurant, command 
 
         <View style={styles.qrSection}>
           <View style={styles.qrPlaceholder}>
-             <QRCode
-          value={finalData}
-          size={qrCodeSize}
-          backgroundColor="white"
-          color="black"
-        />
-            <Text style={styles.qrText}></Text>
+            {tableOrderId && (
+              <QRCode
+                value={finalData} // Now includes tableOrderId
+                size={qrCodeSize}
+                backgroundColor="white"
+                color="black"
+              />
+            )}
             <Text style={styles.qrSubtext}>Show this at the restaurant</Text>
           </View>
         </View>
@@ -193,6 +325,12 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
   },
+  errorText: {
+  color: 'red',
+  fontSize: 16,
+  textAlign: 'center',
+  marginTop: 20
+},
   detailText: {
     fontSize: 16,
     color: '#666',
